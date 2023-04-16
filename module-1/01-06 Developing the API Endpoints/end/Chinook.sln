@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chinook.API", "Chinook.API\Chinook.API.csproj", "{DBCE727E-D1B1-4E10-8523-9B18B997BD2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chinook.Data", "Chinook.Data\Chinook.Data.csproj", "{EAC79970-8919-416C-A585-BB6C16D41B80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chinook.Domain", "Chinook.Domain\Chinook.Domain.csproj", "{0366E363-924B-4117-B677-C50EA62EF4CE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DBCE727E-D1B1-4E10-8523-9B18B997BD2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBCE727E-D1B1-4E10-8523-9B18B997BD2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBCE727E-D1B1-4E10-8523-9B18B997BD2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBCE727E-D1B1-4E10-8523-9B18B997BD2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAC79970-8919-416C-A585-BB6C16D41B80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAC79970-8919-416C-A585-BB6C16D41B80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAC79970-8919-416C-A585-BB6C16D41B80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAC79970-8919-416C-A585-BB6C16D41B80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0366E363-924B-4117-B677-C50EA62EF4CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0366E363-924B-4117-B677-C50EA62EF4CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0366E363-924B-4117-B677-C50EA62EF4CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0366E363-924B-4117-B677-C50EA62EF4CE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {31229EC2-1B29-448D-B193-E433B30789C7}
+	EndGlobalSection
+EndGlobal

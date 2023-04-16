@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31808.319
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chinook.API", "Chinook.API\Chinook.API.csproj", "{97527ED1-C3F5-40C1-8F94-4C027FB10878}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chinook.Domain", "Chinook.Domain\Chinook.Domain.csproj", "{3EDE1300-9C81-4F6A-85E2-5ED734474A9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chinook.Data", "Chinook.Data\Chinook.Data.csproj", "{D55DD974-0D03-48AD-BCD1-12F10B655CD3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{97527ED1-C3F5-40C1-8F94-4C027FB10878}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97527ED1-C3F5-40C1-8F94-4C027FB10878}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97527ED1-C3F5-40C1-8F94-4C027FB10878}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97527ED1-C3F5-40C1-8F94-4C027FB10878}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EDE1300-9C81-4F6A-85E2-5ED734474A9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EDE1300-9C81-4F6A-85E2-5ED734474A9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EDE1300-9C81-4F6A-85E2-5ED734474A9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EDE1300-9C81-4F6A-85E2-5ED734474A9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D55DD974-0D03-48AD-BCD1-12F10B655CD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D55DD974-0D03-48AD-BCD1-12F10B655CD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D55DD974-0D03-48AD-BCD1-12F10B655CD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D55DD974-0D03-48AD-BCD1-12F10B655CD3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5821B858-68D4-4AD4-A2C9-2B809D4B448C}
+	EndGlobalSection
+EndGlobal
