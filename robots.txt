@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: /sitemap.xml.gz
+Sitemap: https://cwoodruff.github.io/web-api-workshop/sitemap.xml.gz
