@@ -32,3 +32,11 @@ footer:
 editor:
   enabled: false
 favicon: images/favicon.png
+search:
+    hotkeys:
+        - "/" 
+    maxResults: 20
+    minChars: 2
+    mode: full
+    noResultsFoundMsg: "No results"
+    placeholder: Search
