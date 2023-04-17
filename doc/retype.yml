@@ -40,3 +40,6 @@ search:
     mode: full
     noResultsFoundMsg: "No results"
     placeholder: Search
+integrations:
+  googleAnalytics:
+    id: "G-VJEMRLLXJN" 
