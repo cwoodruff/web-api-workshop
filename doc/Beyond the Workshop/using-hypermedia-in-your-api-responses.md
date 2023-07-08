@@ -4,4 +4,5 @@ icon: rocket
 ---
 # Using Hypermedia in your API Responses
 
-## To be completed at a later date
+## START FROM THE END OF THE WORKSHOP FINAL PROJECT
+[Documenting your API with OpenAPI](../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/)

@@ -4,8 +4,8 @@ icon: rocket
 ---
 # Formatting Response Data in your API
 
-## START FROM PREVIOUS MODULE'S END
-[Documenting your API with OpenAPI](documenting-with-openapi.md)
+## START FROM THE END OF THE WORKSHOP FINAL PROJECT
+[Documenting your API with OpenAPI](../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/)
 
 ## Format-specific Action Results
 

@@ -4,8 +4,8 @@ icon: rocket
 ---
 # Identity in your Web API
 
-## START FROM PREVIOUS MODULE'S END
-[Caching Data in Your API](caching-data.md)
+## START FROM THE END OF THE WORKSHOP FINAL PROJECT
+[Documenting your API with OpenAPI](../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/)
 
 ## INSTALL NUGET PACKAGES TO API PROJECT
 

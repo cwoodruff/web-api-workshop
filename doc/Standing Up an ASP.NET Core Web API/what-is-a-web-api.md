@@ -2,7 +2,7 @@
 order: 9
 icon: gear
 ---
-# What is a API?
+# What is an API?
 
 In computer programming, an application programming interface (API) is a set of subroutine definitions, protocols, and tools for building software and applications.
 

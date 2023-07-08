@@ -1,6 +1,6 @@
 {
 	"scripts": {
-	"start": "retype watch",
+	"start": "retype watch --verbose",
 	"build": "retype build"
 	},
 	"dependencies": {

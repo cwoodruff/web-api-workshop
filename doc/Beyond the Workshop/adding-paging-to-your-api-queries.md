@@ -4,8 +4,8 @@ icon: rocket
 ---
 # Adding Paging to your API Queries
 
-## START FROM PREVIOUS MODULE'S END
-[Using the PATCH HTTP Request in your API](using-patch-request.md)
+## START FROM THE END OF THE WORKSHOP FINAL PROJECT
+[Documenting your API with OpenAPI](../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/)
 
 ## Add Microsoft.EntityFrameworkCore NUGET PACKAGE TO DOMAIN PROJECT
 
