@@ -4,7 +4,7 @@ icon: home
 ---
 # Workshop Home
 
-For the source code for the workshop visit the [ASP.NET 7 Web API Workshop](https://github.com/cwoodruff/aspnet-7-web-api-workshop ) GitHub repo.
+For the source code for the workshop, visit the [ASP.NET 7 Web API Workshop](https://github.com/cwoodruff/aspnet-7-web-api-workshop ) GitHub repo.
 
 Interested in learning about designing, architecting and developing Web APIs using ASP.NET 7?
 

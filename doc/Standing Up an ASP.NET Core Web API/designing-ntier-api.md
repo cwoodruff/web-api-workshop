@@ -9,8 +9,12 @@ icon: gear
 
 ## CREATE NEW PROJECTS FOR DATA AND DOMAIN
 
-![](designing-ntier-api/Snag_adca7b7.png)
-![](designing-ntier-api/Snag_adcb6cb.png)
-![](designing-ntier-api/Snag_adcf829.png)
-![](designing-ntier-api/Snag_add0e80.png)
-![](designing-ntier-api/Snag_add3198.png)
+![](designing-ntier-api/2023-07-27_10-21-46.png)
+
+![](designing-ntier-api/2023-07-27_10-22-15.png)
+
+![](designing-ntier-api/2023-07-27_10-22-28.png)
+
+Perform the same steps for **Chinook.Data**
+
+![](designing-ntier-api/2023-07-27_10-23-50.png)
