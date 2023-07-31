@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744143732428">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744162233025">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.1.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Installing and Setting Up SQL Server 2022 in Docker</title>
     <meta name="title" content="Installing and Setting Up SQL Server 2022 in Docker">
-    <meta name="description" content="This is a Tab">
+    <meta name="description" content="Docker released beta support today for Apple’s Rosetta 2 x86 emulation layer, which means you can run SQL Server on Apple M1 or Apple M2 silicon...">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/installing-mssql-docker/">
@@ -24,22 +24,22 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/installing-mssql-docker/">
     <meta property="og:title" content="Installing and Setting Up SQL Server 2022 in Docker">
-    <meta property="og:description" content="This is a Tab">
+    <meta property="og:description" content="Docker released beta support today for Apple’s Rosetta 2 x86 emulation layer, which means you can run SQL Server on Apple M1 or Apple M2 silicon...">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/installing-mssql-docker/">
     <meta property="twitter:title" content="Installing and Setting Up SQL Server 2022 in Docker">
-    <meta property="twitter:description" content="This is a Tab">
+    <meta property="twitter:description" content="Docker released beta support today for Apple’s Rosetta 2 x86 emulation layer, which means you can run SQL Server on Apple M1 or Apple M2 silicon...">
 
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("/web-api-workshop/doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
     <link href="../images/favicon.png" rel="icon">
-    <link href="../resources/css/retype.css?v=3.1.0.744143732428" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=3.1.0.744162233025" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=3.1.0.744143732428" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=3.1.0.744162233025" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=3.1.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.1.0.744143732428" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.1.0.744162233025" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -236,11 +236,16 @@
 <doc-tabs>
 <doc-tab v-cloak id="macos">
 <template #title>macOS</template>
-<p>This is a Tab</p>
-</doc-tab>
-<doc-tab v-cloak id="linux">
-<template #title>Linux</template>
-<p>This is a Tab</p>
+<p>Docker released beta support today for Apple’s Rosetta 2 x86 emulation layer, which means you can run SQL Server on Apple M1 or Apple M2 silicon using this option.</p>
+<ol>
+<li>Download and install the latest Docker for Apple Silicon</li>
+<li>Once Docker Desktop is running, open the Dashboard and go into Settings</li>
+<li>Find the “Features in development” option, and select the “Use Rosetta for x86/amd64 emulation on Apple Silicon” checkbox</li>
+<li>Restart the Docker engine</li>
+<li>In the following Quickstart, please us the following command &quot;sudo docker pull woodruffsolutions/sql-2022-chinook&quot;</li>
+<li>Follow the instructions on <a href="https://learn.microsoft.com/sql/linux/quickstart-install-connect-docker" target="_blank">Quickstart: Run SQL Server Linux container images with Docker</a> to install SQL Server</li>
+<li>You can ignore the warning that the “requested image’s platform (linux/amd64) does not match the detected host platform”</li>
+</ol>
 </doc-tab>
 <doc-tab v-cloak id="windows">
 <template #title>Windows</template>
@@ -283,19 +288,9 @@
         <span>Docker Containers</span>
     </h2>
 </doc-anchor-target>
-<ul>
-<li>(x86)</li>
-</ul>
 <div class="codeblock-wrapper"><doc-codeblock>
 <div class="codeblock-title">output</div>
-<pre class="language-none"><code v-pre class="language-none">docker pull mcr.microsoft.com/mssql/server</code></pre>
-</doc-codeblock></div>
-<ul>
-<li>(arm)</li>
-</ul>
-<div class="codeblock-wrapper"><doc-codeblock>
-<div class="codeblock-title">output</div>
-<pre class="language-none"><code v-pre class="language-none">docker pull mcr.microsoft.com/mssql/server</code></pre>
+<pre class="language-none"><code v-pre class="language-none">docker pull woodruffsolutions/sql-2022-chinook</code></pre>
 </doc-codeblock></div>
 </doc-tab>
 </doc-tabs>
