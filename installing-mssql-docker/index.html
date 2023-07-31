@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744123957432">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744142319961">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.1.0">
@@ -35,11 +35,11 @@
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("/web-api-workshop/doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
     <link href="../images/favicon.png" rel="icon">
-    <link href="../resources/css/retype.css?v=3.1.0.744123957432" rel="stylesheet">
+    <link href="../resources/css/retype.css?v=3.1.0.744142319961" rel="stylesheet">
 
-    <script data-cfasync="false" src="../resources/js/config.js?v=3.1.0.744123957432" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../resources/js/config.js?v=3.1.0.744142319961" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../resources/js/retype.js?v=3.1.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.1.0.744123957432" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../resources/js/lunr.js?v=3.1.0.744142319961" data-turbo-eval="false" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -234,25 +234,69 @@
     </h1>
 </doc-anchor-target>
 <doc-tabs>
-<doc-tab v-cloak id="macos-x86">
-<template #title>macOS (x86)</template>
-<p>This is a Tab</p>
-</doc-tab>
-<doc-tab v-cloak id="macos-arm">
-<template #title>macOS (arm)</template>
+<doc-tab v-cloak id="macos">
+<template #title>macOS</template>
 <p>This is a Tab</p>
 </doc-tab>
 <doc-tab v-cloak id="linux">
 <template #title>Linux</template>
 <p>This is a Tab</p>
 </doc-tab>
-<doc-tab v-cloak id="windows-x86">
-<template #title>Windows (x86)</template>
-<p>This is a Tab</p>
-</doc-tab>
-<doc-tab v-cloak id="windows-arm">
-<template #title>Windows (arm)</template>
-<p>This is a Tab</p>
+<doc-tab v-cloak id="windows">
+<template #title>Windows</template>
+<doc-anchor-target id="wsl-2-backend">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#wsl-2-backend">#</doc-anchor-trigger>
+        <span>WSL 2 backend</span>
+    </h2>
+</doc-anchor-target>
+<ul>
+<li>WSL version 1.1.3.0 or above.</li>
+<li>Windows 11 64-bit: Home or Pro version 21H2 or higher, or Enterprise or Education version 21H2 or higher.</li>
+<li>Windows 10 64-bit: Home or Pro 21H2 (build 19044) or higher, or Enterprise or Education 21H2 (build 19044) or higher.</li>
+<li>Enable the WSL 2 feature on Windows. For detailed instructions, refer to the <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">Microsoft documentation</a>.</li>
+<li>The following hardware prerequisites are required to successfully run WSL 2 on Windows 10 or Windows 11:
+<ul>
+<li>64-bit processor with <a href="https://en.wikipedia.org/wiki/Second_Level_Address_Translation">Second Level Address Translation (SLAT)</a></li>
+<li>4GB system RAM</li>
+<li>BIOS-level hardware virtualization support must be enabled in the BIOS settings. For more information, see <a href="https://docs.docker.com/desktop/troubleshoot/topics/#virtualization">Virtualization</a>.</li>
+</ul>
+</li>
+<li>Download and install the <a href="https://docs.microsoft.com/windows/wsl/wsl2-kernel">Linux kernel update package</a>.</li>
+</ul>
+<doc-anchor-target id="install-docker-and-docker-desktop">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#install-docker-and-docker-desktop">#</doc-anchor-trigger>
+        <span>Install Docker and Docker Desktop</span>
+    </h2>
+</doc-anchor-target>
+<ol>
+<li>Download Docker Desktop for Windows from <a href="https://www.docker.com/products/docker-desktop">https://www.docker.com/products/docker-desktop</a>.</li>
+<li>Open the downloaded setup and grant administrator privileges, if required.</li>
+<li>Follow the setup wizard to complete the installation of Docker Desktop.</li>
+<li>Restart your PC for the changes to take effect.</li>
+<li>Start Docker Desktop from the Windows Start menu, then select the Docker icon from the hidden icons menu of your taskbar.</li>
+</ol>
+<doc-anchor-target id="docker-containers">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#docker-containers">#</doc-anchor-trigger>
+        <span>Docker Containers</span>
+    </h2>
+</doc-anchor-target>
+<ul>
+<li>(x86)</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<div class="codeblock-title">output</div>
+<pre class="language-none"><code v-pre class="language-none">docker pull mcr.microsoft.com/mssql/server</code></pre>
+</doc-codeblock></div>
+<ul>
+<li>(arm)</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<div class="codeblock-title">output</div>
+<pre class="language-none"><code v-pre class="language-none">docker pull mcr.microsoft.com/mssql/server</code></pre>
+</doc-codeblock></div>
 </doc-tab>
 </doc-tabs>
 
