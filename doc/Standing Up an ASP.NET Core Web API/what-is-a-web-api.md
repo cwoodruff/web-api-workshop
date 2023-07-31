@@ -13,7 +13,6 @@ In computer programming, an application programming interface (API) is a set of 
 * Uses HTTP Requests and Responses
 * Maps to HTTP verbs
 
-
-![Types of Web Services](what-is-a-web-api/01-01%20What%20is%20a%20Web%20API.png)
+![](what-is-a-web-api/01-01%20What%20is%20a%20Web%20API.png)
 
 ![](what-is-a-web-api/01-01%20What%20is%20a%20Web%20API-2.png)
