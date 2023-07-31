@@ -9,11 +9,11 @@ icon: gear
 
 ## ADD PROJECT REFERENCE FOR API PROJECT
 
-![](ntier-data-access/Snag_d64f3d5.png)
+![](ntier-data-access/2023-07-27_10-28-16.png)
 
 ## ADD PROJECT REFERENCE FOR DATA PROJECT
 
-![](ntier-data-access/Snag_d64f395.png)
+![](ntier-data-access/2023-07-27_10-29-13.png)
 
 ## INSTALL OR UPDATE THR EF CORE CLI
 
@@ -36,30 +36,27 @@ dotnet add package Microsoft.EntityFrameworkCore.Design
 Run the following command in Developer Command Prompt inside the Data project
 
 ```dos
-dotnet ef dbcontext scaffold "Server=.;Database=Chinook;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer --context-dir Data --output-dir Entities
+dotnet ef dbcontext scaffold "Server=.;Database=Chinook;MultipleActiveResultSets=true;TrustServerCertificate=true;Integrated Security=true;Trusted_Connection=true;" Microsoft.EntityFrameworkCore.SqlServer --context-dir Data --output-dir Entities
 ```
 
-
-
-![](ntier-data-access/Snag_ade0860.png)
-
-![](ntier-data-access/Snag_addfac4.png)
+![](ntier-data-access/2023-07-31_04-10-36.png)
 
 ## MOVE ENTITIES IN DATA PROJECT TO DOMAIN
 
-![](ntier-data-access/Snag_b3dbf8d.png)
+![](ntier-data-access/2023-07-31_04-10-36.png)
+
 
 Adjust the namespace for the Entities
 
-![](ntier-data-access/Snag_b3dcd29.png)
+![](ntier-data-access/2023-07-31_04-11-28.png)
 
 Add using reference in DBContext to Entities in Domain
 
-![](ntier-data-access/Snag_b47f4a6.png)
+![](ntier-data-access/2023-07-31_04-13-37.png)
 
 ## ADD REPOSITORY INTERFACES TO DOMAIN
 
-![](ntier-data-access/Snag_d64f403.png)
+![](ntier-data-access/2023-07-31_04-21-40.png)
 
 ```csharp
 using Chinook.Domain.Entities;
@@ -78,10 +75,9 @@ namespace Chinook.Domain.Repositories
 }
 ```
 
-
 ## ADD REPOSITORIES TO DATA
 
-![](ntier-data-access/Snag_d64f412.png)
+![](ntier-data-access/2023-07-31_04-23-11.png)
 
 ```csharp
 using Chinook.Data.Data;
@@ -146,15 +142,15 @@ namespace Chinook.Data.Repositories
 ```
 
 ## ADD CONFIGURATIONS FOLDER to API PROJECT
-![](ntier-data-access/Snag_b4acf9b.png)
 
+![](ntier-data-access/2023-07-31_04-24-29.png)
 
 ## ADD CONNECTIONSTRING TO APPSETTINGS.JSON
 
 ```json
 "ConnectionStrings": {
-  "ChinookDbWindows": "Server=.;Database=Chinook;Trusted_Connection=True;TrustServerCertificate=True;Application Name=Chinook7WebAPI",
-  "ChinookDbDocker": "Server=localhost,1433;Database=Chinook;User=sa;Password=P@55w0rd;Trusted_Connection=False;Application Name=ChinookASPNETCoreAPINTier"
+  "ChinookDbWindows": "Server=.;Database=Chinook;MultipleActiveResultSets=true;TrustServerCertificate=true;Integrated Security=true;Trusted_Connection=true;Application Name=Chinook7WebAPI",
+  "ChinookDbDocker": "Server=localhost,1433;Database=Chinook;User=sa;Password=P@55w0rd;MultipleActiveResultSets=true;TrustServerCertificate=true;Integrated Security=true;Trusted_Connection=true;Application Name=Chinook7WebAPI"
 },
 ```
 
@@ -169,7 +165,8 @@ public abstract class AppSettings
 ```
 
 ## ADD CONFIGUREAPPSETTINGS TO API PROJECT
-![](ntier-data-access/2022-05-11_09-16-20.png)
+![](ntier-data-access/2023-07-31_04-28-46.png)
+
 
 ### CONFIGUREAPPSETTINGS CLASS IN CONFIGURATIONS FOLDER
 
@@ -203,7 +200,7 @@ builder.Services.AddControllers();
 
 ## ADD DBCONTEXT TO DEPENDANCY INJECTION IN API PROJECT
 
-![](ntier-data-access/Snag_d64f422.png)
+![](ntier-data-access/2023-07-31_04-30-14.png)
 
 ```csharp
 using System.Runtime.InteropServices;
@@ -241,9 +238,9 @@ builder.Services.AddConnectionProvider(builder.Configuration);
 ```
 
 ## REMOVE ONCONFIGURING() FROM DBCONTEXT
-![](ntier-data-access/2022-05-11_09-24-35.png)
+![](ntier-data-access/2023-07-31_04-39-34.png)
 
 ## REMOVE THE DBCONTEXT CONSTRUCTOR W/O A PARAMETER
-![](ntier-data-access/2022-05-11_09-25-07.png)
+![](ntier-data-access/2023-07-31_04-40-02.png)
 
 ## REMOVE CLASS.CS FILES FROM DATA AND DOMAIN PROJECTS
