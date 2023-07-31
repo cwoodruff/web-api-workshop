@@ -2,7 +2,7 @@
 order: 1
 icon: shield-check
 ---
-# Creating and using Integrating Testing for your API
+# Creating and using Integration Testing for your API
 
 ## OPEN SOLUTION (BEFORE PAGING MODULE) IN THE TESTING MODULE FOR INTEGRATION TESTING
 
