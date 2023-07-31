@@ -12,7 +12,6 @@ icon: gear
 ```dos
 dotnet add package Microsoft.AspNetCore.Mvc.Versioning
 ```
-![](versioning/Snag_1122b35c.png)
 
 ## ADD API VERSIONING TO STARTUP IN API PROJECT
 

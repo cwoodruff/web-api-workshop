@@ -2,7 +2,7 @@
 order: 3
 icon: container
 ---
-# Installing and Setting Up SQL Server 2019 in Docker
+# Installing and Setting Up SQL Server 2022 in Docker
 
 +++ macOS
 This is a Tab
