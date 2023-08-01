@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744201197363">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744206261536">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.1.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Versioning your Web API</title>
     <meta name="title" content="Versioning your Web API">
-    <meta name="description" content="Identity in your Web API">
+    <meta name="description" content="Caching Data in Your API">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/versioning/">
@@ -24,23 +24,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/versioning/">
     <meta property="og:title" content="Versioning your Web API">
-    <meta property="og:description" content="Identity in your Web API">
+    <meta property="og:description" content="Caching Data in Your API">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/versioning/">
     <meta property="twitter:title" content="Versioning your Web API">
-    <meta property="twitter:description" content="Identity in your Web API">
+    <meta property="twitter:description" content="Caching Data in Your API">
 
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("/web-api-workshop/doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.1.0.744201197363" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.1.0.744206261536" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744201197363" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744206261536" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.1.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744201197363" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744201197363" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744206261536" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744206261536" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -240,7 +240,7 @@
         <span>START FROM PREVIOUS MODULE&#x27;S END</span>
     </h2>
 </doc-anchor-target>
-<p><a href="identity.md">Identity in your Web API</a></p>
+<p><a href="../caching-data/">Caching Data in Your API</a></p>
 <doc-anchor-target id="add-versioning-nuget-package-to-api-project">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#add-versioning-nuget-package-to-api-project">#</doc-anchor-trigger>
@@ -250,15 +250,6 @@
 <div class="codeblock-wrapper"><doc-codeblock>
 <div class="codeblock-title">dos</div>
 <pre class="language-none"><code v-pre class="language-none">dotnet add package Microsoft.AspNetCore.Mvc.Versioning</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="add-api-versioning-to-startup-in-api-project">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-api-versioning-to-startup-in-api-project">#</doc-anchor-trigger>
-        <span>ADD API VERSIONING TO STARTUP IN API PROJECT</span>
-    </h2>
-</doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddVersioning();</code></pre>
 </doc-codeblock></div>
 <doc-anchor-target id="add-versioning-to-servicesconfiguration-in-api-project">
     <h2>
@@ -286,6 +277,15 @@
         //options.ApiVersionReader = new HeaderApiVersionReader(&quot;api-version&quot;);
     });
 }</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="add-api-versioning-to-startup-in-api-project">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#add-api-versioning-to-startup-in-api-project">#</doc-anchor-trigger>
+        <span>ADD API VERSIONING TO STARTUP IN API PROJECT</span>
+    </h2>
+</doc-anchor-target>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddVersioning();</code></pre>
 </doc-codeblock></div>
 <doc-anchor-target id="add-new-customer-controller-for-version-2">
     <h2>
