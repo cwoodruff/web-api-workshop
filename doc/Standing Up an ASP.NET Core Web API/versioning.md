@@ -24,11 +24,9 @@ public static void AddVersioning(this IServiceCollection services)
     {
         options.AssumeDefaultVersionWhenUnspecified = true;
         options.DefaultApiVersion = new ApiVersion(1, 0);
-        //options.DefaultApiVersion = new ApiVersion( new DateTime( 2020, 9, 22 ) );
-        //options.DefaultApiVersion =
-        //  new ApiVersion(new DateTime( 2020, 9, 22 ), "LetoII", 1, "Beta");
+        //options.DefaultApiVersion = new ApiVersion( new DateTime( 2023, 8, 4 ) );
+        //options.DefaultApiVersion = new ApiVersion(new DateTime( 2023, 8, 4 ), "LetoII", 1, "Beta");
         options.ReportApiVersions = true;
-        //options.ApiVersionReader = new HeaderApiVersionReader("api-version");
     });
 }
 ```
