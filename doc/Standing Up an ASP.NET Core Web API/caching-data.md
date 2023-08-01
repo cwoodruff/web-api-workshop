@@ -253,6 +253,16 @@ dotnet sql-cache create "Data Source=.;Initial Catalog=ChinookCacheDb;Integrated
 
 ![](caching-data/Snag_d81a71e.png)
 
+### INSTALLING THE MSSQL DOCKER CONTAINER WITH DIST CACHING DATABASE
+
+Please install this updated docker image with the database for the distributed caching demo.
+
+*** Instructions can be found here [Installing and Setting Up SQL Server 2022 in Docker](../installing-mssql-docker.md)
+
+``` dos
+docker pull woodruffsolutions/sql-2022-chinook-dist-caching
+```
+
 ### Install Microsoft.Extensions.Caching.SqlServer NuGet package to Domain
 
 ```dos
