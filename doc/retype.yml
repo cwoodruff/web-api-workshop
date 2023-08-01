@@ -12,9 +12,6 @@ links:
   - text: Home
     link: /index.md
     icon: home
-    
-    text: GitHub
-    link: https://github.com/cwoodruff/web-api-workshop
 
   - text: Issues
     link: https://github.com/cwoodruff/web-api-workshop/issues
