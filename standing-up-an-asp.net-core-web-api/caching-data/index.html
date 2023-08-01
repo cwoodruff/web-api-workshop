@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744162343775">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744163281574">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.1.0">
@@ -35,12 +35,12 @@
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("/web-api-workshop/doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.1.0.744162343775" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.1.0.744163281574" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744162343775" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744163281574" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.1.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744162343775" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744162343775" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744163281574" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744163281574" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -549,6 +549,18 @@ GO</code></pre>
     <figcaption class="caption"></figcaption>
 </figure>
 </p>
+<doc-anchor-target id="installing-the-mssql-docker-container-with-dist-caching-database">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#installing-the-mssql-docker-container-with-dist-caching-database">#</doc-anchor-trigger>
+        <span>INSTALLING THE MSSQL DOCKER CONTAINER WITH DIST CACHING DATABASE</span>
+    </h3>
+</doc-anchor-target>
+<p>Please install this updated docker image with the database for the distributed caching demo.</p>
+<p>*** Instructions can be found here <a href="../../installing-mssql-docker/">Installing and Setting Up SQL Server 2022 in Docker</a></p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<div class="codeblock-title">dos</div>
+<pre class="language-none"><code v-pre class="language-none">docker pull woodruffsolutions/sql-2022-chinook-dist-caching</code></pre>
+</doc-codeblock></div>
 <doc-anchor-target id="install-microsoftextensionscachingsqlserver-nuget-package-to-domain">
     <h3>
         <doc-anchor-trigger class="header-anchor-trigger" to="#install-microsoftextensionscachingsqlserver-nuget-package-to-domain">#</doc-anchor-trigger>
