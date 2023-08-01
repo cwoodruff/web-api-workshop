@@ -5,18 +5,12 @@ icon: gear
 # Versioning your Web API
 
 ## START FROM PREVIOUS MODULE'S END
-[Identity in your Web API](identity.md)
+[Caching Data in Your API](caching-data.md)
 
 ## ADD VERSIONING NUGET PACKAGE TO API PROJECT
 
 ```dos
 dotnet add package Microsoft.AspNetCore.Mvc.Versioning
-```
-
-## ADD API VERSIONING TO STARTUP IN API PROJECT
-
-```csharp
-builder.Services.AddVersioning();
 ```
 
 ## ADD VERSIONING TO ServicesConfiguration IN API PROJECT
@@ -37,6 +31,12 @@ public static void AddVersioning(this IServiceCollection services)
         //options.ApiVersionReader = new HeaderApiVersionReader("api-version");
     });
 }
+```
+
+## ADD API VERSIONING TO STARTUP IN API PROJECT
+
+```csharp
+builder.Services.AddVersioning();
 ```
 
 ## ADD NEW CUSTOMER CONTROLLER FOR VERSION 2
