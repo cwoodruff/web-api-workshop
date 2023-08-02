@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744229959076">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744306383510">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.1.0">
@@ -35,12 +35,12 @@
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("/web-api-workshop/doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.1.0.744229959076" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.1.0.744306383510" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744229959076" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744306383510" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.1.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744229959076" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744229959076" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744306383510" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744306383510" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -241,6 +241,31 @@
     </h2>
 </doc-anchor-target>
 <p><a href="../versioning/">Versioning your Web API</a></p>
+<doc-anchor-target id="decorate-every-version-10-controller-with-versioning">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#decorate-every-version-10-controller-with-versioning">#</doc-anchor-trigger>
+        <span>DECORATE EVERY VERSION 1.0 CONTROLLER WITH VERSIONING</span>
+    </h2>
+</doc-anchor-target>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre class="language-csharp"><code v-pre class="language-csharp">[Route( &quot;api/v{version:apiVersion}/[controller]&quot; )]
+[ApiController]
+[EnableCors(&quot;CorsPolicy&quot;)]
+[ApiVersion( &quot;1.0&quot; )]
+public class CustomerController : ControllerBase</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="decorate-every-version-10-controller-action-with-versioning">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#decorate-every-version-10-controller-action-with-versioning">#</doc-anchor-trigger>
+        <span>DECORATE EVERY VERSION 1.0 CONTROLLER ACTION WITH VERSIONING</span>
+    </h2>
+</doc-anchor-target>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre class="language-csharp"><code v-pre class="language-csharp">[HttpGet]
+[Produces(typeof(List&lt;AlbumApiModel&gt;))]
+[MapToApiVersion(&quot;1.0&quot;)]
+public async Task&lt;ActionResult&lt;List&lt;AlbumApiModel&gt;&gt;&gt; Get()</code></pre>
+</doc-codeblock></div>
 <doc-anchor-target id="add-openapiswagger-nuget-packages-to-api-project">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#add-openapiswagger-nuget-packages-to-api-project">#</doc-anchor-trigger>
@@ -316,39 +341,27 @@ app.UseSwaggerUI(s =&gt; s.SwaggerEndpoint(&quot;/swagger/v1/swagger.json&quot;,
     <figcaption class="caption"></figcaption>
 </figure>
 </p>
-<doc-anchor-target id="decorate-every-version-20-controller-action-endpoint-with-versioning">
+<p><span style='color: red;font-size: large;'><strong>We will now resolve and allow the Web API solution to use version for OpenAPI</strong></span></p>
+<doc-anchor-target id="add-apiexplorer">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#decorate-every-version-20-controller-action-endpoint-with-versioning">#</doc-anchor-trigger>
-        <span>DECORATE EVERY VERSION 2.0 CONTROLLER ACTION ENDPOINT WITH VERSIONING</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#add-apiexplorer">#</doc-anchor-trigger>
+        <span>ADD APIEXPLORER</span>
     </h2>
 </doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-csharp"><code v-pre class="language-csharp">[Route( &quot;api/v{version:apiVersion}/[controller]&quot; )]
-[ApiController]
-[EnableCors(&quot;CorsPolicy&quot;)]
-[ApiVersion( &quot;2.0&quot; )]
-public class CustomerController : ControllerBase</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="install-apiexplorer-nuget-package-in-api-project">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#install-apiexplorer-nuget-package-in-api-project">#</doc-anchor-trigger>
-        <span>INSTALL APIEXPLORER NUGET PACKAGE IN API PROJECT</span>
-    </h2>
+<doc-anchor-target id="add-apiexplorer-nuget-packages-to-api-project">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#add-apiexplorer-nuget-packages-to-api-project">#</doc-anchor-trigger>
+        <span>ADD APIEXPLORER NUGET PACKAGES TO API PROJECT</span>
+    </h3>
 </doc-anchor-target>
 <div class="codeblock-wrapper"><doc-codeblock>
 <div class="codeblock-title">dos</div>
 <pre class="language-none"><code v-pre class="language-none">dotnet add package Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="add-apiexplorer-to-services-in-startup">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-apiexplorer-to-services-in-startup">#</doc-anchor-trigger>
-        <span>ADD APIEXPLORER TO SERVICES IN STARTUP</span>
-    </h2>
-</doc-anchor-target>
-<doc-anchor-target id="servicesconfigurationcs-1">
+<doc-anchor-target id="add-addapiexplorer-method-to-configureservices">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#servicesconfigurationcs-1">#</doc-anchor-trigger>
-        <span>ServicesConfiguration.cs</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#add-addapiexplorer-method-to-configureservices">#</doc-anchor-trigger>
+        <span>ADD ADDAPIEXPLORER METHOD TO CONFIGURESERVICES</span>
     </h3>
 </doc-anchor-target>
 <div class="codeblock-wrapper"><doc-codeblock>
@@ -361,40 +374,62 @@ public class CustomerController : ControllerBase</code></pre>
     });
 }</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="add-configureswaggeroptions-and-modify-the-swagger-code-to-document-each-versions-swagger-file">
+<doc-anchor-target id="remove-previous-addswaggerservices-in-configureservicescs">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-configureswaggeroptions-and-modify-the-swagger-code-to-document-each-versions-swagger-file">#</doc-anchor-trigger>
-        <span>ADD ConfigureSwaggerOptions AND MODIFY THE SWAGGER CODE TO DOCUMENT EACH VERSION&#x27;S SWAGGER FILE</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#remove-previous-addswaggerservices-in-configureservicescs">#</doc-anchor-trigger>
+        <span>REMOVE PREVIOUS ADDSWAGGERSERVICES IN CONFIGURESERVICES.CS</span>
     </h2>
 </doc-anchor-target>
-<doc-anchor-target id="servicesconfigurationcs-2">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#servicesconfigurationcs-2">#</doc-anchor-trigger>
-        <span>ServicesConfiguration.cs</span>
-    </h3>
+<p>Remove the following code:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre class="language-csharp"><code v-pre class="language-csharp">public static void AddSwaggerServices(this IServiceCollection services)
+{
+    services.AddSwaggerGen(c =&gt;
+    {
+        c.SwaggerDoc(&quot;v1&quot;, new OpenApiInfo
+        {
+            Version = &quot;v1&quot;,
+            Title = &quot;Chinook Music Store API&quot;,
+            Description = &quot;A simple example ASP.NET Core Web API&quot;,
+            TermsOfService = new Uri(&quot;https://example.com/terms&quot;),
+            Contact = new OpenApiContact
+            {
+                Name = &quot;Chris Woodruff&quot;,
+                Email = string.Empty,
+                Url = new Uri(&quot;https://chriswoodruff.com&quot;)
+            },
+            License = new OpenApiLicense
+            {
+                Name = &quot;Use under MIT&quot;,
+                Url = new Uri(&quot;https://opensource.org/licenses/MIT&quot;)
+            }
+        });
+        c.EnableAnnotations();
+    });
+}</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="add-openapiswagger-to-configureservicescs">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#add-openapiswagger-to-configureservicescs">#</doc-anchor-trigger>
+        <span>ADD OPENAPI/SWAGGER TO CONFIGURESERVICES.CS</span>
+    </h2>
 </doc-anchor-target>
 <div class="codeblock-wrapper"><doc-codeblock>
 <pre class="language-csharp"><code v-pre class="language-csharp">public static void AddSwaggerServices(this IServiceCollection services)
 {
-
+    services.AddSwaggerGen(options =&gt; {
+        // for further customization
+        //options.OperationFilter&lt;DefaultValuesFilter&gt;();
+    });
     services.AddSwaggerGen();
     services.ConfigureOptions&lt;ConfigureSwaggerOptions&gt;();
-}
-
-public static void AddApiExplorer(this IServiceCollection services)
-{
-    services.AddVersionedApiExplorer(setup =&gt;
-    {
-        setup.GroupNameFormat = &quot;'v'VVV&quot;;
-        setup.SubstituteApiVersionInUrl = true;
-    });
 }</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="add-configureswaggeroptions-class-to-servicesconfigurationcs">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-configureswaggeroptions-class-to-servicesconfigurationcs">#</doc-anchor-trigger>
-        <span>Add ConfigureSwaggerOptions class to ServicesConfiguration.cs</span>
-    </h3>
+<doc-anchor-target id="add-configureswaggeroptions-class-to-configureservicescs">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#add-configureswaggeroptions-class-to-configureservicescs">#</doc-anchor-trigger>
+        <span>ADD CONFIGURESWAGGEROPTIONS CLASS TO CONFIGURESERVICES.CS</span>
+    </h2>
 </doc-anchor-target>
 <div class="codeblock-wrapper"><doc-codeblock>
 <pre class="language-csharp"><code v-pre class="language-csharp">public class ConfigureSwaggerOptions : IConfigureNamedOptions&lt;SwaggerGenOptions&gt;
@@ -427,15 +462,15 @@ public static void AddApiExplorer(this IServiceCollection services)
     {
         var info = new OpenApiInfo()
         {
-            Version = &quot;v1&quot;,
             Title = &quot;Chinook Music Store API&quot;,
+            Version = description.ApiVersion.ToString(),
             Description = &quot;A simple example ASP.NET Core Web API&quot;,
             TermsOfService = new Uri(&quot;https://example.com/terms&quot;),
             Contact = new OpenApiContact
             {
                 Name = &quot;Chris Woodruff&quot;,
                 Email = string.Empty,
-                Url = new Uri(&quot;https://chriswoodruff.com&quot;)
+                Url = new Uri(&quot;https://woodruff.dev&quot;)
             },
             License = new OpenApiLicense
             {
@@ -453,70 +488,58 @@ public static void AddApiExplorer(this IServiceCollection services)
     }
 }</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="add-apiexplorer-to-startup">
+<doc-anchor-target id="add-appbuilderextensionscs-to-api-project">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-apiexplorer-to-startup">#</doc-anchor-trigger>
-        <span>ADD APIEXPLORER TO STARTUP</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#add-appbuilderextensionscs-to-api-project">#</doc-anchor-trigger>
+        <span>ADD APPBUILDEREXTENSIONS.CS TO API PROJECT</span>
+    </h2>
+</doc-anchor-target>
+<p><figure class="content-center">
+    <img src="standing20up20an20asp.net20core20web20api/documenting-with-openapi/addappbuilderextensionsclass.png" alt="">
+    <figcaption class="caption"></figcaption>
+</figure>
+</p>
+<doc-anchor-target id="create-appbuilderextensions-class-and-useswaggerwithversioning-method">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#create-appbuilderextensions-class-and-useswaggerwithversioning-method">#</doc-anchor-trigger>
+        <span>CREATE APPBUILDEREXTENSIONS CLASS AND USESWAGGERWITHVERSIONING METHOD</span>
+    </h3>
+</doc-anchor-target>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre class="language-csharp"><code v-pre class="language-csharp">public static class AppBuilderExtensions
+{
+    public static IApplicationBuilder UseSwaggerWithVersioning(this IApplicationBuilder app)
+    {
+        IServiceProvider services = app.ApplicationServices;
+        var provider = services.GetRequiredService&lt;IApiVersionDescriptionProvider&gt;();
+
+        app.UseSwagger();
+
+        app.UseSwaggerUI(options =&gt;
+        {
+            foreach (var description in provider.ApiVersionDescriptions)
+            {
+                options.SwaggerEndpoint($&quot;/swagger/{description.GroupName}/swagger.json&quot;, description.GroupName.ToUpperInvariant());
+            }
+        });
+
+        return app;
+    }
+}</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="connection-everything-inside-programcs">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#connection-everything-inside-programcs">#</doc-anchor-trigger>
+        <span>CONNECTION EVERYTHING INSIDE PROGRAM.CS</span>
     </h2>
 </doc-anchor-target>
 <div class="codeblock-wrapper"><doc-codeblock>
 <pre class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddApiExplorer();
 builder.Services.AddSwaggerServices();
 
-app.UseSwagger();
-app.UseSwaggerUI(s =&gt; s.SwaggerEndpoint(&quot;/swagger/v1/swagger.json&quot;, &quot;v1 docs&quot;));</code></pre>
+
+app.UseSwaggerWithVersioning();</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="change-launchsettingsjson-in-properties-folder-to-launch-swagger-on-run">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#change-launchsettingsjson-in-properties-folder-to-launch-swagger-on-run">#</doc-anchor-trigger>
-        <span>CHANGE launchSettings.json IN PROPERTIES FOLDER TO LAUNCH SWAGGER ON RUN</span>
-    </h2>
-</doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-json"><code v-pre class="language-json">&quot;profiles&quot;: {
-    &quot;Chinook.API&quot;: {
-      &quot;commandName&quot;: &quot;Project&quot;,
-      &quot;dotnetRunMessages&quot;: true,
-      &quot;launchBrowser&quot;: true,
-      &quot;launchUrl&quot;: &quot;swagger/&quot;,
-      &quot;applicationUrl&quot;: &quot;https://localhost:7211;http://localhost:5211&quot;,
-      &quot;environmentVariables&quot;: {
-        &quot;ASPNETCORE_ENVIRONMENT&quot;: &quot;Development&quot;
-      }
-    },
-    &quot;IIS Express&quot;: {
-      &quot;commandName&quot;: &quot;IISExpress&quot;,
-      &quot;launchBrowser&quot;: true,
-      &quot;launchUrl&quot;: &quot;swagger/&quot;,
-      &quot;environmentVariables&quot;: {
-        &quot;ASPNETCORE_ENVIRONMENT&quot;: &quot;Development&quot;
-      }
-    }
-}</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="swagger-for-v1">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#swagger-for-v1">#</doc-anchor-trigger>
-        <span>SWAGGER FOR V1</span>
-    </h2>
-</doc-anchor-target>
-<p><figure class="content-center">
-    <img src="snag_1163dee4.png" alt="">
-    <figcaption class="caption"></figcaption>
-</figure>
-</p>
-<doc-anchor-target id="swagger-for-v2">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#swagger-for-v2">#</doc-anchor-trigger>
-        <span>SWAGGER FOR V2</span>
-    </h2>
-</doc-anchor-target>
-<p><figure class="content-center">
-    <img src="snag_1163df13.png" alt="">
-    <figcaption class="caption"></figcaption>
-</figure>
-</p>
-<p><strong>NOTE:</strong> Solution for versioning issues from @referbruv <a href="https://www.referbruv.com/blog/posts/integrating-aspnet-core-api-versions-with-swagger-ui">https://www.referbruv.com/blog/posts/integrating-aspnet-core-api-versions-with-swagger-ui</a></p>
 
                                 
                                 <!-- Required only on API pages -->
