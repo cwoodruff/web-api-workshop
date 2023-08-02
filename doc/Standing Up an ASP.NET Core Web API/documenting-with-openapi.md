@@ -7,6 +7,25 @@ icon: gear
 ## START FROM PREVIOUS MODULE'S END
 [Versioning your Web API](versioning.md)
 
+## DECORATE EVERY VERSION 1.0 CONTROLLER WITH VERSIONING
+
+```csharp
+[Route( "api/v{version:apiVersion}/[controller]" )]
+[ApiController]
+[EnableCors("CorsPolicy")]
+[ApiVersion( "1.0" )]
+public class CustomerController : ControllerBase
+``` 
+
+## DECORATE EVERY VERSION 1.0 CONTROLLER ACTION WITH VERSIONING
+
+```csharp
+[HttpGet]
+[Produces(typeof(List<AlbumApiModel>))]
+[MapToApiVersion("1.0")]
+public async Task<ActionResult<List<AlbumApiModel>>> Get()
+```
+
 ## ADD OPENAPI/SWAGGER NUGET PACKAGES TO API PROJECT
 
 ```dos
@@ -60,25 +79,16 @@ app.UseSwaggerUI(s => s.SwaggerEndpoint("/swagger/v1/swagger.json", "v1 docs"));
 ## DISCOVER THAT OUR SWAGGER SETUP DOES NOT WORK WITH OUR VERSIONING
 ![](documenting-with-openapi/Snag_1163deb6.png)
 
-## DECORATE EVERY VERSION 2.0 CONTROLLER ACTION ENDPOINT WITH VERSIONING
+<span style='color: red;font-size: large;'>**We will now resolve and allow the Web API solution to use version for OpenAPI**</span>
 
-```csharp
-[Route( "api/v{version:apiVersion}/[controller]" )]
-[ApiController]
-[EnableCors("CorsPolicy")]
-[ApiVersion( "2.0" )]
-public class CustomerController : ControllerBase
-```
+## ADD APIEXPLORER
 
-## INSTALL APIEXPLORER NUGET PACKAGE IN API PROJECT
-
+### ADD APIEXPLORER NUGET PACKAGES TO API PROJECT
 ```dos
 dotnet add package Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer
 ```
 
-## ADD APIEXPLORER TO SERVICES IN STARTUP
-
-### ServicesConfiguration.cs
+### ADD ADDAPIEXPLORER METHOD TO CONFIGURESERVICES
 
 ```csharp
 public static void AddApiExplorer(this IServiceCollection services)
@@ -91,31 +101,54 @@ public static void AddApiExplorer(this IServiceCollection services)
 }
 ```
 
-## ADD ConfigureSwaggerOptions AND MODIFY THE SWAGGER CODE TO DOCUMENT EACH VERSION'S SWAGGER FILE
+## REMOVE PREVIOUS ADDSWAGGERSERVICES IN CONFIGURESERVICES.CS
 
-### ServicesConfiguration.cs
-
+Remove the following code:
 ```csharp
 public static void AddSwaggerServices(this IServiceCollection services)
 {
-
-    services.AddSwaggerGen();
-    services.ConfigureOptions<ConfigureSwaggerOptions>();
-}
-
-public static void AddApiExplorer(this IServiceCollection services)
-{
-    services.AddVersionedApiExplorer(setup =>
+    services.AddSwaggerGen(c =>
     {
-        setup.GroupNameFormat = "'v'VVV";
-        setup.SubstituteApiVersionInUrl = true;
+        c.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Version = "v1",
+            Title = "Chinook Music Store API",
+            Description = "A simple example ASP.NET Core Web API",
+            TermsOfService = new Uri("https://example.com/terms"),
+            Contact = new OpenApiContact
+            {
+                Name = "Chris Woodruff",
+                Email = string.Empty,
+                Url = new Uri("https://chriswoodruff.com")
+            },
+            License = new OpenApiLicense
+            {
+                Name = "Use under MIT",
+                Url = new Uri("https://opensource.org/licenses/MIT")
+            }
+        });
+        c.EnableAnnotations();
     });
 }
 ```
 
-### Add ConfigureSwaggerOptions class to ServicesConfiguration.cs
+## ADD OPENAPI/SWAGGER TO CONFIGURESERVICES.CS
 
-```csharp
+``` csharp
+public static void AddSwaggerServices(this IServiceCollection services)
+{
+    services.AddSwaggerGen(options => {
+        // for further customization
+        //options.OperationFilter<DefaultValuesFilter>();
+    });
+    services.AddSwaggerGen();
+    services.ConfigureOptions<ConfigureSwaggerOptions>();
+}
+```
+
+## ADD CONFIGURESWAGGEROPTIONS CLASS TO CONFIGURESERVICES.CS
+
+``` csharp
 public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
 {
     private readonly IApiVersionDescriptionProvider provider;
@@ -146,15 +179,15 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
     {
         var info = new OpenApiInfo()
         {
-            Version = "v1",
             Title = "Chinook Music Store API",
+            Version = description.ApiVersion.ToString(),
             Description = "A simple example ASP.NET Core Web API",
             TermsOfService = new Uri("https://example.com/terms"),
             Contact = new OpenApiContact
             {
                 Name = "Chris Woodruff",
                 Email = string.Empty,
-                Url = new Uri("https://chriswoodruff.com")
+                Url = new Uri("https://woodruff.dev")
             },
             License = new OpenApiLicense
             {
@@ -173,53 +206,41 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
 }
 ```
 
-## ADD APIEXPLORER TO STARTUP 
+## ADD APPBUILDEREXTENSIONS.CS TO API PROJECT
 
-```csharp
-builder.Services.AddApiExplorer();
-builder.Services.AddSwaggerServices();
+![](Standing%20Up%20an%20ASP.NET%20Core%20Web%20API/documenting-with-openapi/AddAppBuilderExtensionsClass.png)
 
-app.UseSwagger();
-app.UseSwaggerUI(s => s.SwaggerEndpoint("/swagger/v1/swagger.json", "v1 docs"));
-```
+### CREATE APPBUILDEREXTENSIONS CLASS AND USESWAGGERWITHVERSIONING METHOD
 
-## CHANGE launchSettings.json IN PROPERTIES FOLDER TO LAUNCH SWAGGER ON RUN
+``` csharp
+public static class AppBuilderExtensions
+{
+    public static IApplicationBuilder UseSwaggerWithVersioning(this IApplicationBuilder app)
+    {
+        IServiceProvider services = app.ApplicationServices;
+        var provider = services.GetRequiredService<IApiVersionDescriptionProvider>();
 
-```json
-"profiles": {
-    "Chinook.API": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "launchUrl": "swagger/",
-      "applicationUrl": "https://localhost:7211;http://localhost:5211",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "swagger/",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+        app.UseSwagger();
+
+        app.UseSwaggerUI(options =>
+        {
+            foreach (var description in provider.ApiVersionDescriptions)
+            {
+                options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+            }
+        });
+
+        return app;
     }
 }
 ```
 
-## SWAGGER FOR V1
-![](documenting-with-openapi/Snag_1163dee4.png)
+## CONNECTION EVERYTHING INSIDE PROGRAM.CS
 
-## SWAGGER FOR V2
-![](documenting-with-openapi/Snag_1163df13.png)
-
-**NOTE:** Solution for versioning issues from @referbruv https://www.referbruv.com/blog/posts/integrating-aspnet-core-api-versions-with-swagger-ui
+``` csharp
+builder.Services.AddApiExplorer();
+builder.Services.AddSwaggerServices();
 
 
-
-
-
-
-
-
+app.UseSwaggerWithVersioning();
+```
