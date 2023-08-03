@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744374878369">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744379699816">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.1.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Creating and using Unit Testing for your API</title>
     <meta name="title" content="Creating and using Unit Testing for your API">
-    <meta name="description" content="\\web-api-workshop\\module-2\\02-01 Creating and using Unit Testing for your Web API\\testing">
+    <meta name="description" content="Documenting your API with OpenAPI">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/testing-your-ap/unit-testing/">
@@ -24,23 +24,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/testing-your-ap/unit-testing/">
     <meta property="og:title" content="Creating and using Unit Testing for your API">
-    <meta property="og:description" content="\\web-api-workshop\\module-2\\02-01 Creating and using Unit Testing for your Web API\\testing">
+    <meta property="og:description" content="Documenting your API with OpenAPI">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/testing-your-ap/unit-testing/">
     <meta property="twitter:title" content="Creating and using Unit Testing for your API">
-    <meta property="twitter:description" content="\\web-api-workshop\\module-2\\02-01 Creating and using Unit Testing for your Web API\\testing">
+    <meta property="twitter:description" content="Documenting your API with OpenAPI">
 
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("/web-api-workshop/doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.1.0.744374878369" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.1.0.744379699816" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744374878369" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744379699816" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.1.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744374878369" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744374878369" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744379699816" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744379699816" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -234,13 +234,13 @@
         <span>Creating and using Unit Testing for your API</span>
     </h1>
 </doc-anchor-target>
-<doc-anchor-target id="open-solution-before-paging-module-in-the-testing-module-for-unit-testing">
+<doc-anchor-target id="start-from-the-documenting-your-api-with-openapi-module-1-modules-end">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#open-solution-before-paging-module-in-the-testing-module-for-unit-testing">#</doc-anchor-trigger>
-        <span>OPEN SOLUTION (BEFORE PAGING MODULE) IN THE TESTING MODULE FOR UNIT TESTING</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#start-from-the-documenting-your-api-with-openapi-module-1-modules-end">#</doc-anchor-trigger>
+        <span>START FROM THE DOCUMENTING YOUR API WITH OPENAPI (MODULE 1) MODULE&#x27;S END</span>
     </h2>
 </doc-anchor-target>
-<p>\web-api-workshop\module-2\02-01 Creating and using Unit Testing for your Web API\testing</p>
+<p><a href="../standing20up20an20asp.net20core20web20api/designing-ntier-api.md">Documenting your API with OpenAPI</a></p>
 <doc-anchor-target id="explorer-the-chinookaspnetwebapiunittest-project-and-understand-the-tests">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#explorer-the-chinookaspnetwebapiunittest-project-and-understand-the-tests">#</doc-anchor-trigger>
@@ -249,10 +249,17 @@
 </doc-anchor-target>
 <p>This will give you a good insight into how to create unit tests for different components of your Web API</p>
 <p><figure class="content-center">
-    <img src="snag_cd4253.png" alt="">
+    <img src="2023-08-03_07-24-41.png" alt="">
     <figcaption class="caption"></figcaption>
 </figure>
 </p>
+<doc-anchor-target id="review-and-understand-the-testhelper-code">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#review-and-understand-the-testhelper-code">#</doc-anchor-trigger>
+        <span>REVIEW AND UNDERSTAND THE TESTHELPER CODE</span>
+    </h2>
+</doc-anchor-target>
+<p><span style='color: red;font-size: large;'><strong>Please understand the code for the TestHelp in the /Helper folder in the project.</strong></span></p>
 <doc-anchor-target id="create-additional-unit-tests-for-data-repositories">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#create-additional-unit-tests-for-data-repositories">#</doc-anchor-trigger>
@@ -264,26 +271,42 @@
 <pre class="language-csharp"><code v-pre class="language-csharp">[Fact]
 public async Task AlbumGetAll()
 {
+    var artist = new Artist() { Id = 1, Name = &quot;Artist1&quot; };
+    var album1 = new Album { Id = 12, Title = &quot;Title1&quot;, ArtistId = 1};
+    var album2 = new Album { Id = 123, Title = &quot;Title1&quot;, ArtistId = 1};
+
     // Arrange
+    _context.Artists.Add(artist);
+    _context.Albums.Add(album1);
+    _context.Albums.Add(album2);
+    _context.SaveChanges();
 
     // Act
     var albums = await _repo.GetAll();
 
     // Assert
-    Assert.True(albums.Count &gt; 1, &quot;The number of albums was not greater than 1&quot;);
+    albums.Count.Should().Be(2);
+    albums.Should().Contain(x =&gt; x.Id == 12);
+    albums.Should().Contain(x =&gt; x.Id == 123);
 }
 
 [Fact]
-public void AlbumGetOne()
+public async Task AlbumGetOne()
 {
     // Arrange
-    var id = 1;
+    var albumId = 1;
+    var artistId = 1;
+
+    // We are currently required to care about an Artist ID because the convert part of album specifically references the artist repository as well.
+    _context.Artists.Add(new Artist() { Id = artistId, Name = &quot;Artist&quot;});
+    _context.Albums.Add(new Album() { Id = albumId, Title = &quot;Title&quot;, ArtistId = artistId });
+    _context.SaveChanges();
 
     // Act
-    var album = _repo.GetById(id);
+    var album = await _repo.GetById(albumId);
 
     // Assert
-    Assert.Equal(id, album.Id);
+    album.Id.Should().Be(albumId);
 }</code></pre>
 </doc-codeblock></div>
 <doc-anchor-target id="create-additional-unit-tests-for-supervisor">
@@ -333,6 +356,7 @@ public void GetAlbumByID_MatchingAlbumInDB_ReturnsIt()
     album.Id.Should().Be(1);
 }</code></pre>
 </doc-codeblock></div>
+<p><span style='color: red;font-size: large;'><strong>There are other tests in the demos for your knowledge</strong></span></p>
 <doc-anchor-target id="create-additional-unit-tests-for-validators">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#create-additional-unit-tests-for-validators">#</doc-anchor-trigger>
@@ -346,7 +370,7 @@ public void Should_have_error_when_Name_is_null()
 {
     // Arrange
     var model = new AlbumApiModel { Title = null };
-    
+
     // Act
     var result = _validator.TestValidate(model);
 
@@ -359,35 +383,12 @@ public void Should_not_have_error_when_name_is_specified()
 {
     // Arrange
     var model = new AlbumApiModel { Title = &quot;Abbey Road&quot; };
-    
+
     // Act
     var result = _validator.TestValidate(model);
 
     // Assert
     result.ShouldNotHaveValidationErrorFor(album =&gt; album.Title);
-}</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="change-your-coonectionstring-to-match-one-that-connects-to-chinook-database">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#change-your-coonectionstring-to-match-one-that-connects-to-chinook-database">#</doc-anchor-trigger>
-        <span>CHANGE YOUR COONECTIONSTRING TO MATCH ONE THAT CONNECTS TO CHINOOK DATABASE</span>
-    </h2>
-</doc-anchor-target>
-<p>Located in the appsettings.json file</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-json"><code v-pre class="language-json">{
-  &quot;Logging&quot;: {
-    &quot;LogLevel&quot;: {
-      &quot;Default&quot;: &quot;Information&quot;,
-      &quot;Microsoft&quot;: &quot;Warning&quot;,
-      &quot;Microsoft.Hosting.Lifetime&quot;: &quot;Information&quot;
-    }
-  },
-  &quot;ConnectionStrings&quot;: {
-    &quot;ChinookDbWindows&quot;: &quot;Server=.;Database=Chinook;Trusted_Connection=True;TrustServerCertificate=True;Application Name=Chinook7WebAPI&quot;,
-    &quot;ChinookDbDocker&quot;: &quot;Server=localhost,1433;Database=Chinook;User=sa;Password=P@55w0rd;Trusted_Connection=False;Application Name=ChinookASPNETCoreAPINTier&quot;
-  },
-  &quot;AllowedHosts&quot;: &quot;*&quot;
 }</code></pre>
 </doc-codeblock></div>
 <doc-anchor-target id="open-test-explorer-and-build-to-see-tests-in-your-solution">
@@ -396,9 +397,9 @@ public void Should_not_have_error_when_name_is_specified()
         <span>OPEN TEST EXPLORER AND BUILD TO SEE TESTS IN YOUR SOLUTION</span>
     </h2>
 </doc-anchor-target>
-<p>Note -- You may need to rebuild your project for the Test Explorer to find the tests</p>
+<p><span style='color: red;font-size: large;'><strong>Note -- You may need to rebuild your project for the Test Explorer to find the tests</strong></span></p>
 <p><figure class="content-center">
-    <img src="snag_cd4eb7.png" alt="">
+    <img src="2023-08-03_07-26-50.png" alt="">
     <figcaption class="caption"></figcaption>
 </figure>
 </p>
@@ -409,7 +410,7 @@ public void Should_not_have_error_when_name_is_specified()
     </h2>
 </doc-anchor-target>
 <p><figure class="content-center">
-    <img src="snag_cd5b88.png" alt="">
+    <img src="2023-08-03_07-27-19.png" alt="">
     <figcaption class="caption"></figcaption>
 </figure>
 </p>
