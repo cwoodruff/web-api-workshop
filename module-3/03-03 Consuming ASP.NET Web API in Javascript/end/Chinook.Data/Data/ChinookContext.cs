@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Chinook.Domain.Entities;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Chinook.Data.Data;
 
-public partial class ChinookContext : DbContext //IdentityDbContext
+public partial class ChinookContext : DbContext
 {
     public ChinookContext(DbContextOptions<ChinookContext> options)
         : base(options)
@@ -25,8 +27,6 @@ public partial class ChinookContext : DbContext //IdentityDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //base.OnModelCreating(modelBuilder);
-
         modelBuilder.Entity<Album>(entity =>
         {
             entity.ToTable("Album");

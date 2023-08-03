@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
 [ApiVersion("1.0")]
@@ -24,6 +24,7 @@ public class EmployeeController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<EmployeeApiModel>>> Get()
     {
         try
@@ -49,6 +50,7 @@ public class EmployeeController : ControllerBase
 
     [HttpGet("{id}", Name = "GetEmployeeById")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<EmployeeApiModel>> Get(int id)
     {
         try
@@ -75,6 +77,7 @@ public class EmployeeController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<EmployeeApiModel>> Post([FromBody] EmployeeApiModel input)
     {
         try
@@ -105,6 +108,7 @@ public class EmployeeController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<EmployeeApiModel>> Put(int id, [FromBody] EmployeeApiModel input)
     {
         try
@@ -133,6 +137,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try
@@ -149,6 +154,7 @@ public class EmployeeController : ControllerBase
 
     [HttpGet("reportsto/{id}")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<EmployeeApiModel>> GetReportsTo(int id)
     {
         try
@@ -175,6 +181,7 @@ public class EmployeeController : ControllerBase
 
     [HttpGet("directreports/{id}")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<EmployeeApiModel>>> GetDirectReports(int id)
     {
         try

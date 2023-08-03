@@ -10,7 +10,6 @@ builder.Services.AddAPILogging();
 builder.Services.AddCORS();
 builder.Services.ConfigureValidators();
 builder.Services.AddCaching(builder.Configuration);
-//builder.Services.AddIdentity(builder.Configuration);
 builder.Services.AddVersioning();
 builder.Services.AddApiExplorer();
 builder.Services.AddSwaggerServices();
@@ -19,24 +18,18 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseAuthentication();
-
 app.UseCors();
 
 app.UseResponseCaching();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseSwaggerWithVersioning();
 
 app.MapControllers();
 

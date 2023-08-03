@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
 [ApiVersion("1.0")]
@@ -24,6 +24,7 @@ public class GenreController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<GenreApiModel>>> Get()
     {
         try
@@ -49,6 +50,7 @@ public class GenreController : ControllerBase
 
     [HttpGet("{id}", Name = "GetGenreById")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<GenreApiModel>> Get(int id)
     {
         try
@@ -75,6 +77,7 @@ public class GenreController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<GenreApiModel>> Post([FromBody] GenreApiModel input)
     {
         try
@@ -103,6 +106,7 @@ public class GenreController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<GenreApiModel>> Put(int id, [FromBody] GenreApiModel input)
     {
         try
@@ -131,6 +135,7 @@ public class GenreController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try

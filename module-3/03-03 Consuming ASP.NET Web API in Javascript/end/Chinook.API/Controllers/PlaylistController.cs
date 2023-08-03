@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
 [ApiVersion("1.0")]
@@ -24,6 +24,7 @@ public class PlaylistController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<PlaylistApiModel>>> Get()
     {
         try
@@ -49,6 +50,7 @@ public class PlaylistController : ControllerBase
 
     [HttpGet("{id}", Name = "GetPlaylistById")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<PlaylistApiModel>> Get(int id)
     {
         try
@@ -75,6 +77,7 @@ public class PlaylistController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<PlaylistApiModel>> Post([FromBody] PlaylistApiModel input)
     {
         try
@@ -105,6 +108,7 @@ public class PlaylistController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<PlaylistApiModel>> Put(int id, [FromBody] PlaylistApiModel input)
     {
         try
@@ -133,6 +137,7 @@ public class PlaylistController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try
@@ -146,29 +151,4 @@ public class PlaylistController : ControllerBase
                 "Error occurred while executing Get Playlist By Id");
         }
     }
-
-    // [HttpGet("track/{id}")]
-    // [Produces("application/json")]
-    // public async Task<ActionResult<List<PlaylistApiModel>>> GetByTrackId(int id)
-    // {
-    //     try
-    //     {
-    //         var playlists = await _chinookSupervisor.GetPlaylistByTrackId(id);
-    //
-    //         if (playlists.Any())
-    //         {
-    //             return Ok(playlists);
-    //         }
-    //         else
-    //         {
-    //             return StatusCode((int)HttpStatusCode.NotFound, "No Playlists Could Be Found for the Track");
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         _logger.LogError($"Something went wrong inside the PlaylistController GetByTrackId action: {ex}");
-    //         return StatusCode((int)HttpStatusCode.InternalServerError,
-    //             "Error occurred while executing Get All Playlists for Track");
-    //     }
-    // }
 }

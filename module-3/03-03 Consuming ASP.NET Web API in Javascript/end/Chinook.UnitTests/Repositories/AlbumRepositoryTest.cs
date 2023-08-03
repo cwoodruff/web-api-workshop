@@ -50,7 +50,7 @@ namespace Chinook.UnitTests.Repositories
         }
 
         [Fact]
-        public void AlbumGetOne()
+        public async Task AlbumGetOne()
         {
             // Arrange
             var albumId = 1;
@@ -62,49 +62,59 @@ namespace Chinook.UnitTests.Repositories
             _context.SaveChanges();
 
             // Act
-            var album = _repo.GetById(albumId);
+            var album = await _repo.GetById(albumId);
 
             // Assert
             album.Id.Should().Be(albumId);
         }
         
         [Fact]
-        public void AlbumAddOne()
+        public async Task AlbumAddOne()
         {
             // Arrange
-            var id = 1;
+            var albumId = 42;
+            var album42 = new Album { Id = albumId, Title = "Title1", ArtistId = 1};
 
             // Act
-            var album = _repo.GetById(id);
+            _repo.Add(album42);
+            var album = await _repo.GetById(albumId);
 
             // Assert
-            Assert.Equal(1, album.Id);
+            album.Id.Should().Be(albumId);
         }
         
         [Fact]
-        public void AlbumUpdateOne()
+        public async Task AlbumUpdateOne()
         {
             // Arrange
-            var id = 1;
+            var albumId = 43;
+            var albumTitle = "NewTitle";
+            var album43 = new Album { Id = albumId, Title = "Title1", ArtistId = 1};
+            _repo.Add(album43);
 
             // Act
-            var album = _repo.GetById(id);
+            album43.Title = albumTitle;
+            _repo.Update(album43);
+            var album = await _repo.GetById(albumId);
 
             // Assert
-            Assert.Equal(1, album.Id);
+            album.Title.Should().Be(albumTitle);
         }
         
         [Fact]
-        public void AlbumDeleteOne()
+        public async Task AlbumDeleteOne()
         {
             // Arrange
-            var id = 1;
+            var albumId = 44;
+            var album44 = new Album { Id = albumId, Title = "Title1", ArtistId = 1};
+            _repo.Add(album44);
 
             // Act
-            var album = _repo.GetById(id);
+            _repo.Delete(albumId);
+            var album = await _repo.GetById(albumId);
 
             // Assert
-            Assert.Equal(id, album.Id);
+            album.Should().Be(null);
         }
     }
 }

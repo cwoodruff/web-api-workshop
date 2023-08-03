@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Xunit;
 
 namespace Chinook.ImplementationTests.API;
@@ -33,7 +32,7 @@ public class AlbumApiTest : IDisposable
     public async void AlbumGetAllTest(string method)
     {
         // Arrange
-        var request = new HttpRequestMessage(new HttpMethod(method), "/api/Album/");
+        var request = new HttpRequestMessage(new HttpMethod(method), "/api/v1.0/Album/");
 
         // Act
         var response = await _client.SendAsync(request);
@@ -48,7 +47,7 @@ public class AlbumApiTest : IDisposable
     public async Task AlbumGetTest(string method, int? id = null)
     {
         // Arrange
-        var request = new HttpRequestMessage(new HttpMethod(method), $"/api/Album/{id}");
+        var request = new HttpRequestMessage(new HttpMethod(method), $"/api/v1.0/Album/{id}");
 
         // Act
         var response = await _client.SendAsync(request);

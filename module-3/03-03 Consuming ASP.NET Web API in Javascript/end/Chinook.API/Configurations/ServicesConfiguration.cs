@@ -1,5 +1,3 @@
-using System.Text;
-using Chinook.Data.Data;
 using Chinook.Domain.Repositories;
 using Chinook.Domain.Supervisor;
 using Chinook.Data.Repositories;
@@ -7,13 +5,10 @@ using Chinook.Domain.ApiModels;
 using Chinook.Domain.Validation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -97,58 +92,20 @@ public static class ServicesConfiguration
             options.TableName = "ChinookCache";
         });
     }
-
-    public static void AddIdentity(this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.Configure<JwtConfig>(configuration.GetSection("JwtConfig"));
-
-        services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(jwt =>
-            {
-                var key = Encoding.ASCII.GetBytes(configuration["JwtConfig:Secret"]);
-
-                jwt.SaveToken = true;
-                jwt.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    RequireExpirationTime = false,
-                    ValidateLifetime = true
-                };
-            });
-
-        services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddEntityFrameworkStores<ChinookContext>();
-    }
-
+    
     public static void AddVersioning(this IServiceCollection services)
     {
         services.AddApiVersioning(options =>
         {
             options.AssumeDefaultVersionWhenUnspecified = true;
+            options.AssumeDefaultVersionWhenUnspecified = true;
             options.DefaultApiVersion = new ApiVersion(1, 0);
-            //options.DefaultApiVersion = new ApiVersion( new DateTime( 2020, 9, 22 ) );
-            //options.DefaultApiVersion =
-            //  new ApiVersion(new DateTime( 2020, 9, 22 ), "LetoII", 1, "Beta");
+            //options.DefaultApiVersion = new ApiVersion( new DateTime( 2023, 8, 4 ) );
+            //options.DefaultApiVersion = new ApiVersion(new DateTime( 2023, 8, 4 ), "LetoII", 1, "Beta");
             options.ReportApiVersions = true;
-            //options.ApiVersionReader = new HeaderApiVersionReader("api-version");
         });
     }
-
-    public static void AddSwaggerServices(this IServiceCollection services)
-    {
-        services.AddSwaggerGen();
-        services.ConfigureOptions<ConfigureSwaggerOptions>();
-    }
-
+    
     public static void AddApiExplorer(this IServiceCollection services)
     {
         services.AddVersionedApiExplorer(setup =>
@@ -156,6 +113,16 @@ public static class ServicesConfiguration
             setup.GroupNameFormat = "'v'VVV";
             setup.SubstituteApiVersionInUrl = true;
         });
+    }
+    
+    public static void AddSwaggerServices(this IServiceCollection services)
+    {
+        services.AddSwaggerGen(options => {
+            // for further customization
+            //options.OperationFilter<DefaultValuesFilter>();
+        });
+        services.AddSwaggerGen();
+        services.ConfigureOptions<ConfigureSwaggerOptions>();
     }
 }
 
@@ -189,15 +156,15 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
     {
         var info = new OpenApiInfo()
         {
-            Version = "v1",
             Title = "Chinook Music Store API",
+            Version = description.ApiVersion.ToString(),
             Description = "A simple example ASP.NET Core Web API",
             TermsOfService = new Uri("https://example.com/terms"),
             Contact = new OpenApiContact
             {
                 Name = "Chris Woodruff",
                 Email = string.Empty,
-                Url = new Uri("https://chriswoodruff.com")
+                Url = new Uri("https://woodruff.dev")
             },
             License = new OpenApiLicense
             {

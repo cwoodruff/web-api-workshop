@@ -73,24 +73,24 @@ public class AlbumSupervisorTest : IDisposable
     public async Task GetAlbumByID_MatchingAlbumInDB_ReturnsIt()
     {
         // Arrange
-        var artist = new Artist() { Id = 2, Name = "Artist1" };
-        var track1 = new Track() { Id = 3, Name = "Track1", AlbumId = 22};
-        var track2 = new Track() { Id = 4, Name = "Track2", AlbumId = 223};
-        var album1 = new Album { Id = 22, Title = "Title1", ArtistId = 2};
-        var album2 = new Album { Id = 223, Title = "Title1", ArtistId = 2};
+        var artist = new Artist() { Id = 6, Name = "Artist1" };
+        var track1 = new Track() { Id = 7, Name = "Track1", AlbumId = 55};
+        var track2 = new Track() { Id = 8, Name = "Track2", AlbumId = 56};
+        var album1 = new Album { Id = 55, Title = "Title1", ArtistId = 6};
+        var album2 = new Album { Id = 56, Title = "Title1", ArtistId = 6};
 
         // Arrange
         _context.Artists.Add(artist);
         _context.Albums.Add(album1);
         _context.Albums.Add(album2);
-        //_context.Tracks.Add(track1);
-        //_context.Tracks.Add(track2);
+        _context.Tracks.Add(track1);
+        _context.Tracks.Add(track2);
         await _context.SaveChangesAsync();
 
         // Act
-        var album = await _super.GetAlbumById(22);
+        var album = await _super.GetAlbumById(55);
 
         // Assert
-        album.Id.Should().Be(5);
+        album.Id.Should().Be(55);
     }
 }

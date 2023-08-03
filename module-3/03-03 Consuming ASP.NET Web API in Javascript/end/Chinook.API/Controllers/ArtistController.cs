@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
 [ApiVersion("1.0")]
@@ -24,6 +24,7 @@ public class ArtistController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<ArtistApiModel>>> Get()
     {
         try
@@ -48,6 +49,7 @@ public class ArtistController : ControllerBase
 
     [HttpGet("{id}", Name = "GetArtistById")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<ArtistApiModel>> Get(int id)
     {
         try
@@ -74,6 +76,7 @@ public class ArtistController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<ArtistApiModel>> Post([FromBody] ArtistApiModel input)
     {
         try
@@ -104,6 +107,7 @@ public class ArtistController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<ArtistApiModel>> Put(int id, [FromBody] ArtistApiModel input)
     {
         try
@@ -132,6 +136,7 @@ public class ArtistController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try

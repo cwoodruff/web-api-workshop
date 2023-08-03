@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
 [ApiVersion("1.0")]
@@ -24,6 +24,7 @@ public class AlbumController : ControllerBase
 
     [HttpGet]
     [Produces(typeof(List<AlbumApiModel>))]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<AlbumApiModel>>> Get()
     {
         try  
@@ -47,6 +48,7 @@ public class AlbumController : ControllerBase
     }
 
     [HttpGet("{id}", Name = "GetAlbumById")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<AlbumApiModel>> Get(int id)
     {
         try  
@@ -72,6 +74,7 @@ public class AlbumController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<AlbumApiModel>> Post([FromBody] AlbumApiModel input)
     {
         try
@@ -100,6 +103,7 @@ public class AlbumController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<AlbumApiModel>> Put(int id, [FromBody] AlbumApiModel input)
     {
         try  
@@ -126,6 +130,7 @@ public class AlbumController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try  
@@ -140,6 +145,7 @@ public class AlbumController : ControllerBase
     }
 
     [HttpGet("artist/{id}")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<AlbumApiModel>>> GetByArtistId(int id)
     {
         try  

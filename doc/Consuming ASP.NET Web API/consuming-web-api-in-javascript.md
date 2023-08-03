@@ -114,16 +114,41 @@ function _displayAlbums(data) {
 }
 ```
 
+## UPDATE PROGRAM
+
+Configure the app to serve static files and enable default file mapping. The following highlighted code is needed in Program.cs: 
+
+``` csharp #6-7
+// Configure the HTTP request pipeline.
+app.UseCors();
+
+app.UseResponseCaching();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.UseSwaggerWithVersioning();
+
+app.MapControllers();
+
+app.Run();
+
+public partial class Program { }
+```
+
 ## RUN FROM WWWROOT
 
 A change to the ASP.NET Core project's launch settings may be required to test the HTML page locally:
 
-```plaintext
 Open Properties\launchSettings.json.
-```
 
-Remove
-```json
+
+Remove line 6 ""launchUrl": "swagger/","
+```json #6
   "profiles": {
     "Chinook.API": {
       "commandName": "Project",
@@ -141,4 +166,10 @@ Remove the launchUrl property to force the app to open at index.html—the proje
 
 ### RUN API PROJECT
 
-### OPEN NEW TAB IN BROWSER AND OPEN INDEX.HTML
+Run the Chinook.Api profile
+
+![](consuming-web-api-in-javascript/2023-08-03_10-53-46.png)
+
+## VIEW RESULTS IN BROWSER
+
+![](consuming-web-api-in-javascript/2023-08-03_10-56-00.png)

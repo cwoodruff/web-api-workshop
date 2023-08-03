@@ -1,4 +1,4 @@
-﻿const uri = 'api/Album';
+﻿const uri = '/api/v1.0/Album';
 let albums = [];
 
 function getAlbums() {

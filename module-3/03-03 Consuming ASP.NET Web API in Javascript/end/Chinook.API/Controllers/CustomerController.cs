@@ -24,6 +24,7 @@ public class CustomerController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<CustomerApiModel>>> Get()
     {
         try
@@ -49,6 +50,7 @@ public class CustomerController : ControllerBase
 
     [HttpGet("{id}", Name = "GetCustomerById")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<CustomerApiModel>> Get(int id)
     {
         try
@@ -75,6 +77,7 @@ public class CustomerController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<CustomerApiModel>> Post([FromBody] CustomerApiModel input)
     {
         try
@@ -105,6 +108,7 @@ public class CustomerController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<CustomerApiModel>> Put(int id, [FromBody] CustomerApiModel input)
     {
         try
@@ -133,6 +137,7 @@ public class CustomerController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try
@@ -149,6 +154,7 @@ public class CustomerController : ControllerBase
 
     [HttpGet("supportrep/{id}")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<EmployeeApiModel>> GetBySupportRepId(int id)
     {
         try

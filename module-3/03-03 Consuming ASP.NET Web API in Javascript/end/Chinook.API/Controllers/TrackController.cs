@@ -3,13 +3,12 @@ using Chinook.Domain.ApiModels;
 using Chinook.Domain.Supervisor;
 using FluentValidation;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chinook.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
 [ApiVersion("1.0")]
@@ -26,6 +25,7 @@ public class TrackController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> Get()
     {
         try
@@ -51,6 +51,7 @@ public class TrackController : ControllerBase
 
     [HttpGet("{id}", Name = "GetTrackById")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<TrackApiModel>> Get(int id)
     {
         try
@@ -77,6 +78,7 @@ public class TrackController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<TrackApiModel>> Post([FromBody] TrackApiModel input)
     {
         try
@@ -105,6 +107,7 @@ public class TrackController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<TrackApiModel>> Put(int id, [FromBody] TrackApiModel input)
     {
         try
@@ -133,6 +136,7 @@ public class TrackController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try
@@ -149,6 +153,7 @@ public class TrackController : ControllerBase
 
     [HttpGet("artist/{id}")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByArtistId(int id)
     {
         try
@@ -174,6 +179,7 @@ public class TrackController : ControllerBase
 
     [HttpGet("invoice/{id}")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByInvoiceId(int id)
     {
         try
@@ -199,6 +205,7 @@ public class TrackController : ControllerBase
 
     [HttpGet("album/{id}")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByAlbumId(int id)
     {
         try
@@ -224,6 +231,7 @@ public class TrackController : ControllerBase
 
     [HttpGet("mediatype/{id}")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByMediaTypeId(int id)
     {
         try
@@ -249,6 +257,7 @@ public class TrackController : ControllerBase
 
     [HttpGet("genre/{id}")]
     [Produces("application/json")]
+    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByGenreId(int id)
     {
         try
@@ -270,34 +279,5 @@ public class TrackController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError,
                 "Error occurred while executing Get All Tracks for Genre");
         }
-    }
-
-    [HttpPatch("{id}")]
-    public async Task<ActionResult<TrackApiModel>> Patch(int id, [FromBody] JsonPatchDocument<TrackApiModel> input)
-    {
-        var track = await _chinookSupervisor.GetTrackById(id);
-
-        if (track == null)
-        {
-            return NotFound();
-        }
-
-        input.ApplyTo(track, ModelState); // Must have Microsoft.AspNetCore.Mvc.NewtonsoftJson installed  
-
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        try
-        {
-            await _chinookSupervisor.UpdateTrack(track); //Update in the database
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return NotFound();
-        }
-
-        return Ok(track);
     }
 }
