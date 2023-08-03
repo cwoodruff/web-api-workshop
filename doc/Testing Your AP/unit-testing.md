@@ -4,17 +4,19 @@ icon: shield-check
 ---
 # Creating and using Unit Testing for your API
 
-## OPEN SOLUTION (BEFORE PAGING MODULE) IN THE TESTING MODULE FOR UNIT TESTING
+## START FROM THE DOCUMENTING YOUR API WITH OPENAPI (MODULE 1) MODULE'S END
 
-\web-api-workshop\module-2\02-01 Creating and using Unit Testing for your Web API\testing
+[Documenting your API with OpenAPI](../Standing%20Up%20an%20ASP.NET%20Core%20Web%20API/designing-ntier-api.md)
 
 ## EXPLORER THE ChinookASPNETWebAPI.UnitTest PROJECT AND UNDERSTAND THE TESTS
 
 This will give you a good insight into how to create unit tests for different components of your Web API
 
+![](unit-testing/2023-08-03_07-24-41.png)
 
-![](unit-testing/Snag_cd4253.png)
+## REVIEW AND UNDERSTAND THE TESTHELPER CODE
 
+<span style='color: red;font-size: large;'>**Please understand the code for the TestHelp in the /Helper folder in the project.**</span>
 
 ## CREATE ADDITIONAL UNIT TESTS FOR DATA REPOSITORIES
 
@@ -24,26 +26,42 @@ Using the existing tests for the Album and Artist Data Repositories as a guide, 
 [Fact]
 public async Task AlbumGetAll()
 {
+    var artist = new Artist() { Id = 1, Name = "Artist1" };
+    var album1 = new Album { Id = 12, Title = "Title1", ArtistId = 1};
+    var album2 = new Album { Id = 123, Title = "Title1", ArtistId = 1};
+
     // Arrange
+    _context.Artists.Add(artist);
+    _context.Albums.Add(album1);
+    _context.Albums.Add(album2);
+    _context.SaveChanges();
 
     // Act
     var albums = await _repo.GetAll();
 
     // Assert
-    Assert.True(albums.Count > 1, "The number of albums was not greater than 1");
+    albums.Count.Should().Be(2);
+    albums.Should().Contain(x => x.Id == 12);
+    albums.Should().Contain(x => x.Id == 123);
 }
 
 [Fact]
-public void AlbumGetOne()
+public async Task AlbumGetOne()
 {
     // Arrange
-    var id = 1;
+    var albumId = 1;
+    var artistId = 1;
+
+    // We are currently required to care about an Artist ID because the convert part of album specifically references the artist repository as well.
+    _context.Artists.Add(new Artist() { Id = artistId, Name = "Artist"});
+    _context.Albums.Add(new Album() { Id = albumId, Title = "Title", ArtistId = artistId });
+    _context.SaveChanges();
 
     // Act
-    var album = _repo.GetById(id);
+    var album = await _repo.GetById(albumId);
 
     // Assert
-    Assert.Equal(id, album.Id);
+    album.Id.Should().Be(albumId);
 }
 ```
 
@@ -93,6 +111,7 @@ public void GetAlbumByID_MatchingAlbumInDB_ReturnsIt()
 }
 ```
 
+<span style='color: red;font-size: large;'>**There are other tests in the demos for your knowledge**</span>
 
 ## CREATE ADDITIONAL UNIT TESTS FOR VALIDATORS
 
@@ -104,7 +123,7 @@ public void Should_have_error_when_Name_is_null()
 {
     // Arrange
     var model = new AlbumApiModel { Title = null };
-    
+
     // Act
     var result = _validator.TestValidate(model);
 
@@ -117,7 +136,7 @@ public void Should_not_have_error_when_name_is_specified()
 {
     // Arrange
     var model = new AlbumApiModel { Title = "Abbey Road" };
-    
+
     // Act
     var result = _validator.TestValidate(model);
 
@@ -127,36 +146,12 @@ public void Should_not_have_error_when_name_is_specified()
 ```
 
 
-## CHANGE YOUR COONECTIONSTRING TO MATCH ONE THAT CONNECTS TO CHINOOK DATABASE
-
-Located in the appsettings.json file
-
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft": "Warning",
-      "Microsoft.Hosting.Lifetime": "Information"
-    }
-  },
-  "ConnectionStrings": {
-    "ChinookDbWindows": "Server=.;Database=Chinook;Trusted_Connection=True;TrustServerCertificate=True;Application Name=Chinook7WebAPI",
-    "ChinookDbDocker": "Server=localhost,1433;Database=Chinook;User=sa;Password=P@55w0rd;Trusted_Connection=False;Application Name=ChinookASPNETCoreAPINTier"
-  },
-  "AllowedHosts": "*"
-}
-```
-
-
 ## OPEN TEST EXPLORER AND BUILD TO SEE TESTS IN YOUR SOLUTION
 
-Note -- You may need to rebuild your project for the Test Explorer to find the tests
+<span style='color: red;font-size: large;'>**Note -- You may need to rebuild your project for the Test Explorer to find the tests**</span>
 
-![](unit-testing/Snag_cd4eb7.png)
-
+![](unit-testing/2023-08-03_07-26-50.png)
 
 ## RUN TESTS
 
-
-![](unit-testing/Snag_cd5b88.png)
+![](unit-testing/2023-08-03_07-27-19.png)

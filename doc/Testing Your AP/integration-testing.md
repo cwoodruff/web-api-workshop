@@ -6,20 +6,37 @@ icon: shield-check
 
 ## OPEN SOLUTION (BEFORE PAGING MODULE) IN THE TESTING MODULE FOR INTEGRATION TESTING
 
-\web-api-workshop\module-2\02-02 Creating and using Integrating Testing for your Web API\testing
+[Creating and using Unit Testing for your API](unit-testing.md)
 
 ## EXPLORER THE ChinookASPNETWebAPI.IntegrationTest PROJECT AND UNDERSTAND THE TESTS
 
-This will give you a good insight into how to create unit tests for different components of your Web API
+This will give you a good insight into how to create implementation tests for different components of your Web API
 
+![](integration-testing/2023-08-03_07-40-07.png)
 
-![](integration-testing/Snag_d3d59d.png)
 
 ## MODIFY THE PROGRAM FILE IN API PROJECT
 
 If you get an error that testhost.deps.json is missing then add the following to your API project's Program.cs
 ```csharp
 public partial class Program { }
+```
+
+## ADD THE SET UP FOR THE IMPLEMENTATION TESTS IN ADDITIONAL TEST CLASSES
+
+``` csharp
+private readonly HttpClient _client;
+
+public AlbumApiTest()
+{
+    var application = new WebApplicationFactory<Program>()
+        .WithWebHostBuilder(builder =>
+        {
+            // ... Configure test services
+        });
+
+    _client = application.CreateClient();
+}
 ```
 
 ## CREATE ADDITIONAL INTEGRATION TESTS
@@ -32,7 +49,7 @@ Using the existing integration tests for the Album as a guide, build more integr
 public async void AlbumGetAllTest(string method)
 {
     // Arrange
-    var request = new HttpRequestMessage(new HttpMethod(method), "/api/Album/");
+    var request = new HttpRequestMessage(new HttpMethod(method), "/api/v1.0/Album/");
 
     // Act
     var response = await _client.SendAsync(request);
@@ -57,36 +74,13 @@ public async Task AlbumGetTest(string method, int? id = null)
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 }
 ```
-
-
-## CHANGE YOUR COONECTIONSTRING TO MATCH ONE THAT CONNECTS TO CHINOOK DATABASE
-
-Located in the appsettings.json file
-
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft": "Warning",
-      "Microsoft.Hosting.Lifetime": "Information"
-    }
-  },
-  "ConnectionStrings": {
-    "ChinookDbWindows": "Server=.;Database=Chinook;Trusted_Connection=True;TrustServerCertificate=True;Application Name=Chinook7WebAPI",
-    "ChinookDbDocker": "Server=localhost,1433;Database=Chinook;User=sa;Password=P@55w0rd;Trusted_Connection=False;Application Name=ChinookASPNETCoreAPINTier"
-  },
-  "AllowedHosts": "*"
-}
-```
+<span style='color: red;font-size: large;'>**Please understand you will only need one of the Asserts from the previous tests. I have given you two ways to test and find the results**</span>
 
 ## OPEN TEST EXPLORER AND BUILD TO SEE TESTS IN YOUR SOLUTION
-Note -- You may need to rebuild your project for the Test Explorer to find the tests
+<span style='color: red;font-size: large;'>**Note -- You may need to rebuild your project for the Test Explorer to find the tests**</span>
 
-![](integration-testing/Snag_d3dd2e.png)
-
+![](integration-testing/2023-08-03_07-40-47.png)
 
 ## RUN TESTS
 
-
-![](integration-testing/Snag_d3e8e6.png)
+![](integration-testing/2023-08-03_07-41-29.png)
