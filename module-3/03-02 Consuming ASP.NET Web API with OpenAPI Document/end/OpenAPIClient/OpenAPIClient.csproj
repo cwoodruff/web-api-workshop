@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <OpenApiReference Include="C:\temp\swagger.json" CodeGenerator="NSwagCSharp" Namespace="ChinookOpenAPI" ClassName="ChinookOpenAPIClient" Link="OpenAPIs\swagger.json" />
+    <OpenApiReference Include="..\..\swagger\swagger.json" CodeGenerator="NSwagCSharp" Namespace="ChinookOpenAPI" ClassName="ChinookOpenAPIClient" Link="OpenAPIs\swagger.json" />
   </ItemGroup>
 
   <ItemGroup>

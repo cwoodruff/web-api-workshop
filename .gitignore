@@ -352,3 +352,5 @@ MigrationBackup/
 .DS_Store
 .typewriter-Mac-Bundle
 .typewriter-*
+
+.idea
