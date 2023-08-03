@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744381989149">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.1.0.744390032897">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.1.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Consuming ASP.NET Web API in Javascript</title>
     <meta name="title" content="Consuming ASP.NET Web API in Javascript">
-    <meta name="description" content="A change to the ASP.NET Core project's launch settings may be required to test the HTML page locally:">
+    <meta name="description" content="Configure the app to serve static files and enable default file mapping. The following highlighted code is needed in Program.cs:">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/consuming-asp.net-web-api/consuming-web-api-in-javascript/">
@@ -24,23 +24,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/consuming-asp.net-web-api/consuming-web-api-in-javascript/">
     <meta property="og:title" content="Consuming ASP.NET Web API in Javascript">
-    <meta property="og:description" content="A change to the ASP.NET Core project's launch settings may be required to test the HTML page locally:">
+    <meta property="og:description" content="Configure the app to serve static files and enable default file mapping. The following highlighted code is needed in Program.cs:">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/consuming-asp.net-web-api/consuming-web-api-in-javascript/">
     <meta property="twitter:title" content="Consuming ASP.NET Web API in Javascript">
-    <meta property="twitter:description" content="A change to the ASP.NET Core project's launch settings may be required to test the HTML page locally:">
+    <meta property="twitter:description" content="Configure the app to serve static files and enable default file mapping. The following highlighted code is needed in Program.cs:">
 
     <script data-cfasync="false">(function () { var el = document.documentElement, m = localStorage.getItem("/web-api-workshop/doc_theme"), wm = window.matchMedia; if (m === "dark" || (!m && wm && wm("(prefers-color-scheme: dark)").matches)) { el.classList.add("dark") } else { el.classList.remove("dark") } })();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.1.0.744381989149" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.1.0.744390032897" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744381989149" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.1.0.744390032897" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.1.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744381989149" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744381989149" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.1.0.744390032897" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.1.0.744390032897" defer></script>
 </head>
 <body>
     <div id="docs-app" class="relative text-base antialiased text-gray-700 bg-white font-body dark:bg-dark-850 dark:text-dark-300">
@@ -366,6 +366,34 @@ function _displayAlbums(data) {
     albums = data;
 }</code></pre>
 </doc-codeblock></div>
+<doc-anchor-target id="update-program">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#update-program">#</doc-anchor-trigger>
+        <span>UPDATE PROGRAM</span>
+    </h2>
+</doc-anchor-target>
+<p>Configure the app to serve static files and enable default file mapping. The following highlighted code is needed in Program.cs:</p>
+<div class="codeblock-wrapper"><doc-codeblock line-numbers>
+<pre class="language-csharp" data-line="6-7"><code v-pre class="language-csharp">// Configure the HTTP request pipeline.
+app.UseCors();
+
+app.UseResponseCaching();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.UseSwaggerWithVersioning();
+
+app.MapControllers();
+
+app.Run();
+
+public partial class Program { }</code></pre>
+</doc-codeblock></div>
 <doc-anchor-target id="run-from-wwwroot">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#run-from-wwwroot">#</doc-anchor-trigger>
@@ -373,13 +401,10 @@ function _displayAlbums(data) {
     </h2>
 </doc-anchor-target>
 <p>A change to the ASP.NET Core project&#x27;s launch settings may be required to test the HTML page locally:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<div class="codeblock-title">plaintext</div>
-<pre class="language-none"><code v-pre class="language-none">Open Properties\launchSettings.json.</code></pre>
-</doc-codeblock></div>
-<p>Remove</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre class="language-json"><code v-pre class="language-json">  &quot;profiles&quot;: {
+<p>Open Properties\launchSettings.json.</p>
+<p>Remove line 6 &quot;&quot;launchUrl&quot;: &quot;swagger/&quot;,&quot;</p>
+<div class="codeblock-wrapper"><doc-codeblock line-numbers>
+<pre class="language-json" data-line="6"><code v-pre class="language-json">  &quot;profiles&quot;: {
     &quot;Chinook.API&quot;: {
       &quot;commandName&quot;: &quot;Project&quot;,
       &quot;dotnetRunMessages&quot;: true,
@@ -398,12 +423,23 @@ function _displayAlbums(data) {
         <span>RUN API PROJECT</span>
     </h3>
 </doc-anchor-target>
-<doc-anchor-target id="open-new-tab-in-browser-and-open-indexhtml">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#open-new-tab-in-browser-and-open-indexhtml">#</doc-anchor-trigger>
-        <span>OPEN NEW TAB IN BROWSER AND OPEN INDEX.HTML</span>
-    </h3>
+<p>Run the Chinook.Api profile</p>
+<p><figure class="content-center">
+    <img src="2023-08-03_10-53-46.png" alt="">
+    <figcaption class="caption"></figcaption>
+</figure>
+</p>
+<doc-anchor-target id="view-results-in-browser">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#view-results-in-browser">#</doc-anchor-trigger>
+        <span>VIEW RESULTS IN BROWSER</span>
+    </h2>
 </doc-anchor-target>
+<p><figure class="content-center">
+    <img src="2023-08-03_10-56-00.png" alt="">
+    <figcaption class="caption"></figcaption>
+</figure>
+</p>
 
                                 
                                 <!-- Required only on API pages -->
