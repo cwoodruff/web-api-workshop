@@ -248,7 +248,7 @@ GO
 ### Run from Command Prompt
 
 ```dos
-dotnet sql-cache create "Data Source=.;Initial Catalog=ChinookCacheDb;Integrated Security=True;" dbo ChinookCache
+dotnet sql-cache create "Data Source=.;Initial Catalog=ChinookCacheDb;Integrated Security=True;TrustServerCertificate=true;" dbo ChinookCache
 ```
 
 ![](caching-data/Snag_d81a71e.png)
