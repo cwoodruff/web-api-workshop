@@ -35,8 +35,16 @@ dotnet add package Microsoft.EntityFrameworkCore.Design
 
 Run the following command in Developer Command Prompt inside the Data project
 
-```dos
-dotnet ef dbcontext scaffold "Server=.;Database=Chinook;MultipleActiveResultSets=true;TrustServerCertificate=true;Integrated Security=true;Trusted_Connection=true;" Microsoft.EntityFrameworkCore.SqlServer --context-dir Data --output-dir Entities
+### Windows Local MMSQL
+
+```bash
+dotnet ef dbcontext scaffold "Server=.;Database=Chinook;MultipleActiveResultSets=true;TrustServerCertificate=true;Integrated Security=true;Trusted_Connection=true;;Application Name=ChinookWebAPI" Microsoft.EntityFrameworkCore.SqlServer --context-dir Data --output-dir Entities
+```
+
+### DOCKER BASED MSSQL
+
+``` bash
+dotnet ef dbcontext scaffold "Server=localhost,<docker-container-port>;Database=Chinook;MultipleActiveResultSets=true;TrustServerCertificate=true;User=sa;Password=<mssql-db-password>;Trusted_Connection=false;Application Name=ChinookWebAPI" Microsoft.EntityFrameworkCore.SqlServer --context-dir Data --output-dir Entities
 ```
 
 ![](ntier-data-access/2023-07-31_04-10-36.png)
