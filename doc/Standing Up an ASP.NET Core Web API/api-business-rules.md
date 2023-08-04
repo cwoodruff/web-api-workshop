@@ -94,7 +94,7 @@ public class AlbumValidator : AbstractValidator<AlbumApiModel>
 ```csharp
 public static void ConfigureValidators(this IServiceCollection services)
 {
-    services.AddFluentValidation()
+    services.AddFluentValidationAutoValidation()
         .AddTransient<IValidator<AlbumApiModel>, AlbumValidator>()
         .AddTransient<IValidator<ArtistApiModel>, ArtistValidator>()
         .AddTransient<IValidator<CustomerApiModel>, CustomerValidator>()
