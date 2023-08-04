@@ -11,7 +11,7 @@ icon: gear
 
 ![](ntier-data-access/2023-07-27_10-28-16.png)
 
-## ADD PROJECT REFERENCE FOR DATA PROJECT
+## ADD PROJECT REFERENCE FOR DOMAIN PROJECT
 
 ![](ntier-data-access/2023-07-27_10-29-13.png)
 
