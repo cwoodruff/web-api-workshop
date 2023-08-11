@@ -281,7 +281,7 @@ public class AlbumController : ControllerBase
 }
 ```
 
-## ADD LOGGING TO API PROJECT
+## ADD LOGGING TO API PROJECT Add Logging to API Project ServicesConfiguration class
 
 ```csharp
 public static void AddAPILogging(this IServiceCollection services)
@@ -304,7 +304,7 @@ public static void AddAPILogging(this IServiceCollection services)
 }
 ```
 
-## ADD ConfigureRepositories() AND ConfigureSupervisor() TO CONFIGURESERVICES IN API PROJECT
+## ADD AddAPILogging TO PROGRAM IN API PROJECT
 
 ```csharp
 builder.Services.AddAPILogging();

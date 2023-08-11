@@ -33,6 +33,8 @@ dotnet add package Microsoft.EntityFrameworkCore.Design
 
 ## SCAFFOLD DBCONTEXT AND ENTITIES FROM CHINOOK DATABASE IN DATA PROJECT
 
+From the embedded Terminal in VS 2022, you will need to change directories to the Chinook.Data project.
+
 Run the following command in Developer Command Prompt inside the Data project
 
 ### Windows Local MMSQL
