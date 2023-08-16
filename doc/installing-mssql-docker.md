@@ -41,6 +41,6 @@ Docker released beta support today for Apple’s Rosetta 2 x86 emulation layer, 
 ## Docker Containers
 
 ``` output
-docker pull woodruffsolutions/sql-2022-chinook
+docker pull woodruffsolutions/sql-2019-chinook
 ```
 +++
