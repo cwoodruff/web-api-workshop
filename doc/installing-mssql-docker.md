@@ -12,7 +12,7 @@ Docker released beta support today for Apple’s Rosetta 2 x86 emulation layer, 
 2. Once Docker Desktop is running, open the Dashboard and go into Settings
 3. Find the “Features in development” option, and select the “Use Rosetta for x86/amd64 emulation on Apple Silicon” checkbox
 4. Restart the Docker engine
-5. In the following Quickstart, please us the following command "sudo docker pull woodruffsolutions/sql-2022-chinook"
+5. In the following Quickstart, please us the following command "sudo docker pull woodruffsolutions/sql-2019-chinook"
 6. Follow the instructions on <a href="https://learn.microsoft.com/sql/linux/quickstart-install-connect-docker" target="_blank">Quickstart: Run SQL Server Linux container images with Docker</a> to install SQL Server
 7. You can ignore the warning that the “requested image’s platform (linux/amd64) does not match the detected host platform”
 
