@@ -1,5 +1,5 @@
 ---
-order: 5
+order: 4
 icon: desktop-download
 ---
 # Installing .NET 7 and ASP.NET 7

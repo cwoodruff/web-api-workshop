@@ -1,5 +1,5 @@
 ---
-order: 1
+order: 6
 icon: comment
 ---
 # Introduction to the Workshop

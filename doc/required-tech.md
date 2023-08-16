@@ -1,5 +1,5 @@
 ---
-order: 6
+order: 5
 icon: stack
 ---
 # Required Technologies for the Workshop

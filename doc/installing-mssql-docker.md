@@ -1,5 +1,5 @@
 ---
-order: 3
+order: 2
 icon: container
 ---
 # Installing and Setting Up SQL Server 2022 in Docker
