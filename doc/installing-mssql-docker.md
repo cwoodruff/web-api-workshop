@@ -44,3 +44,5 @@ Docker released beta support today for Apple’s Rosetta 2 x86 emulation layer, 
 docker pull woodruffsolutions/sql-2019-chinook
 ```
 +++
+
+Finally, follow the instructions on <a href="https://learn.microsoft.com/sql/linux/quickstart-install-connect-docker" target="_blank">Quickstart: Run SQL Server Linux container images with Docker</a> to install SQL Server
