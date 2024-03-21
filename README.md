@@ -1,5 +1,5 @@
 # web-api-workshop
-Workshop for ASP.NET 7 Web API
+Workshop for ASP.NET Core 8 Web API
 
 The solution uses the Chinook database on MSSQL, and that can be found at this GitHub repo below.
 
