@@ -2,7 +2,7 @@
 order: 7
 icon: gear
 ---
-# Your First ASP.NET 7 Web API
+# Your First ASP.NET 8 Web API
 
 ## Create a new ASP.NET Core Web API solution and project
 
@@ -18,7 +18,7 @@ Project name is **Chinook.API**
 
 ## Set Details for the Solution and API Project
 
-Target Framework is **.NET 7.0**
+Target Framework is **.NET 8.0**
 
 Authentication Type is **None**
 

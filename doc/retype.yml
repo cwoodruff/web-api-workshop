@@ -3,7 +3,7 @@ output: .retype
 url: https://cwoodruff.github.io/web-api-workshop/
 branding:
   title: Web API Workshop
-  label: v7
+  label: v8
   logo: images/gear-earth.png
   logoDark: images/gear-earth-dark.png
 edit:
