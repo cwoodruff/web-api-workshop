@@ -1,9 +1,5 @@
 ---
-<<<<<<< Updated upstream
 order: 6
-=======
-order: 5
->>>>>>> Stashed changes
 icon: desktop-download
 ---
 # Installing .NET 10 and ASP.NET 10

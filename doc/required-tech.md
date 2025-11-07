@@ -1,9 +1,5 @@
 ---
-<<<<<<< Updated upstream
 order: 7
-=======
-order: 6
->>>>>>> Stashed changes
 icon: stack
 ---
 # Required Technologies for the Workshop
