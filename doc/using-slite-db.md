@@ -15,11 +15,14 @@ For this workshop, we will be using SQLite as our database. SQLite is a lightwei
    ```
    You should see the version number of SQLite printed in the terminal.
 5. Congratulations! You have successfully installed SQLite on your machine.
-6. ## Next Steps
-7. You can now create a new SQLite database for your project. To create a new database, open a terminal and run:
+
+## Next Steps
+1. You can now create a new SQLite database for your project. To create a 
+   new database, open a terminal and run:
    ```bash
    sqlite3 mydatabase.db
    ```
    This command will create a new SQLite database file named `mydatabase.db` in your current directory.
-8. You can start executing SQL commands to create tables and insert data into your database.
-9. For more information on how to use SQLite, refer to the [SQLite Documentation](https
+2. You can start executing SQL commands to create tables and insert data 
+   into your database.
+3. For more information on how to use SQLite, refer to the [SQLite Documentation](https://www.sqlite.org/docs.html)

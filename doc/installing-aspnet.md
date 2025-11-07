@@ -4,12 +4,7 @@ icon: desktop-download
 ---
 # Installing .NET 10 and ASP.NET 10
 
-<<<<<<< Updated upstream
-This page will instruct you how to download and install the .NET 10 SDK, 
-including ASP.NET10Web API.
-=======
 This page will instruct you how to download and install the .NET 10 SDK, including ASP.NET 10 Web API.
->>>>>>> Stashed changes
 
 First, download the [.NET SDK](https://dotnet.microsoft.com/download/dotnet) on your computer.
 
@@ -17,11 +12,7 @@ First, download the [.NET SDK](https://dotnet.microsoft.com/download/dotnet) on 
 
 Next, install the .NET SDK on your computer.
 
-<<<<<<< Updated upstream
-Next, open a terminal such as **PowerShell**, **Command Prompt**, or **bash**. Enter the following `dotnet` commands to verify that .NET10has been installed:
-=======
 Next, open a terminal such as **PowerShell**, **Command Prompt**, or **bash**. Enter the following `dotnet` commands to verify that .NET 10 has been installed:
->>>>>>> Stashed changes
 
 ```dotnetcli
 dotnet --list-sdks
