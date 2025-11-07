@@ -1,5 +1,5 @@
 ---
-order: 3
+order: 5
 icon: database
 ---
 # Installing and Setting Up SQL Server 2022

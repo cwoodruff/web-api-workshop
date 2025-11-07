@@ -1,5 +1,5 @@
 ---
-order: 1
+order: 2
 icon: desktop-download
 ---
 # Installing and Setting Up Postman
