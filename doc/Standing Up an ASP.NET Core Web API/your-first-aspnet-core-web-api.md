@@ -2,7 +2,11 @@
 order: 7
 icon: gear
 ---
+<<<<<<< Updated upstream
 # Your First ASP.NET10Web API
+=======
+# Your First ASP.NET 10 Web API
+>>>>>>> Stashed changes
 
 ## Create a new ASP.NET Core Web API solution and project
 

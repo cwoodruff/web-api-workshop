@@ -1,5 +1,9 @@
 ---
+<<<<<<< Updated upstream
 order: 4
+=======
+order: 3
+>>>>>>> Stashed changes
 icon: container
 ---
 # Installing and Setting Up SQL Server 2022 in Docker

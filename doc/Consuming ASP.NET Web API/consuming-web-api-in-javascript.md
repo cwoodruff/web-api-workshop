@@ -118,7 +118,7 @@ function _displayAlbums(data) {
 
 Configure the app to serve static files and enable default file mapping. The following highlighted code is needed in Program.cs: 
 
-``` csharp #6-8
+``` csharp
 // Configure the HTTP request pipeline.
 app.UseCors();
 

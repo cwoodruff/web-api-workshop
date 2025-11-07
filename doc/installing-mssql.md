@@ -1,5 +1,9 @@
 ---
+<<<<<<< Updated upstream
 order: 5
+=======
+order: 4
+>>>>>>> Stashed changes
 icon: database
 ---
 # Installing and Setting Up SQL Server 2022
