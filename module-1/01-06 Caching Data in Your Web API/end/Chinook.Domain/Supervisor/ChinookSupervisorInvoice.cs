@@ -10,51 +10,41 @@ public partial class ChinookSupervisor
 {
     public async Task<IEnumerable<InvoiceApiModel>> GetAllInvoice()
     {
-        List<Invoice> invoices = await _invoiceRepository.GetAll();
-        var invoiceApiModels = invoices.ConvertAll();
-
-        foreach (var invoice in invoiceApiModels)
+        var key = _vCache.All("invoice");
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(3));
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Invoice-", invoice.Id), invoice, (TimeSpan)cacheEntryOptions);
-        }
-
-        return invoiceApiModels;
+            List<Invoice> invoices = await _invoiceRepository.GetAll();
+            return invoices.ConvertAll();
+        }, options) ?? Array.Empty<InvoiceApiModel>();
     }
 
     public async Task<InvoiceApiModel?> GetInvoiceById(int id)
     {
-        var invoiceApiModelCached = _cache.Get<InvoiceApiModel>(string.Concat("Invoice-", id));
+        var key = _vCache.EntityById("invoice", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromDays(1))
+            .SetSlidingExpiration(TimeSpan.FromHours(1));
 
-        if (invoiceApiModelCached != null)
-        {
-            return invoiceApiModelCached;
-        }
-        else
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
             var invoice = await _invoiceRepository.GetById(id);
             if (invoice == null) return null;
             var invoiceApiModel = invoice.Convert();
             invoiceApiModel.InvoiceLines = (await GetInvoiceLineByInvoiceId(invoiceApiModel.Id)).ToList();
-
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Invoice-", invoiceApiModel.Id), invoiceApiModel, (TimeSpan)cacheEntryOptions);
-
             return invoiceApiModel;
-        }
+        }, options);
     }
 
     public async Task<IEnumerable<InvoiceApiModel>> GetInvoiceByCustomerId(int id)
     {
-        var invoices = await _invoiceRepository.GetByCustomerId(id);
-
-        return invoices.ConvertAll();
+        var key = _vCache.ByFk("invoice", "by-customer", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var invoices = await _invoiceRepository.GetByCustomerId(id);
+            return invoices.ConvertAll();
+        }, options) ?? Array.Empty<InvoiceApiModel>();
     }
 
     public async Task<InvoiceApiModel> AddInvoice(InvoiceApiModel newInvoiceApiModel)
@@ -65,6 +55,8 @@ public partial class ChinookSupervisor
 
         invoice = await _invoiceRepository.Add(invoice);
         newInvoiceApiModel.Id = invoice.Id;
+
+        _vCache.BumpVersion("invoice");
         return newInvoiceApiModel;
     }
 
@@ -85,16 +77,35 @@ public partial class ChinookSupervisor
         invoice.BillingPostalCode = invoiceApiModel.BillingPostalCode ?? string.Empty;
         invoice.Total = invoiceApiModel.Total;
 
-        return await _invoiceRepository.Update(invoice);
+        var updated = await _invoiceRepository.Update(invoice);
+        if (updated)
+        {
+            _vCache.Remove(_vCache.EntityById("invoice", invoice.Id));
+            _vCache.BumpVersion("invoice");
+        }
+        return updated;
     }
 
-    public Task<bool> DeleteInvoice(int id)
-        => _invoiceRepository.Delete(id);
+    public async Task<bool> DeleteInvoice(int id)
+    {
+        var deleted = await _invoiceRepository.Delete(id);
+        if (deleted)
+        {
+            _vCache.Remove(_vCache.EntityById("invoice", id));
+            _vCache.BumpVersion("invoice");
+        }
+        return deleted;
+    }
 
 
     public async Task<IEnumerable<InvoiceApiModel>> GetInvoiceByEmployeeId(int id)
     {
-        var invoices = await _invoiceRepository.GetByEmployeeId(id);
-        return invoices.ConvertAll();
+        var key = _vCache.ByFk("invoice", "by-employee", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var invoices = await _invoiceRepository.GetByEmployeeId(id);
+            return invoices.ConvertAll();
+        }, options) ?? Array.Empty<InvoiceApiModel>();
     }
 }

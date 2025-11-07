@@ -10,66 +10,45 @@ public partial class ChinookSupervisor
 {
     public async Task<IEnumerable<CustomerApiModel>> GetAllCustomer()
     {
-        List<Customer> customers = await _customerRepository.GetAll();
-        var customerApiModels = customers.ConvertAll();
-
-        foreach (var customer in customerApiModels)
+        var key = _vCache.All("customer");
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(3));
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Customer-", customer.Id), customer, (TimeSpan)cacheEntryOptions);
-        }
-
-        return customerApiModels;
+            List<Customer> customers = await _customerRepository.GetAll();
+            return customers.ConvertAll();
+        }, options) ?? Array.Empty<CustomerApiModel>();
     }
 
     public async Task<CustomerApiModel> GetCustomerById(int id)
     {
-        var customerApiModelCached = _cache.Get<CustomerApiModel>(string.Concat("Customer-", id));
+        var key = _vCache.EntityById("customer", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromDays(1))
+            .SetSlidingExpiration(TimeSpan.FromHours(1));
 
-        if (customerApiModelCached != null)
-        {
-            return customerApiModelCached;
-        }
-        else
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
             var customer = await _customerRepository.GetById(id);
             if (customer == null) return null!;
             var customerApiModel = customer.Convert();
             customerApiModel.Invoices = (await GetInvoiceByCustomerId(customerApiModel.Id)).ToList();
-            customerApiModel.SupportRep =
-                await GetEmployeeById(customerApiModel.SupportRepId);
+            customerApiModel.SupportRep = await GetEmployeeById(customerApiModel.SupportRepId);
             if (customerApiModel.SupportRep != null)
                 customerApiModel.SupportRepName =
                     $"{customerApiModel.SupportRep.LastName}, {customerApiModel.SupportRep.FirstName}";
-
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Customer-", customerApiModel.Id), customerApiModel,
-                (TimeSpan)cacheEntryOptions);
-
             return customerApiModel;
-        }
+        }, options)!;
     }
 
     public async Task<IEnumerable<CustomerApiModel>> GetCustomerBySupportRepId(int id)
     {
-        var customers = await _customerRepository.GetBySupportRepId(id);
-
-        foreach (var customer in customers)
+        var key = _vCache.ByFk("customer", "by-supportrep", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Customer-", customer.Id), customer, (TimeSpan)cacheEntryOptions);
-        }
-
-        return customers.ConvertAll();
+            var customers = await _customerRepository.GetBySupportRepId(id);
+            return customers.ConvertAll();
+        }, options) ?? Array.Empty<CustomerApiModel>();
     }
 
     public async Task<CustomerApiModel> AddCustomer(CustomerApiModel newCustomerApiModel)
@@ -80,6 +59,9 @@ public partial class ChinookSupervisor
 
         customer = await _customerRepository.Add(customer);
         newCustomerApiModel.Id = customer.Id;
+
+        _vCache.BumpVersion("customer");
+        _vCache.BumpVersion("invoice");
         return newCustomerApiModel;
     }
 
@@ -103,9 +85,24 @@ public partial class ChinookSupervisor
         customer.Email = customerApiModel.Email ?? string.Empty;
         customer.SupportRepId = customerApiModel.SupportRepId;
 
-        return await _customerRepository.Update(customer);
+        var updated = await _customerRepository.Update(customer);
+        if (updated)
+        {
+            _vCache.Remove(_vCache.EntityById("customer", customer.Id));
+            _vCache.BumpVersion("customer");
+            _vCache.BumpVersion("invoice");
+        }
+        return updated;
     }
 
-    public Task<bool> DeleteCustomer(int id)
-        => _customerRepository.Delete(id);
+    public async Task<bool> DeleteCustomer(int id)
+    {
+        var deleted = await _customerRepository.Delete(id);
+        if (deleted)
+        {
+            _vCache.Remove(_vCache.EntityById("customer", id));
+            _vCache.BumpVersion("customer");
+        }
+        return deleted;
+    }
 }

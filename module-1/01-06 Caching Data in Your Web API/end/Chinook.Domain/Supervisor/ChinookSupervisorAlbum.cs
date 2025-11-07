@@ -10,53 +10,48 @@ public partial class ChinookSupervisor
 {
     public async Task<IEnumerable<AlbumApiModel>> GetAllAlbum()
     {
-        List<Album> albums = await _albumRepository.GetAll();
-        var albumApiModels = albums.ConvertAll();
+        var key = _vCache.All("album");
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(3));
 
-        foreach (var album in albumApiModels)
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Album-", album.Id), album, (TimeSpan)cacheEntryOptions);
-        }
-
-        return albumApiModels;
+            List<Album> albums = await _albumRepository.GetAll();
+            return albums.ConvertAll();
+        }, options) ?? Array.Empty<AlbumApiModel>();
     }
 
     public async Task<AlbumApiModel?> GetAlbumById(int id)
     {
-        var albumApiModelCached = _cache.Get<AlbumApiModel>(string.Concat("Album-", id));
+        var key = _vCache.EntityById("album", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromDays(1))
+            .SetSlidingExpiration(TimeSpan.FromHours(1));
 
-        if (albumApiModelCached != null)
-        {
-            return albumApiModelCached;
-        }
-        else
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
             var album = await _albumRepository.GetById(id);
             if (album == null) return null;
             var albumApiModel = album.Convert();
-            var result = (_artistRepository.GetById(album.ArtistId)).Result;
-            if (result != null)
-                albumApiModel.ArtistName = result.Name;
+            var artist = await GetArtistById(album.ArtistId);
+            if (artist != null)
+                albumApiModel.ArtistName = artist.Name;
             albumApiModel.Tracks = (await GetTrackByAlbumId(id) ?? Array.Empty<TrackApiModel>()).ToList();
-
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Album-", albumApiModel.Id), albumApiModel, (TimeSpan)cacheEntryOptions);
-
             return albumApiModel;
-        }
+        }, options);
     }
 
     public async Task<IEnumerable<AlbumApiModel>> GetAlbumByArtistId(int id)
     {
-        var albums = await _albumRepository.GetByArtistId(id);
-        return albums.ConvertAll();
+        var key = _vCache.ByFk("album", "by-artist", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var albums = await _albumRepository.GetByArtistId(id);
+            return albums.ConvertAll();
+        }, options) ?? Array.Empty<AlbumApiModel>();
     }
 
     public async Task<AlbumApiModel> AddAlbum(AlbumApiModel newAlbumApiModel)
@@ -67,6 +62,9 @@ public partial class ChinookSupervisor
 
         album = await _albumRepository.Add(album);
         newAlbumApiModel.Id = album.Id;
+
+        // Invalidate album lists; next lookups will use new version
+        _vCache.BumpVersion("album");
         return newAlbumApiModel;
     }
 
@@ -81,9 +79,23 @@ public partial class ChinookSupervisor
         album.Title = albumApiModel.Title;
         album.ArtistId = albumApiModel.ArtistId;
 
-        return await _albumRepository.Update(album);
+        var updated = await _albumRepository.Update(album);
+        if (updated)
+        {
+            _vCache.Remove(_vCache.EntityById("album", album.Id));
+            _vCache.BumpVersion("album");
+        }
+        return updated;
     }
 
-    public Task<bool> DeleteAlbum(int id)
-        => _albumRepository.Delete(id);
+    public async Task<bool> DeleteAlbum(int id)
+    {
+        var deleted = await _albumRepository.Delete(id);
+        if (deleted)
+        {
+            _vCache.Remove(_vCache.EntityById("album", id));
+            _vCache.BumpVersion("album");
+        }
+        return deleted;
+    }
 }

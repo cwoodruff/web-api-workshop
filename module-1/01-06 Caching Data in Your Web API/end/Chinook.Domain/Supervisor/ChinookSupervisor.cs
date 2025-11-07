@@ -3,6 +3,7 @@ using Chinook.Domain.Repositories;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Chinook.Domain.Supervisor.Caching;
 
 namespace Chinook.Domain.Supervisor;
 
@@ -31,8 +32,10 @@ public partial class ChinookSupervisor : IChinookSupervisor
     private readonly IValidator<TrackApiModel> _trackValidator;
 
     private readonly IMemoryCache _cache;
-
     private readonly IDistributedCache _distributedCache;
+
+    // Unified in-memory versioned cache helper
+    private readonly VersionedMemoryCache _vCache;
 
     public ChinookSupervisor(IAlbumRepository albumRepository,
         IArtistRepository artistRepository,
@@ -82,5 +85,6 @@ public partial class ChinookSupervisor : IChinookSupervisor
 
         _cache = memoryCache;
         _distributedCache = distributedCache;
+        _vCache = new VersionedMemoryCache(_cache);
     }
 }

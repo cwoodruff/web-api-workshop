@@ -2,29 +2,41 @@
 order: 2
 icon: gear
 ---
-# Caching Data in Your API
+### Caching Data in Your API
 
-## START FROM PREVIOUS MODULE'S END
+#### START FROM PREVIOUS MODULE'S END
 [Developing the Web API Business Rules](api-business-rules.md)
 
-## RESPONSE CACHING
+---
 
-### ADD RESPONSE CACHING TO ADDCACHING() IN SERVICESCONFIGURATION.CS
+### What you will implement in this module
+- HTTP response caching for controllers/actions (client/proxy cache hints)
+- A unified, robust in-process caching strategy for business-layer reads using `IMemoryCache` via a small helper called `VersionedMemoryCache`
+- Reliable invalidation on writes (Create/Update/Delete) and for cross-entity impacts
+- Consistent cache keys, TTLs, and stampede protection
 
+This replaces the previous ad-hoc patterns (e.g., `"Album-<id>"` keys, inconsistent expirations, and missing invalidation).
+
+---
+
+### Response Caching (HTTP-level)
+Response caching is about client/proxy behavior and is complementary to server-side memory caching.
+
+#### 1) Add response caching to DI
+`ServicesConfiguration.AddCaching()`
 ```csharp
-public static void AddCaching(this IServiceCollection services,
-    IConfiguration configuration)
+public static void AddCaching(this IServiceCollection services, IConfiguration configuration)
 {
     services.AddResponseCaching();
+    services.AddMemoryCache();
+    // Optional: leave distributed cache registration if you also demo it later
+    // services.AddDistributedSqlServerCache(...);
 }
 ```
 
-### ADD TO CONFIGURE() IN STARTUP.CS
-**** Note: needs to go after CORS**
-
+#### 2) Enable middleware in Program/Startup
+Ensure `UseResponseCaching` runs after CORS.
 ```csharp
-using Chinook.API.Configurations;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAppSettings(builder.Configuration);
@@ -39,408 +51,243 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 app.UseCors();
-
 app.UseResponseCaching();
-
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
 ```
 
-### ADD TO CONTROLLERS OR ACTIONS
-
+#### 3) Opt-in per controller/action
 ```csharp
 [Route("api/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
-[ResponseCache(Duration = 604800)]
+[ResponseCache(Duration = 604800)] // 7 days in seconds
 public class GenreController : ControllerBase
-```
-
-**Note: 604800 is seconds and equals a week**
-
-#### What is seen in the Response Header
-Response Header:
-Cache-Control: public,max-age=604800
-
-Test in Postman and web browser to see how the API Consumer behaves.
-
-## IN-MEMORY CACHING
-
-### Install Microsoft.Extensions.Caching.Abstractions NuGet package to Domain
-
-```dos
-dotnet add package Microsoft.Extensions.Caching.Abstractions
-```
-
-### ADD IN-MEMORY CACHING TO ADDCACHING() IN SERVICESCONFIGURATION.CS
-
-```csharp
-public static void AddCaching(this IServiceCollection services,
-    IConfiguration configuration)
 {
-    services.AddResponseCaching();
-    services.AddMemoryCache();
+    // ...
+}
+```
+Response header example: `Cache-Control: public,max-age=604800`
+
+Use Postman/browser dev tools to observe the effect. This does not cache on the server; it only instructs clients/proxies.
+
+---
+
+### In-memory caching with VersionedMemoryCache (server-side)
+We standardize on an in-process cache-aside approach backed by `IMemoryCache` and a small helper you already have in the project: `Chinook.Domain/Supervisor/Caching/VersionedMemoryCache.cs`.
+
+Key benefits:
+- Standardized versioned keys per entity (automatic bulk invalidation)
+- Per-key async locking to prevent cache stampedes
+- Centralized TTL policies
+- Minimal code in `ChinookSupervisor` methods
+
+#### Core concepts
+- Key schema (namespaced + versioned):
+    - Single entity: `entity:{ver}:{id}` (e.g., `album:3:10`)
+    - Lists/FK: `entity:{ver}:{suffix}:{id}` (e.g., `track:5:by-album:10`)
+    - All: `entity:{ver}:all`
+- Per-entity version: internal counter stored in cache under `ver:{entity}`. Bumping it invalidates all old keys logically.
+- Cache-aside flow: Try cache → load repo → set cache with TTL → return.
+- Writes must remove by-id and bump the entity version (and sometimes cross-entity versions) to avoid stale lists.
+
+#### Helper API you use in Supervisor
+From `VersionedMemoryCache`:
+```csharp
+// Build logical keys (they include the current version internally)
+string EntityById(string entity, int id)
+string ByFk(string entity, string suffix, int id)
+string All(string entity)
+
+// Get or create with per-key lock
+Task<T?> GetOrCreateAsync<T>(string key, Func<Task<T?>> factory, MemoryCacheEntryOptions options)
+
+// Invalidate
+void Remove(string key)
+void BumpVersion(string entity)
+```
+
+#### DI wiring (already present)
+- `services.AddMemoryCache()` in `AddCaching`
+- `ChinookSupervisor` injects `IMemoryCache` and constructs `_vCache`:
+```csharp
+private readonly IMemoryCache _cache;
+private readonly VersionedMemoryCache _vCache;
+
+public ChinookSupervisor(..., IMemoryCache memoryCache, ...)
+{
+    _cache = memoryCache;
+    _vCache = new VersionedMemoryCache(_cache);
 }
 ```
 
-### ADD MEMORYCACHE TO SUPERVISOR AND GET FROM DI
+#### TTL conventions
+- Entity by id: Absolute 1 day, Sliding 1 hour
+- Large collections (GetAll): 3 minutes
+- Lists by FK (by artist/album/genre/etc.): 10 minutes
+- Reference/static-like (genre, media type): Absolute 2 days, Sliding 6 hours for by-id; 12 hours for lists
 
-#### ChinookSupervisor.cs
+Use `MemoryCacheEntryOptions` accordingly in each method.
+
+---
+
+### How to write Supervisor methods with the new cache
+Below are canonical patterns using code that mirrors what’s already implemented in your repo.
+
+#### Reads — Get by id
 ```csharp
-public partial class ChinookSupervisor : IChinookSupervisor
-{
-    private readonly IAlbumRepository _albumRepository;
-    private readonly IArtistRepository _artistRepository;
-    private readonly ICustomerRepository _customerRepository;
-    private readonly IEmployeeRepository _employeeRepository;
-    private readonly IGenreRepository _genreRepository;
-    private readonly IInvoiceLineRepository _invoiceLineRepository;
-    private readonly IInvoiceRepository _invoiceRepository;
-    private readonly IMediaTypeRepository _mediaTypeRepository;
-    private readonly IPlaylistRepository _playlistRepository;
-    private readonly ITrackRepository _trackRepository;
-
-    private readonly IValidator<AlbumApiModel> _albumValidator;
-    private readonly IValidator<ArtistApiModel> _artistValidator;
-    private readonly IValidator<CustomerApiModel> _customerValidator;
-    private readonly IValidator<EmployeeApiModel> _employeeValidator;
-    private readonly IValidator<GenreApiModel> _genreValidator;
-    private readonly IValidator<InvoiceApiModel> _invoiceValidator;
-    private readonly IValidator<InvoiceLineApiModel> _invoiceLineValidator;
-    private readonly IValidator<MediaTypeApiModel> _mediaTypeValidator;
-    private readonly IValidator<PlaylistApiModel> _playlistValidator;
-    private readonly IValidator<TrackApiModel> _trackValidator;
-
-    private readonly IMemoryCache _cache;
-
-    public ChinookSupervisor(IAlbumRepository albumRepository,
-        IArtistRepository artistRepository,
-        ICustomerRepository customerRepository,
-        IEmployeeRepository employeeRepository,
-        IGenreRepository genreRepository,
-        IInvoiceLineRepository invoiceLineRepository,
-        IInvoiceRepository invoiceRepository,
-        IMediaTypeRepository mediaTypeRepository,
-        IPlaylistRepository playlistRepository,
-        ITrackRepository trackRepository,
-        IValidator<AlbumApiModel> albumValidator,
-        IValidator<ArtistApiModel> artistValidator,
-        IValidator<CustomerApiModel> customerValidator,
-        IValidator<EmployeeApiModel> employeeValidator,
-        IValidator<GenreApiModel> genreValidator,
-        IValidator<InvoiceApiModel> invoiceValidator,
-        IValidator<InvoiceLineApiModel> invoiceLineValidator,
-        IValidator<MediaTypeApiModel> mediaTypeValidator,
-        IValidator<PlaylistApiModel> playlistValidator,
-        IValidator<TrackApiModel> trackValidator,
-        IMemoryCache memoryCache
-    )
-    {
-        _albumRepository = albumRepository;
-        _artistRepository = artistRepository;
-        _customerRepository = customerRepository;
-        _employeeRepository = employeeRepository;
-        _genreRepository = genreRepository;
-        _invoiceLineRepository = invoiceLineRepository;
-        _invoiceRepository = invoiceRepository;
-        _mediaTypeRepository = mediaTypeRepository;
-        _playlistRepository = playlistRepository;
-        _trackRepository = trackRepository;
-
-        _albumValidator = albumValidator;
-        _artistValidator = artistValidator;
-        _customerValidator = customerValidator;
-        _employeeValidator = employeeValidator;
-        _genreValidator = genreValidator;
-        _invoiceValidator = invoiceValidator;
-        _invoiceLineValidator = invoiceLineValidator;
-        _mediaTypeValidator = mediaTypeValidator;
-        _playlistValidator = playlistValidator;
-        _trackValidator = trackValidator;
-
-        _cache = memoryCache;
-    }
-}
-```
-
-### ADD CODE TO SUPERVISOR FOR EACH ENTITY TYPE NEEDED
-
-#### ChinookSupervisorAlbum.cs
-
-```csharp
-public async Task<IEnumerable<AlbumApiModel>> GetAllAlbum()
-{
-    List<Album> albums = await _albumRepository.GetAll();
-    var albumApiModels = albums.ConvertAll();
-
-    foreach (var album in albumApiModels)
-    {
-        var cacheEntryOptions =
-            new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-        ;
-        _cache.Set(string.Concat("Album-", album.Id), album, (TimeSpan)cacheEntryOptions);
-    }
-
-    return albumApiModels;
-}
-
 public async Task<AlbumApiModel?> GetAlbumById(int id)
 {
-    var albumApiModelCached = _cache.Get<AlbumApiModel>(string.Concat("Album-", id));
+    var key = _vCache.EntityById("album", id);
+    var options = new MemoryCacheEntryOptions()
+        .SetAbsoluteExpiration(TimeSpan.FromDays(1))
+        .SetSlidingExpiration(TimeSpan.FromHours(1));
 
-    if (albumApiModelCached != null)
-    {
-        return albumApiModelCached;
-    }
-    else
+    return await _vCache.GetOrCreateAsync(key, async () =>
     {
         var album = await _albumRepository.GetById(id);
         if (album == null) return null;
-        var albumApiModel = album.Convert();
-        var result = (_artistRepository.GetById(album.ArtistId)).Result;
-        if (result != null)
-            albumApiModel.ArtistName = result.Name;
-        albumApiModel.Tracks = (await GetTrackByAlbumId(id) ?? Array.Empty<TrackApiModel>()).ToList();
-
-        var cacheEntryOptions =
-            new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-        ;
-        _cache.Set(string.Concat("Album-", albumApiModel.Id), albumApiModel, (TimeSpan)cacheEntryOptions);
-
-        return albumApiModel;
-    }
+        var model = album.Convert();
+        var artist = await GetArtistById(album.ArtistId);
+        if (artist != null) model.ArtistName = artist.Name;
+        model.Tracks = (await GetTrackByAlbumId(id) ?? Array.Empty<TrackApiModel>()).ToList();
+        return model;
+    }, options);
 }
 ```
 
-## DISTRIBUTED CACHING
-
-### Install tool for MSSQL distrubuted caching using the commend in Command Prompt
-
-```dos
-dotnet tool install --global dotnet-sql-cache
-```
-
-![](caching-data/Snag_d81a70e.png)
-
-### CREATE NEW EMPTY DATABASE ChinookCacheDb IN MSSQL
-
-```sql
-USE master;
-GO
-CREATE DATABASE ChinookCacheDb;
-GO
--- Verify the database files and sizes
-SELECT name, size, size*1.0/128 AS [Size in MBs]
-FROM sys.master_files
-WHERE name = N'ChinookCacheDb';
-GO
-```
-
-### Run from Command Prompt
-
-```dos
-dotnet sql-cache create "Data Source=.;Initial Catalog=ChinookCacheDb;Integrated Security=True;TrustServerCertificate=true;" dbo ChinookCache
-```
-
-![](caching-data/Snag_d81a71e.png)
-
-### INSTALLING THE MSSQL DOCKER CONTAINER WITH DIST CACHING DATABASE
-
-Please install this updated docker image with the database for the distributed caching demo.
-
-*** Instructions can be found here [Installing and Setting Up SQL Server 2022 in Docker](../installing-mssql-docker.md)
-
-``` dos
-docker pull woodruffsolutions/sql-2022-chinook-dist-caching
-```
-
-### Install Microsoft.Extensions.Caching.SqlServer NuGet package to Domain
-
-```dos
-dotnet add package Microsoft.Extensions.Caching.SqlServer
-```
-
-### ADD ChinookSQLCache CONNECTIONSTRING TO APPSETTINGS
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning",
-      "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware": "Information"
-    }
-  },
-  "AllowedHosts": "*",
-  "ConnectionStrings": {
-    "ChinookDbWindows": "Server=.;Database=Chinook;Trusted_Connection=True;TrustServerCertificate=True;Application Name=Chinook7WebAPI",
-    "ChinookDbDocker": "Server=localhost,1433;Database=Chinook;User=sa;Password=P@55w0rd;Trusted_Connection=False;Application Name=ChinookASPNETCoreAPINTier",
-    "ChinookSQLCache": "Data Source=.;Initial Catalog=ChinookCacheDb;Integrated Security=True;TrustServerCertificate=True"
-  }
-}
-```
-
-### ADD DISTRIBUTED CACHING TO ADDCACHING() IN SERVICESCONFIGURATION.CS
-
+#### Reads — Get all
 ```csharp
-public static void AddCaching(this IServiceCollection services,
-    IConfiguration configuration)
+public async Task<IEnumerable<AlbumApiModel>> GetAllAlbum()
 {
-    services.AddResponseCaching();
-    services.AddMemoryCache();
-    services.AddDistributedSqlServerCache(options =>
+    var key = _vCache.All("album");
+    var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(3));
+
+    return await _vCache.GetOrCreateAsync(key, async () =>
     {
-        options.ConnectionString = configuration.GetConnectionString("ChinookSQLCache");
-        options.SchemaName = "dbo";
-        options.TableName = "ChinookCache";
-    });
+        var albums = await _albumRepository.GetAll();
+        return albums.ConvertAll();
+    }, options) ?? Array.Empty<AlbumApiModel>();
 }
 ```
 
-### ADD DISTRIBUTEDCACHE TO SUPERVISOR AND GET FROM DI
-
-#### ChinookSupervisor.cs
+#### Reads — List by foreign key
 ```csharp
-public partial class ChinookSupervisor : IChinookSupervisor
+public async Task<IEnumerable<TrackApiModel>> GetTrackByAlbumId(int id)
 {
-    private readonly IAlbumRepository _albumRepository;
-    private readonly IArtistRepository _artistRepository;
-    private readonly ICustomerRepository _customerRepository;
-    private readonly IEmployeeRepository _employeeRepository;
-    private readonly IGenreRepository _genreRepository;
-    private readonly IInvoiceLineRepository _invoiceLineRepository;
-    private readonly IInvoiceRepository _invoiceRepository;
-    private readonly IMediaTypeRepository _mediaTypeRepository;
-    private readonly IPlaylistRepository _playlistRepository;
-    private readonly ITrackRepository _trackRepository;
-
-    private readonly IValidator<AlbumApiModel> _albumValidator;
-    private readonly IValidator<ArtistApiModel> _artistValidator;
-    private readonly IValidator<CustomerApiModel> _customerValidator;
-    private readonly IValidator<EmployeeApiModel> _employeeValidator;
-    private readonly IValidator<GenreApiModel> _genreValidator;
-    private readonly IValidator<InvoiceApiModel> _invoiceValidator;
-    private readonly IValidator<InvoiceLineApiModel> _invoiceLineValidator;
-    private readonly IValidator<MediaTypeApiModel> _mediaTypeValidator;
-    private readonly IValidator<PlaylistApiModel> _playlistValidator;
-    private readonly IValidator<TrackApiModel> _trackValidator;
-
-    private readonly IMemoryCache _cache;
-
-    private readonly IDistributedCache _distributedCache;
-
-    public ChinookSupervisor(IAlbumRepository albumRepository,
-        IArtistRepository artistRepository,
-        ICustomerRepository customerRepository,
-        IEmployeeRepository employeeRepository,
-        IGenreRepository genreRepository,
-        IInvoiceLineRepository invoiceLineRepository,
-        IInvoiceRepository invoiceRepository,
-        IMediaTypeRepository mediaTypeRepository,
-        IPlaylistRepository playlistRepository,
-        ITrackRepository trackRepository,
-        IValidator<AlbumApiModel> albumValidator,
-        IValidator<ArtistApiModel> artistValidator,
-        IValidator<CustomerApiModel> customerValidator,
-        IValidator<EmployeeApiModel> employeeValidator,
-        IValidator<GenreApiModel> genreValidator,
-        IValidator<InvoiceApiModel> invoiceValidator,
-        IValidator<InvoiceLineApiModel> invoiceLineValidator,
-        IValidator<MediaTypeApiModel> mediaTypeValidator,
-        IValidator<PlaylistApiModel> playlistValidator,
-        IValidator<TrackApiModel> trackValidator,
-        IMemoryCache memoryCache,
-        IDistributedCache distributedCache
-    )
+    var key = _vCache.ByFk("track", "by-album", id);
+    var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+    return await _vCache.GetOrCreateAsync(key, async () =>
     {
-        _albumRepository = albumRepository;
-        _artistRepository = artistRepository;
-        _customerRepository = customerRepository;
-        _employeeRepository = employeeRepository;
-        _genreRepository = genreRepository;
-        _invoiceLineRepository = invoiceLineRepository;
-        _invoiceRepository = invoiceRepository;
-        _mediaTypeRepository = mediaTypeRepository;
-        _playlistRepository = playlistRepository;
-        _trackRepository = trackRepository;
-
-        _albumValidator = albumValidator;
-        _artistValidator = artistValidator;
-        _customerValidator = customerValidator;
-        _employeeValidator = employeeValidator;
-        _genreValidator = genreValidator;
-        _invoiceValidator = invoiceValidator;
-        _invoiceLineValidator = invoiceLineValidator;
-        _mediaTypeValidator = mediaTypeValidator;
-        _playlistValidator = playlistValidator;
-        _trackValidator = trackValidator;
-
-        _cache = memoryCache;
-        _distributedCache = distributedCache;
-    }
+        var tracks = await _trackRepository.GetByAlbumId(id);
+        return tracks.ConvertAll();
+    }, options) ?? Array.Empty<TrackApiModel>();
 }
 ```
 
-### ADD CODE TO SUPERVISOR FOR EACH ENTITY TYPE NEEDED
-
-#### ChinookSupervisorTrack.cs
-
+#### Writes — Invalidate correctly
+On successful update/delete: remove the current by-id item and bump version.
 ```csharp
-    public async Task<IEnumerable<TrackApiModel>> GetAllTrack()
+public async Task<bool> UpdateAlbum(AlbumApiModel albumApiModel)
+{
+    // ... map & repo update
+    var updated = await _albumRepository.Update(album);
+    if (updated)
     {
-        List<Track> tracks = await _trackRepository.GetAll();
-        var trackApiModels = tracks.ConvertAll();
-
-        foreach (var track in trackApiModels)
-        {
-            DistributedCacheEntryOptions cacheEntryOptions = new DistributedCacheEntryOptions();
-            cacheEntryOptions.SetSlidingExpiration(TimeSpan.FromSeconds(3600));
-            cacheEntryOptions.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(86400);
-
-            await _distributedCache.SetStringAsync($"Track-{track.Id}", JsonSerializer.Serialize(track),
-                cacheEntryOptions);
-        }
-
-        return trackApiModels;
+        _vCache.Remove(_vCache.EntityById("album", album.Id));
+        _vCache.BumpVersion("album");
     }
-
-    public async Task<TrackApiModel?> GetTrackById(int id)
-    {
-        var trackApiModelCached = await _distributedCache.GetStringAsync($"Track-{id}");
-
-        if (trackApiModelCached != null)
-        {
-            return JsonSerializer.Deserialize<TrackApiModel>(trackApiModelCached);
-        }
-        else
-        {
-            var track = await _trackRepository.GetById(id);
-            if (track == null) return null;
-            var trackApiModel = track.Convert();
-            trackApiModel.Genre = await GetGenreById(trackApiModel.GenreId);
-            trackApiModel.Album = await GetAlbumById(trackApiModel.AlbumId);
-            trackApiModel.MediaType = await GetMediaTypeById(trackApiModel.MediaTypeId);
-            if (trackApiModel.Album != null) trackApiModel.AlbumName = trackApiModel.Album.Title;
-
-            if (trackApiModel.MediaType != null) trackApiModel.MediaTypeName = trackApiModel.MediaType.Name;
-            if (trackApiModel.Genre != null) trackApiModel.GenreName = trackApiModel.Genre.Name;
-
-            DistributedCacheEntryOptions cacheEntryOptions = new DistributedCacheEntryOptions();
-            cacheEntryOptions.SetSlidingExpiration(TimeSpan.FromSeconds(3600));
-            cacheEntryOptions.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(86400);
-
-            await _distributedCache.SetStringAsync($"Track-{track.Id}", JsonSerializer.Serialize(trackApiModel),
-                cacheEntryOptions);
-
-            return trackApiModel;
-        }
-    }
+    return updated;
+}
 ```
+
+On create: bump the version (lists need refresh; by-id isn’t cached yet).
+```csharp
+public async Task<AlbumApiModel> AddAlbum(AlbumApiModel newAlbumApiModel)
+{
+    // ... validate & repo add
+    _vCache.BumpVersion("album");
+    return newAlbumApiModel;
+}
+```
+
+#### Cross-entity invalidation rules (examples)
+- Artist changes may impact album views → also bump `album` version when artist updates
+- Genre/MediaType updates impact track views → bump `track` version
+- Employee changes can impact customer support-rep projections → bump `customer` version
+- Customer changes may impact invoice lists → bump `invoice` version
+
+These are already reflected in the Supervisor partials.
+
+---
+
+### Migration guide from the old approach
+Replace any of the following patterns:
+- Ad-hoc keys like `"Album-" + id` or `"Artist-" + id`
+- Misuse of `MemoryCacheEntryOptions` (e.g., passing a `TimeSpan` instead of the options object to `Set`)
+- Missing invalidation on writes
+- Mixed in-memory and distributed caching for read paths that should remain in-process
+
+With these steps:
+1) Ensure `services.AddMemoryCache()` is present.
+2) Use `_vCache` in all Supervisor read methods:
+    - Build a key with `EntityById`, `All`, or `ByFk`.
+    - Call `GetOrCreateAsync` with a factory and `MemoryCacheEntryOptions`.
+3) In all write methods (Add/Update/Delete):
+    - On update/delete: `_vCache.Remove(_vCache.EntityById("entity", id));`
+    - Then `_vCache.BumpVersion("entity");`
+    - Add cross-entity bumps as needed.
+4) Remove any leftover direct `IMemoryCache.Set/Get` with raw strings.
+5) Do not cache `InvoiceLine` and `PlaylistTrack` — intentionally left uncached.
+
+---
+
+### Verification checklist
+Manual checks (Postman or similar):
+- Cold read (e.g., `GET /api/album/10`) hits DB once and populates cache. Repeated reads return fast.
+- Concurrent requests for the same key do not stampede the DB (harder to see, but you can simulate with a small script).
+- After an update to an album, the next `GET` misses and repopulates due to version bump.
+- Artist rename triggers fresh album views if you also bump `album`.
+- Memory pressure/evictions (optional): enable logging on eviction callbacks to observe behavior.
+
+---
+
+### Troubleshooting / FAQ
+- Q: I updated an entity, but lists still return old data briefly.
+    - A: Ensure you call `_vCache.BumpVersion("entity")` on writes and that readers use versioned keys. Old keys become unreachable; new reads will repopulate.
+
+- Q: Why do I sometimes still see a DB call on a repeated read?
+    - A: Entry might have expired (TTL), been evicted under pressure, or the version was bumped due to a related write.
+
+- Q: Can I make TTLs configurable?
+    - A: Yes. Wrap TTLs in options loaded from `IConfiguration` or create a central `CachePolicies` static with values bound from `appsettings`.
+
+- Q: Do I need distributed cache?
+    - A: Not for this in-process strategy. Distributed cache can be used for cross-instance sharing, but keep the Supervisor’s primary layer as `IMemoryCache` for speed.
+
+---
+
+### Advanced (Optional): Distributed Caching Appendix
+If you want to demonstrate SQL Server distributed cache in addition to the in-memory layer, you can keep the existing tooling steps (creating the cache table, connection string, and `services.AddDistributedSqlServerCache`). However, the Supervisor’s current design standardizes on `VersionedMemoryCache` (in-memory). If you later add a 2nd layer, use the same key scheme and invalidation semantics. Keep concerns separated (L1 memory, optional L2 distributed).
+
+Tooling recap (optional):
+- Install global tool: `dotnet tool install --global dotnet-sql-cache`
+- Create DB/table: `dotnet sql-cache create "<connstring>" dbo ChinookCache`
+- Add connection string `ChinookSQLCache` to `appsettings.json`
+- Register in `AddCaching` via `services.AddDistributedSqlServerCache(...)`
+
+Do not mix distributed cache calls into the Supervisor read paths unless you explicitly implement a layered cache helper. Stick with `_vCache` for now.
+
+---
+
+### Summary
+You now have:
+- HTTP response caching for client/proxy hints
+- A consistent, versioned, stampede-safe in-memory caching strategy in the Supervisor
+- Clear invalidation on writes and cross-entity impacts
+- A migration path off legacy patterns and optional guidance for adding a distributed cache later
+
