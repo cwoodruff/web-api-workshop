@@ -14,7 +14,16 @@ builder.Services.AddCaching(builder.Configuration);
 builder.Services.AddVersioning();
 builder.Services.AddApiExplorer();
 builder.Services.AddSwaggerServices();
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.RespectBrowserAcceptHeader = true;
+    options.ReturnHttpNotAcceptable = true;
+})
+.AddXmlSerializerFormatters()
+.AddJsonOptions(o =>
+{
+    o.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+});
 
 var app = builder.Build();
 

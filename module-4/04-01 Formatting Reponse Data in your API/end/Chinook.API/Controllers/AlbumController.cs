@@ -1,9 +1,11 @@
 ﻿using System.Net;
+using System.Text;
 using Chinook.Domain.ApiModels;
 using Chinook.Domain.Supervisor;
 using FluentValidation;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace Chinook.API.Controllers;
 
@@ -11,6 +13,7 @@ namespace Chinook.API.Controllers;
 [ApiController]
 [EnableCors("CorsPolicy")]
 [ApiVersion("1.0")]
+[FormatFilter]
 public class AlbumController : ControllerBase
 {
     private readonly IChinookSupervisor _chinookSupervisor;
@@ -23,7 +26,9 @@ public class AlbumController : ControllerBase
     }
 
     [HttpGet]
-    [Produces(typeof(List<AlbumApiModel>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AlbumApiModel>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<AlbumApiModel>>> Get()
     {
         try  
@@ -47,6 +52,10 @@ public class AlbumController : ControllerBase
     }
 
     [HttpGet("{id}", Name = "GetAlbumById")]
+    [HttpGet("{id}.{format?}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AlbumApiModel))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<AlbumApiModel>> Get(int id)
     {
         try  
@@ -160,5 +169,27 @@ public class AlbumController : ControllerBase
             _logger.LogError($"Something went wrong inside the AlbumController Get By Artist action: {ex}");  
             return StatusCode((int)HttpStatusCode.InternalServerError, "Error occurred while executing Get All Albums for Artist");  
         }  
+    }
+
+    [HttpGet("version")]
+    [Produces("text/plain")]
+    public IActionResult Version()
+    {
+        return Content("1.0.0", "text/plain", Encoding.UTF8);
+    }
+
+    [HttpGet("fail-example")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public IActionResult FailExample()
+    {
+        return Problem(title: "Bad request", detail: "Example failure", statusCode: 400);
+    }
+
+    [HttpGet("sample.txt")]
+    [Produces("text/plain")]
+    public IActionResult GetSampleFile()
+    {
+        var bytes = Encoding.UTF8.GetBytes("Hello file\n");
+        return File(bytes, "text/plain", "sample.txt");
     }
 }
