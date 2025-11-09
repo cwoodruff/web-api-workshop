@@ -1,5 +1,5 @@
 ---
-order: 1
+order: 3
 icon: gear
 ---
 # Versioning your Web API

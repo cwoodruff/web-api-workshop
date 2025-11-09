@@ -1,6 +1,6 @@
 ---
-order: 5
-icon: rocket
+order: 2
+icon: gear
 ---
 # Identity in your Web API
 
