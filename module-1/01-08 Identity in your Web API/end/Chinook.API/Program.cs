@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,14 +41,27 @@ builder.Services.AddVersionedApiExplorer(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 
-// Identity EF DbContext (reuse existing Chinook connection per OS)
-var connection = string.Empty;
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-    connection = builder.Configuration.GetConnectionString("ChinookDbWindows");
-else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-    connection = builder.Configuration.GetConnectionString("ChinookDbDocker");
+// Identity EF DbContext (separate Identity database with provider switch)
+var idProvider = builder.Configuration["Identity:Provider"] ?? "SqlServer";
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    if (idProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        var sqliteConn = builder.Configuration.GetConnectionString("IdentitySqlite")
+                         ?? "Data Source=ChinookIdentity.db;Cache=Shared";
+        options.UseSqlite(sqliteConn);
+    }
+    else
+    {
+        // Default to SQL Server for Identity DB; fallback to existing Chinook connections if specific one absent
+        var sqlConn = builder.Configuration.GetConnectionString("IdentitySqlServer")
+                      ?? (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                            ? builder.Configuration.GetConnectionString("ChinookDbWindows")
+                            : builder.Configuration.GetConnectionString("ChinookDbDocker"));
+        options.UseSqlServer(sqlConn);
+    }
+});
 
 // Identity Core + Roles
 builder.Services
@@ -95,28 +107,6 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddSingleton<ITokenService, TokenService>();
 
 // Swagger with JWT support
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Chinook API", Version = "v1" });
-
-    var jwtScheme = new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Description = "Enter 'Bearer {token}'",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-    };
-
-    c.AddSecurityDefinition("Bearer", jwtScheme);
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { jwtScheme, Array.Empty<string>() }
-    });
-});
 
 var app = builder.Build();
 
@@ -130,12 +120,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Swagger UI (dev only recommended; here enabled for workshop)
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Chinook API V1");
-});
 
 app.MapControllers();
 

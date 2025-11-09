@@ -102,40 +102,103 @@ namespace Chinook.API.Data
 ```json
 {
   "ConnectionStrings": {
-    "IdentityConnection": "<SET IN user-secrets OR ENV>"
+    // Existing SQL Server connections (already in your project)
+    "ChinookDbWindows": "Server=.;Database=Chinook;MultipleActiveResultSets=true;TrustServerCertificate=true;Integrated Security=true;Trusted_Connection=true;Application Name=ChinookWebAPI",
+    "ChinookDbDocker": "Server=localhost,2022;Database=Chinook;User=sa;Password=8Riwudeg!!;Trusted_Connection=False;MultipleActiveResultSets=true;TrustServerCertificate=true;Application Name=ChinookWebAPI",
+
+    // Option B (separate Identity DB) – SQL Server variant
+    "IdentitySqlServer": "Server=.;Database=ChinookIdentity;MultipleActiveResultSets=true;TrustServerCertificate=true;Integrated Security=true;Trusted_Connection=true;Application Name=ChinookWebAPI",
+
+    // Option B (separate Identity DB) – SQLite variant
+    // Creates/uses a local file ChinookIdentity.db in the API folder
+    "IdentitySqlite": "Data Source=ChinookIdentity.db;Cache=Shared"
+  },
+  "Identity": {
+    // Choose which provider to use for the Identity context when on Option B
+    // Values: "SqlServer" or "Sqlite"
+    "Provider": "SqlServer"
   },
   "Jwt": {
     "Issuer": "Chinook.Api",
     "Audience": "Chinook.Api.Clients",
-    "SigningKey": "<DEVELOPMENT-ONLY-KEY-USE-USER-SECRETS>"
+    "SigningKey": "<SET_WITH_USER_SECRETS>"
   }
 }
 ```
-- Set Development values via user-secrets (example for SQL Server):
+Development secrets (recommended):
+- Set `Jwt:SigningKey` using user‑secrets.
+- If you override any connection strings locally, set them via user‑secrets as well.
+
 ```bash
-# Inside Chinook.API directory
-dotnet user-secrets set "ConnectionStrings:IdentityConnection" "Server=localhost;Database=ChinookIdentity;Trusted_Connection=True;TrustServerCertificate=True;"
-dotnet user-secrets set "Jwt:SigningKey" "dev-super-secret-signing-key-change-me"
+ cd Chinook.API
+ dotnet user-secrets init
+ dotnet user-secrets set "Jwt:SigningKey" "dev-super-secret-signing-key-change-me"
 ```
 
 ### Step 4 Register DbContext, Identity, Authentication, Authorization in `Program.cs`
-- Using statements to add:
-```csharp
-using System.Text;
-using Chinook.API.Data;
-using Chinook.API.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-```
-- Service registrations (in the builder.Services section):
-```csharp
-// DbContext for Identity (choose provider)
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+You have two solid ways to wire the Identity `ApplicationDbContext`.
 
-// Identity Core
+#### Option A — Reuse the existing Chinook SQL Server connection (simple)
+This is already close to what you have. Keep or paste this block where services are configured (before Identity is added):
+
+```csharp
+using System.Runtime.InteropServices;
+using Microsoft.EntityFrameworkCore;
+using Chinook.API.Data;
+
+// Decide at runtime which Chinook SQL connection to use
+var connection = string.Empty;
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    connection = builder.Configuration.GetConnectionString("ChinookDbWindows");
+else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+    connection = builder.Configuration.GetConnectionString("ChinookDbDocker");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
+```
+
+Pros: one database to manage; fewer moving parts for a workshop.
+Cons: Identity tables mix with application tables (OK for workshops, less ideal for prod).
+
+#### Option B — Separate Identity DB with a switch for SQL Server or SQLite
+Use this when you want to switch Identity storage independently (SQL Server vs SQLite) without touching Chinook’s main DB.
+
+```csharp
+using Microsoft.EntityFrameworkCore;
+using Chinook.API.Data;
+
+var idProvider = builder.Configuration["Identity:Provider"] ?? "SqlServer";
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    if (idProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        var sqliteConn = builder.Configuration.GetConnectionString("IdentitySqlite")
+                         ?? "Data Source=ChinookIdentity.db;Cache=Shared";
+        options.UseSqlite(sqliteConn);
+    }
+    else
+    {
+        // Default to SQL Server for Identity DB
+        var sqlConn = builder.Configuration.GetConnectionString("IdentitySqlServer")
+                      ?? builder.Configuration.GetConnectionString(
+                           RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                               ? "ChinookDbWindows"
+                               : "ChinookDbDocker");
+        options.UseSqlServer(sqlConn);
+    }
+});
+```
+
+Notes:
+- For SQLite, ensure the `Microsoft.EntityFrameworkCore.Sqlite` package is referenced in `Chinook.API.csproj` if you choose this provider:
+  ```xml
+  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0-rc.2.25502.107" />
+  ```
+- For SQL Server, you already have `Microsoft.EntityFrameworkCore.SqlServer` referenced.
+
+Identity + JWT + Authorization registrations remain as you have them (no change needed):
+
+```csharp
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
     {
@@ -147,11 +210,10 @@ builder.Services
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager()
     .AddDefaultTokenProviders();
 
-// Authentication with JWT Bearer
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         var cfg = builder.Configuration;
@@ -163,23 +225,44 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = cfg["Jwt:Issuer"],
             ValidAudience = cfg["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:SigningKey"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:SigningKey"] ?? "")),
+            ClockSkew = TimeSpan.FromMinutes(1)
         };
     });
 
-// Authorization policies
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("CanWrite", policy => policy.RequireRole("Admin", "Manager"));
 });
 ```
-- Middleware order (in the pipeline before `app.MapControllers();`):
+
+Pipeline (unchanged):
 ```csharp
 app.UseAuthentication();
 app.UseAuthorization();
 ```
 
-### Step 5 Implement a token service
+### Step 5 EF Core migrations per provider
+Run from the `Chinook.API` directory.
+
+- SQL Server (Option A or Option B with SqlServer):
+```bash
+ dotnet ef migrations add AddIdentitySchema --context ApplicationDbContext
+ dotnet ef database update --context ApplicationDbContext
+```
+
+- SQLite (Option B):
+```bash
+# Add the Sqlite provider package first if not present
+ dotnet add package Microsoft.EntityFrameworkCore.Sqlite --version 10.0.0-rc.2.25502.107
+
+ dotnet ef migrations add AddIdentitySchema_Sqlite --context ApplicationDbContext
+ dotnet ef database update --context ApplicationDbContext
+```
+
+- Verify Identity tables (`AspNetUsers`, `AspNetRoles`, etc.) are created.
+
+### Step 6 Implement a token service
 - Add `Services/ITokenService.cs`:
 ```csharp
 using System.Security.Claims;
@@ -229,7 +312,7 @@ namespace Chinook.API.Services
 ```
 - Register in DI (in `Program.cs`): `builder.Services.AddSingleton<ITokenService, TokenService>();`
 
-### Step 6 Add authentication endpoints
+### Step 7 Add authentication endpoints
 - Add `Controllers/AuthController.cs`:
 ```csharp
 using System.Security.Claims;
@@ -299,7 +382,7 @@ namespace Chinook.API.Controllers
 ```
 - Note: `SignInManager` is optional for API; `UserManager` + password check is sufficient.
 
-### Step 7 Seed default roles and an admin user
+### Step 8 Seed default roles and an admin user
 - Add `Infrastructure/IdentityDataSeeder.cs`:
 ```csharp
 using Chinook.API.Identity;
@@ -343,74 +426,48 @@ namespace Chinook.API.Infrastructure
 await Chinook.API.Infrastructure.IdentityDataSeeder.SeedAsync(app.Services);
 ```
 
-### Step 8 Protect existing API endpoints
+### Step 9 Protect existing API endpoints
 - Strategy for `AlbumController` and others
     - Add `[Authorize]` at the controller level to require authentication for all actions, then place `[AllowAnonymous]` on the `GET` actions if you want them public.
     - For write operations, add `[Authorize(Policy = "CanWrite")]`.
-- Example attribute usage:
-```csharp
-[Authorize] // at controller level
-public class AlbumController : ControllerBase
-{
-    [AllowAnonymous]
-    [HttpGet]
-    public Task<...> Get() { ... }
 
-    [Authorize(Policy = "CanWrite")] 
+The `AlbumController` in your repo already matches the recommended pattern. Here’s the authoritative template to apply elsewhere:
+
+```csharp
+using Microsoft.AspNetCore.Authorization;
+
+[Authorize] // default: all actions require an authenticated user
+[ApiController]
+[Route("api/v{version:apiVersion}/[controller]")]
+public class SampleController : ControllerBase
+{
+    [HttpGet]
+    [AllowAnonymous] // explicitly allow public, unauthenticated GETs
+    public async Task<IActionResult> GetAll() { /* ... */ }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id) { /* ... */ }
+
     [HttpPost]
-    public Task<...> Post(...) { ... }
+    [Authorize(Policy = "CanWrite")] // only Admin/Manager (per policy) can write
+    public async Task<IActionResult> Create([FromBody] object dto) { /* ... */ }
+
+    [HttpPut("{id}")]
+    [Authorize(Policy = "CanWrite")] // protect updates
+    public async Task<IActionResult> Update(int id, [FromBody] object dto) { /* ... */ }
+
+    [HttpDelete("{id}")]
+    [Authorize(Policy = "CanWrite")] // protect deletes
+    public async Task<IActionResult> Delete(int id) { /* ... */ }
 }
 ```
 
-### Step 9 Add Swagger/OpenAPI with JWT support and API versioning
-- Services (in `Program.cs`):
-```csharp
-using Microsoft.OpenApi.Models;
+Use `[AllowAnonymous]` only where you truly want open access. Otherwise, everything under `[Authorize]` will enforce JWT auth, returning 401 for missing/invalid tokens and 403 for insufficient roles.
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    // Versioned docs: you can dynamically add docs using IApiVersionDescriptionProvider later
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Chinook API", Version = "v1" });
-
-    var jwtScheme = new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Description = "Enter 'Bearer {token}'",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-    };
-
-    c.AddSecurityDefinition("Bearer", jwtScheme);
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { jwtScheme, Array.Empty<string>() }
-    });
-});
-```
-- Middleware and UI (after building `app`):
-```csharp
-app.UseSwagger();
-app.UseSwaggerUI();
-```
-- Enhancement for API versioning: inject `IApiVersionDescriptionProvider` and enumerate to call `SwaggerEndpoint` per version group in `UseSwaggerUI`.
-
-### Step 10 Create and apply EF Core migrations
-- Add migration and update database:
-```bash
-# From Chinook.API folder
- dotnet ef migrations add AddIdentitySchema --context ApplicationDbContext
- dotnet ef database update --context ApplicationDbContext
-```
-- Verify Identity tables (`AspNetUsers`, `AspNetRoles`, etc.) are created.
-
-### Step 11 Manual test plan (quick pass)
+### Step 10 Manual test plan (quick pass)
 - Register a user via `POST /api/v1/auth/register` with JSON body `{ "userName": "alice", "email": "alice@local", "password": "Alice123!" }`.
 - Login via `POST /api/v1/auth/login`, copy `access_token`.
-- In Swagger, click `Authorize` and paste `Bearer {token}`.
+- Call a protected write endpoint (e.g., `POST /api/v1/albums`) without token and verify 401.
 - Call a protected write endpoint (e.g., `POST /api/v1/albums`) and verify 403 for a normal user.
 - Login as admin (seeded), paste token, and verify write succeeds (200/201).
 - Call a public `GET` without token and confirm it works if `[AllowAnonymous]` is applied.
@@ -428,13 +485,6 @@ app.UseSwaggerUI();
     - Authorization policies exist (at least `CanWrite`).
     - Write endpoints return 401 without token and 403 for authenticated users without sufficient role.
     - Admin token can access write endpoints successfully.
-- Swagger/OpenAPI
-    - Swagger UI is available in Development.
-    - “Authorize” button accepts a Bearer token; authenticated calls succeed via Swagger.
-    - Versioned endpoints appear under correct version groups.
 - Configuration and security hygiene
     - JWT signing key and connection strings are stored in user-secrets or environment variables, not committed.
     - Password policy documented; defaults appropriate for workshop.
-- Documentation and testing
-    - README (or module guide) includes setup steps, testing instructions, and example requests.
-    - Manual test steps executed and passed (register → login → call protected & public endpoints).
