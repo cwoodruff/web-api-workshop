@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816039058002">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816044080574">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Formatting Response Data in your API</title>
     <meta name="title" content="Formatting Response Data in your API">
-    <meta name="description" content="Documenting your API with OpenAPI">
+    <meta name="description" content="This plan guides a developer through modern, practical ways to implement and demonstrate response formatting in an ASP.">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/beyond-the-workshop/formatting-response-data/">
@@ -24,23 +24,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/beyond-the-workshop/formatting-response-data/">
     <meta property="og:title" content="Formatting Response Data in your API">
-    <meta property="og:description" content="Documenting your API with OpenAPI">
+    <meta property="og:description" content="This plan guides a developer through modern, practical ways to implement and demonstrate response formatting in an ASP.">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/beyond-the-workshop/formatting-response-data/">
     <meta property="twitter:title" content="Formatting Response Data in your API">
-    <meta property="twitter:description" content="Documenting your API with OpenAPI">
+    <meta property="twitter:description" content="This plan guides a developer through modern, practical ways to implement and demonstrate response formatting in an ASP.">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.11.0.816039058002" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.816044080574" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816039058002" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816044080574" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816039058002" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816039058002" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816044080574" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816044080574" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -253,164 +253,343 @@
         <span>Formatting Response Data in your API</span>
     </h1>
 </doc-anchor-target>
-<doc-anchor-target id="start-from-the-end-of-the-workshop-final-project">
+<doc-anchor-target id="overview">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#start-from-the-end-of-the-workshop-final-project">#</doc-anchor-trigger>
-        <span>START FROM THE END OF THE WORKSHOP FINAL PROJECT</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#overview">#</doc-anchor-trigger>
+        <span>Overview</span>
     </h2>
 </doc-anchor-target>
-<p><a href="../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/">Documenting your API with OpenAPI</a></p>
-<doc-anchor-target id="format-specific-action-results">
+<p>This plan guides a developer through modern, practical ways to implement and demonstrate response formatting in an ASP.NET Core 10 Web API (controller-based and optional minimal APIs). You’ll:</p>
+<ul>
+<li>Start with the default JSON behavior and explicit string/text responses.</li>
+<li>Enable stricter content negotiation (honor <code v-pre>Accept</code> and return 406 when unsupported).</li>
+<li>Add extra formatters (XML) only if needed.</li>
+<li>Demonstrate route-based <code v-pre>.{format}</code> URLs vs. <code v-pre>Accept</code> negotiation.</li>
+<li>Document responses for OpenAPI/Swagger.</li>
+<li>Show standardized error responses using <code v-pre>ProblemDetails</code>.</li>
+<li>Optionally add a simple custom formatter (CSV) to illustrate extensibility.</li>
+<li>Verify behavior with <code v-pre>curl</code>, browser/Postman, and Swagger UI.</li>
+</ul>
+<p>All steps are incremental and reversible. Use the smallest possible changes per step and verify as you go.</p>
+<hr>
+<doc-anchor-target id="detailed-implementation-steps">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#format-specific-action-results">#</doc-anchor-trigger>
-        <span>Format-specific Action Results</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#detailed-implementation-steps">#</doc-anchor-trigger>
+        <span>Detailed Implementation Steps</span>
     </h2>
 </doc-anchor-target>
-<doc-anchor-target id="json-formatted-data-response">
+<doc-anchor-target id="step-1-prerequisites-and-baseline">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#json-formatted-data-response">#</doc-anchor-trigger>
-        <span>JSON-formatted Data Response</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-1-prerequisites-and-baseline">#</doc-anchor-trigger>
+        <span>Step 1 Prerequisites and baseline</span>
     </h3>
 </doc-anchor-target>
+<ul>
+<li>Ensure your API builds and runs.</li>
+<li>Confirm you have a simple controller returning data, e.g., <code v-pre>AlbumController.Get()</code> returning <code v-pre>ActionResult&lt;List&lt;AlbumApiModel&gt;&gt;</code>.</li>
+<li>In <code v-pre>Program.cs</code> (Chinook.API), you likely have:</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddControllers();
+app.MapControllers();</code></pre>
+</doc-codeblock></div>
+<p>Why: Establish the baseline behavior — JSON by default via <code v-pre>System.Text.Json</code>.</p>
+<hr>
+<doc-anchor-target id="step-2-return-strongly-typed-json-with-explicit-openapi-metadata">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-2-return-strongly-typed-json-with-explicit-openapi-metadata">#</doc-anchor-trigger>
+        <span>Step 2 Return strongly-typed JSON with explicit OpenAPI metadata</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Update one GET action to use <code v-pre>ActionResult&lt;T&gt;</code> and add per-status metadata.</li>
+</ul>
+<p>Example (controller):</p>
 <div class="codeblock-wrapper"><doc-codeblock>
 <pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[HttpGet]
-[Produces(typeof(List&lt;AlbumApiModel&gt;))]
+[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List&lt;AlbumApiModel&gt;))]
+[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 public async Task&lt;ActionResult&lt;List&lt;AlbumApiModel&gt;&gt;&gt; Get()
 {
-	return Ok(await _chinookSupervisor.GetAllAlbum());
+    var albums = await _chinookSupervisor.GetAllAlbum();
+    return Ok(albums);
 }</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="string-formatted-data-response">
+<p>Why: Clear contract for clients; accurate Swagger/OpenAPI generation.</p>
+<hr>
+<doc-anchor-target id="step-3-explicit-plain-text-responses-healthversionabout">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#string-formatted-data-response">#</doc-anchor-trigger>
-        <span>String-formatted Data Response</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-3-explicit-plain-text-responses-healthversionabout">#</doc-anchor-trigger>
+        <span>Step 3 Explicit plain text responses (health/version/about)</span>
     </h3>
 </doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[HttpGet(&quot;About&quot;)]
-public ContentResult About()
-{
-    return Content(&quot;An API listing authors of docs.asp.net.&quot;);
-}</code></pre>
-</doc-codeblock></div>
+<ul>
+<li>Add one endpoint that returns text and explicitly sets <code v-pre>text/plain</code>.</li>
+</ul>
+<p>Controller example:</p>
 <div class="codeblock-wrapper"><doc-codeblock>
 <pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[HttpGet(&quot;version&quot;)]
-public string Version()
-{
-    return &quot;Version 1.0.0&quot;;
-}</code></pre>
+[Produces(&quot;text/plain&quot;)]
+public IActionResult Version() =&gt; Content(&quot;1.0.0&quot;, &quot;text/plain&quot;);</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="by-default-aspnet-5-supports-the-following-formats-for-responses">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#by-default-aspnet-5-supports-the-following-formats-for-responses">#</doc-anchor-trigger>
-        <span>By default, ASP.NET 5 supports the following formats for responses:</span>
-    </h2>
-</doc-anchor-target>
-<ul>
-<li>application/json</li>
-<li>text/json</li>
-<li>text/plain</li>
-</ul>
-<doc-anchor-target id="web-browser--response-formats">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#web-browser--response-formats">#</doc-anchor-trigger>
-        <span>Web Browser &amp; Response Formats</span>
-    </h2>
-</doc-anchor-target>
-<doc-anchor-target id="when-aspnet-5-web-api-detects-a-browser-calling-an-endpoint-what-happens">
+<p>Why: Demonstrates non-JSON content and explicit content type.</p>
+<hr>
+<doc-anchor-target id="step-4-enable-stricter-content-negotiation-optional-recommended-for-demos">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#when-aspnet-5-web-api-detects-a-browser-calling-an-endpoint-what-happens">#</doc-anchor-trigger>
-        <span>When ASP.NET 5 Web API detects a browser calling an endpoint what happens?</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-4-enable-stricter-content-negotiation-optional-recommended-for-demos">#</doc-anchor-trigger>
+        <span>Step 4 Enable stricter content negotiation (optional, recommended for demos)</span>
     </h3>
 </doc-anchor-target>
 <ul>
-<li>The Accept header is ignored.</li>
-<li>The content is returned in JSON, unless otherwise configured.</li>
+<li>Honor browser <code v-pre>Accept</code> and return 406 for unsupported media types.</li>
 </ul>
-<doc-anchor-target id="to-configure-an-app-to-honor-browser-accept-headers">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#to-configure-an-app-to-honor-browser-accept-headers">#</doc-anchor-trigger>
-        <span>To configure an app to honor browser accept headers:</span>
-    </h3>
-</doc-anchor-target>
+<p><code v-pre>Program.cs</code>:</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">services.AddControllers(options =&gt;
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddControllers(options =&gt;
 {
-	options.RespectBrowserAcceptHeader = true; // false by default
+    options.RespectBrowserAcceptHeader = true; // honor Accept from browsers and clients
+    options.ReturnHttpNotAcceptable = true;    // 406 if no formatter matches
 });</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="if-no-formatter-is-found-that-can-satisfy-the-clients-request-aspnet-core-will">
+<p>Why: Makes the negotiation behavior visible and testable.</p>
+<hr>
+<doc-anchor-target id="step-5-add-an-extra-formatter-xml-only-if-needed">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#if-no-formatter-is-found-that-can-satisfy-the-clients-request-aspnet-core-will">#</doc-anchor-trigger>
-        <span>If no formatter is found that can satisfy the client&#x27;s request, ASP.NET Core will:</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-5-add-an-extra-formatter-xml-only-if-needed">#</doc-anchor-trigger>
+        <span>Step 5 Add an extra formatter (XML) only if needed</span>
     </h3>
 </doc-anchor-target>
-<p>Returns 406 Not Acceptable if MvcOptions.ReturnHttpNotAcceptable is set to true</p>
-<doc-anchor-target id="restrict-response-formats">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#restrict-response-formats">#</doc-anchor-trigger>
-        <span>Restrict Response Formats</span>
-    </h2>
-</doc-anchor-target>
-<doc-anchor-target id="to-restrict-the-response-formats-apply-the-produces-filter-like-most-filters-produces-can-be-applied-at-the-action-controller-or-global-scope">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#to-restrict-the-response-formats-apply-the-produces-filter-like-most-filters-produces-can-be-applied-at-the-action-controller-or-global-scope">#</doc-anchor-trigger>
-        <span>To restrict the response formats, apply the [Produces] filter. Like most Filters, [Produces] can be applied at the action, controller, or global scope:</span>
-    </h3>
-</doc-anchor-target>
+<ul>
+<li>If you want to show multiple formats, add XML output support.</li>
+</ul>
+<p><code v-pre>Program.cs</code> (extend the registration above):</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[HttpPost]
-[Produces(&quot;application/json&quot;)]
-[Consumes(&quot;application/json&quot;)]
-public async Task&lt;ActionResult&lt;ArtistApiModel&gt;&gt; Post([FromBody] ArtistApiModel input)
-{</code></pre>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddControllers(options =&gt;
+{
+    options.RespectBrowserAcceptHeader = true;
+    options.ReturnHttpNotAcceptable = true;
+})
+.AddXmlSerializerFormatters()
+.AddJsonOptions(o =&gt;
+{
+    // optional JSON tuning; keeps example realistic
+    o.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+});</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="response-format-url-mappings">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#response-format-url-mappings">#</doc-anchor-trigger>
-        <span>Response Format URL Mappings</span>
-    </h2>
-</doc-anchor-target>
-<doc-anchor-target id="the-mapping-from-request-path-should-be-specified-in-the-route-the-api-is-using-for-example">
+<p>Why: Demonstrates adding a secondary format without changing endpoints.</p>
+<hr>
+<doc-anchor-target id="step-6-demonstrate-accept-driven-negotiation">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#the-mapping-from-request-path-should-be-specified-in-the-route-the-api-is-using-for-example">#</doc-anchor-trigger>
-        <span>The mapping from request path should be specified in the route the API is using. For example:</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-6-demonstrate-accept-driven-negotiation">#</doc-anchor-trigger>
+        <span>Step 6 Demonstrate <code v-pre>Accept</code>-driven negotiation</span>
     </h3>
 </doc-anchor-target>
+<ul>
+<li>Use the existing GET endpoint; no code changes. Clients control the format via <code v-pre>Accept</code>:
+<ul>
+<li><code v-pre>Accept: application/json</code> → JSON</li>
+<li><code v-pre>Accept: application/xml</code> → XML (since you added XML)</li>
+<li><code v-pre>Accept: text/csv</code> → 406 (no CSV formatter yet) because <code v-pre>ReturnHttpNotAcceptable = true</code></li>
+</ul>
+</li>
+</ul>
+<p>Why: Shows the default, standards-based negotiation path.</p>
+<hr>
+<doc-anchor-target id="step-7-demonstrate-route-based-format-with-formatfilter-legacyoptional">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-7-demonstrate-route-based-format-with-formatfilter-legacyoptional">#</doc-anchor-trigger>
+        <span>Step 7 Demonstrate route-based format with <code v-pre>[FormatFilter]</code> (legacy/optional)</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>If you want URL suffixes like <code v-pre>/api/albums/5.json</code>:</li>
+</ul>
+<p>Controller setup:</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[Route(&quot;api/[controller]&quot;)]
-[ApiController]
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[ApiController]
+[Route(&quot;api/[controller]&quot;)]
 [FormatFilter]
 public class AlbumsController : ControllerBase
 {
     [HttpGet(&quot;{id}.{format?}&quot;)]
-    public Album Get(int id)
-    {</code></pre>
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AlbumApiModel))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task&lt;IActionResult&gt; GetById(int id)
+    {
+        var album = await _chinookSupervisor.GetAlbum(id);
+        return album is null ? NotFound() : Ok(album);
+    }
+}</code></pre>
 </doc-codeblock></div>
-<div class="table-wrapper scrollbar overflow-hidden">
-<table class="comfortable">
-<thead>
-<tr>
-<th>Route</th>
-<th>Formatter</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>/api/Album/5</td>
-<td>The default output formatter</td>
-</tr>
-<tr>
-<td>/api/Album/5.json</td>
-<td>The JSON formatter (if configured)</td>
-</tr>
-<tr>
-<td>/api/Album/5.xml</td>
-<td>The XML formatter (if configured)</td>
-</tr>
-</tbody>
-</table>
-</div>
+<ul>
+<li>With XML formatter enabled, the following URLs work (negotiation fallback still applies):
+<ul>
+<li><code v-pre>/api/albums/5</code> → default formatter (typically JSON)</li>
+<li><code v-pre>/api/albums/5.json</code> → JSON</li>
+<li><code v-pre>/api/albums/5.xml</code> → XML</li>
+</ul>
+</li>
+</ul>
+<p>Why: Demonstrates an alternative for clients that prefer URL suffixes.</p>
+<hr>
+<doc-anchor-target id="step-8-standardize-error-responses-with-problemdetails">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-8-standardize-error-responses-with-problemdetails">#</doc-anchor-trigger>
+        <span>Step 8 Standardize error responses with <code v-pre>ProblemDetails</code></span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Add one example action that returns a standardized error.</li>
+</ul>
+<p>Example:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[HttpGet(&quot;fail-example&quot;)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+public IActionResult FailExample()
+{
+    return Problem(title: &quot;Bad request&quot;, detail: &quot;Example failure&quot;, statusCode: 400);
+}</code></pre>
+</doc-codeblock></div>
+<ul>
+<li>With <code v-pre>[ApiController]</code> enabled, invalid model states automatically return <code v-pre>ValidationProblemDetails</code> (no extra code).</li>
+</ul>
+<p>Why: Shows modern, interoperable error payloads.</p>
+<hr>
+<doc-anchor-target id="step-9-optional-implement-a-simple-custom-csv-output-formatter">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-9-optional-implement-a-simple-custom-csv-output-formatter">#</doc-anchor-trigger>
+        <span>Step 9 Optional: Implement a simple custom CSV output formatter</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Create a tiny formatter for demo purposes (e.g., for a flat DTO). This is optional but great for workshops.</li>
+</ul>
+<p>Skeleton steps:</p>
+<ol>
+<li>Create a <code v-pre>CsvOutputFormatter : TextOutputFormatter</code>.</li>
+<li>Support <code v-pre>text/csv</code> media type and UTF-8 encoding.</li>
+<li>Implement <code v-pre>CanWriteType</code> and <code v-pre>WriteResponseBodyAsync</code> to serialize a list of DTOs.</li>
+<li>Register it:</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddControllers(options =&gt;
+{
+    options.RespectBrowserAcceptHeader = true;
+    options.ReturnHttpNotAcceptable = true;
+    options.OutputFormatters.Add(new CsvOutputFormatter());
+});</code></pre>
+</doc-codeblock></div>
+<p>Why: Demonstrates extensibility of the pipeline beyond built-ins.</p>
+<hr>
+<doc-anchor-target id="step-10-file-and-stream-responses-bonus">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-10-file-and-stream-responses-bonus">#</doc-anchor-trigger>
+        <span>Step 10 File and stream responses (bonus)</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Add an endpoint returning a file/bytes/stream with explicit content type.</li>
+</ul>
+<p>Example:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[HttpGet(&quot;sample.txt&quot;)]
+[Produces(&quot;text/plain&quot;)]
+public IActionResult GetSampleFile()
+{
+    var bytes = System.Text.Encoding.UTF8.GetBytes(&quot;Hello file\n&quot;);
+    return File(bytes, &quot;text/plain&quot;, &quot;sample.txt&quot;);
+}</code></pre>
+</doc-codeblock></div>
+<p>Why: Shows content-type control outside of object serialization.</p>
+<hr>
+<doc-anchor-target id="follow-up-verification-checklist-and-commands">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#follow-up-verification-checklist-and-commands">#</doc-anchor-trigger>
+        <span>Follow-up: Verification Checklist and Commands</span>
+    </h3>
+</doc-anchor-target>
+<p>Use <code v-pre>curl</code> (or Postman) to verify each behavior. Replace <code v-pre>https://localhost:5001</code> with your dev URL.</p>
+<ol>
+<li>Baseline JSON (status 200, <code v-pre>application/json</code>):</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">curl -i https://localhost:5001/api/albums</code></pre>
+</doc-codeblock></div>
+<ol start="2">
+<li>Explicit text response (status 200, <code v-pre>text/plain</code>):</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">curl -i https://localhost:5001/api/albums/version</code></pre>
+</doc-codeblock></div>
+<ol start="3">
+<li>Accept negotiation — JSON (200):</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">curl -i -H &quot;Accept: application/json&quot; https://localhost:5001/api/albums</code></pre>
+</doc-codeblock></div>
+<ol start="4">
+<li>Accept negotiation — XML (200 if XML formatter added):</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">curl -i -H &quot;Accept: application/xml&quot; https://localhost:5001/api/albums</code></pre>
+</doc-codeblock></div>
+<ol start="5">
+<li>Unsupported Accept (406 when <code v-pre>ReturnHttpNotAcceptable = true</code>):</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">curl -i -H &quot;Accept: text/csv&quot; https://localhost:5001/api/albums</code></pre>
+</doc-codeblock></div>
+<ol start="6">
+<li>Route-based format filter (if enabled):</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">curl -i https://localhost:5001/api/albums/5.json
+curl -i https://localhost:5001/api/albums/5.xml</code></pre>
+</doc-codeblock></div>
+<ol start="7">
+<li>ProblemDetails error:</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">curl -i https://localhost:5001/api/albums/fail-example</code></pre>
+</doc-codeblock></div>
+<p>Expect <code v-pre>application/problem+json</code> with a JSON body containing <code v-pre>type</code>, <code v-pre>title</code>, <code v-pre>status</code>, etc.</p>
+<ol start="8">
+<li>File response:</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">curl -i https://localhost:5001/api/albums/sample.txt</code></pre>
+</doc-codeblock></div>
+<p>Expect <code v-pre>Content-Type: text/plain</code> and a <code v-pre>Content-Disposition</code> filename.</p>
+<ol start="9">
+<li>Swagger/OpenAPI checks:</li>
+</ol>
+<ul>
+<li>Run the app and open Swagger UI.</li>
+<li>Confirm response schemas, content types, and status codes match your attributes and endpoint metadata.</li>
+<li>If you added XML, confirm both <code v-pre>application/json</code> and <code v-pre>application/xml</code> are shown for responses.</li>
+</ul>
+<ol start="10">
+<li>Optional CSV formatter (if implemented):</li>
+</ol>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-none"><code v-pre class="language-none">curl -i -H &quot;Accept: text/csv&quot; https://localhost:5001/api/albums</code></pre>
+</doc-codeblock></div>
+<p>Expect <code v-pre>200 OK</code> and <code v-pre>Content-Type: text/csv</code> with CSV content.</p>
+<hr>
+<doc-anchor-target id="tips-and-good-practices">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#tips-and-good-practices">#</doc-anchor-trigger>
+        <span>Tips and Good Practices</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Add only the formatters you will support; let negotiation pick the best match.</li>
+<li>Use <code v-pre>ProducesResponseType</code> (controllers) or <code v-pre>.Produces&lt;T&gt;()</code> (minimal) for accurate OpenAPI.</li>
+<li>Prefer <code v-pre>ProblemDetails</code> for error payloads.</li>
+<li>Be explicit with non-JSON content types (text, files) to avoid ambiguity.</li>
+<li>Keep route <code v-pre>.{format}</code> only when audiences benefit from URL-based formats; otherwise prefer <code v-pre>Accept</code> negotiation.</li>
+<li>Consider integration tests that assert <code v-pre>Content-Type</code> and 406 behavior for key endpoints.</li>
+</ul>
 
                                 
                                 <!-- Required only on API pages -->
