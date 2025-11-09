@@ -62,7 +62,7 @@ public static class ServicesConfiguration
 
     public static void ConfigureValidators(this IServiceCollection services)
     {
-        services.AddFluentValidation()
+        services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters()
             .AddTransient<IValidator<AlbumApiModel>, AlbumValidator>()
             .AddTransient<IValidator<ArtistApiModel>, ArtistValidator>()
             .AddTransient<IValidator<CustomerApiModel>, CustomerValidator>()
