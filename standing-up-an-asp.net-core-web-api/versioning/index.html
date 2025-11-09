@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.815844595758">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816021343355">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Versioning your Web API</title>
     <meta name="title" content="Versioning your Web API">
-    <meta name="description" content="Caching Data in Your API">
+    <meta name="description" content="This plan adds API versioning using URL segments (e.g., /api/v1/albums) to cleanly separate versions, work seamlessly with HTTP response caching, and...">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/versioning/">
@@ -24,23 +24,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/versioning/">
     <meta property="og:title" content="Versioning your Web API">
-    <meta property="og:description" content="Caching Data in Your API">
+    <meta property="og:description" content="This plan adds API versioning using URL segments (e.g., /api/v1/albums) to cleanly separate versions, work seamlessly with HTTP response caching, and...">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/versioning/">
     <meta property="twitter:title" content="Versioning your Web API">
-    <meta property="twitter:description" content="Caching Data in Your API">
+    <meta property="twitter:description" content="This plan adds API versioning using URL segments (e.g., /api/v1/albums) to cleanly separate versions, work seamlessly with HTTP response caching, and...">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.11.0.815844595758" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.816021343355" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.815844595758" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816021343355" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.815844595758" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.815844595758" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816021343355" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816021343355" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -253,129 +253,362 @@
         <span>Versioning your Web API</span>
     </h1>
 </doc-anchor-target>
-<doc-anchor-target id="start-from-previous-modules-end">
+<doc-anchor-target id="overview">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#start-from-previous-modules-end">#</doc-anchor-trigger>
-        <span>START FROM PREVIOUS MODULE&#x27;S END</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#overview">#</doc-anchor-trigger>
+        <span>Overview</span>
     </h2>
 </doc-anchor-target>
-<p><a href="../caching-data/">Caching Data in Your API</a></p>
-<doc-anchor-target id="add-versioning-nuget-package-to-api-project">
+<p>This plan adds API versioning using URL segments (e.g., <code v-pre>/api/v1/albums</code>) to cleanly separate versions, work seamlessly with HTTP response caching, and prepare for multi-version Swagger. You’ll:</p>
+<ul>
+<li>Install API versioning packages</li>
+<li>Register API versioning in <code v-pre>Program.cs</code></li>
+<li>Annotate controllers and adjust routes</li>
+<li>Prepare for deprecation/sunset</li>
+<li>Validate caching behavior</li>
+<li>Add test coverage</li>
+</ul>
+<p>Why URL segments? They naturally partition caches (path differs per version), are easy to reason about, and Swagger grouping is straightforward. Your domain cache (<code v-pre>VersionedMemoryCache</code>) remains unchanged, because API versioning is a surface concern.</p>
+<p>Where you will code:</p>
+<ul>
+<li><code v-pre>Chinook.API/Program.cs</code> (service registration)</li>
+<li><code v-pre>Chinook.API/Controllers/*Controller.cs</code> (attributes/routes)</li>
+<li>Optional: custom middleware/filter for deprecation headers</li>
+<li>Tests: new test project or existing test suite</li>
+</ul>
+<hr>
+<doc-anchor-target id="step-1--add-nuget-dependencies">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-versioning-nuget-package-to-api-project">#</doc-anchor-trigger>
-        <span>ADD VERSIONING NUGET PACKAGE TO API PROJECT</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-1--add-nuget-dependencies">#</doc-anchor-trigger>
+        <span>Step 1 — Add NuGet dependencies</span>
     </h2>
 </doc-anchor-target>
+<p>Why: Brings in the MVC API versioning services and the API explorer needed later for Swagger to emit one document per version.</p>
+<ul>
+<li>API versioning core:
+<ul>
+<li><code v-pre>Microsoft.AspNetCore.Mvc.Versioning</code></li>
+</ul>
+</li>
+<li>API explorer integration (for Swagger grouping later):
+<ul>
+<li><code v-pre>Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer</code></li>
+</ul>
+</li>
+</ul>
+<p>Commands:</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<div class="codeblock-title">dos</div>
-<pre translate="no" class="language-none"><code v-pre class="language-none">dotnet add package Microsoft.AspNetCore.Mvc.Versioning</code></pre>
+<pre translate="no" class="language-none"><code v-pre class="language-none">dotnet add Chinook.API package Microsoft.AspNetCore.Mvc.Versioning
+dotnet add Chinook.API package Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="add-versioning-to-servicesconfiguration-in-api-project">
+<hr>
+<doc-anchor-target id="step-2--register-api-versioning-in-programcs">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-versioning-to-servicesconfiguration-in-api-project">#</doc-anchor-trigger>
-        <span>ADD VERSIONING TO ServicesConfiguration IN API PROJECT</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-2--register-api-versioning-in-programcs">#</doc-anchor-trigger>
+        <span>Step 2 — Register API versioning in Program.cs</span>
     </h2>
 </doc-anchor-target>
-<doc-anchor-target id="servicesconfigurationcs">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#servicesconfigurationcs">#</doc-anchor-trigger>
-        <span>ServicesConfiguration.cs</span>
-    </h3>
-</doc-anchor-target>
+<p>Why: Configures how versions are read (URL segment), defaulting behavior, and exposes helpful headers.</p>
+<p>Edit <code v-pre>Chinook.API/Program.cs</code> and add the following service registrations right after controllers are added (or before building the app):</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">public static void AddVersioning(this IServiceCollection services)
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using Microsoft.AspNetCore.Mvc; // for ApiVersion
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.Mvc.ApiExplorer; // later for Swagger
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ... existing service registrations
+builder.Services.AddControllers();
+
+// API Versioning
+builder.Services.AddApiVersioning(options =&gt;
 {
-    services.AddApiVersioning(options =&gt;
-    {
-        options.AssumeDefaultVersionWhenUnspecified = true;
-        options.DefaultApiVersion = new ApiVersion(1, 0);
-        //options.DefaultApiVersion = new ApiVersion( new DateTime( 2023, 8, 4 ) );
-        //options.DefaultApiVersion = new ApiVersion(new DateTime( 2023, 8, 4 ), &quot;LetoII&quot;, 1, &quot;Beta&quot;);
-        options.ReportApiVersions = true;
-    });
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = false; // force explicit versioning
+    options.ReportApiVersions = true; // adds api-supported-versions, api-deprecated-versions headers
+    options.ApiVersionReader = new UrlSegmentApiVersionReader(); // version in the URL path
+});
+
+// Versioned API Explorer (used by Swagger later)
+builder.Services.AddVersionedApiExplorer(options =&gt;
+{
+    options.GroupNameFormat = &quot;'v'VVV&quot;; // e.g., v1, v1.1
+    options.SubstituteApiVersionInUrl = true;
+});
+
+var app = builder.Build();
+
+// ... existing middleware (UseCors, UseResponseCaching, etc.)</code></pre>
+</doc-codeblock></div>
+<p>Notes:</p>
+<ul>
+<li>Keep <code v-pre>app.UseResponseCaching()</code> as-is. URL segment versioning inherently splits cached entries by path.</li>
+<li>If you prefer a soft rollout, temporarily set <code v-pre>AssumeDefaultVersionWhenUnspecified = true</code> and remove it after client migration.</li>
+</ul>
+<hr>
+<doc-anchor-target id="step-3--annotate-controllers-and-update-route-templates">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-3--annotate-controllers-and-update-route-templates">#</doc-anchor-trigger>
+        <span>Step 3 — Annotate controllers and update route templates</span>
+    </h2>
+</doc-anchor-target>
+<p>Why: Declares supported versions and makes the version part of routes like <code v-pre>/api/v1/album</code>.</p>
+<p>For each API controller under <code v-pre>Chinook.API/Controllers</code>:</p>
+<ol>
+<li>Add an API version attribute at the class level</li>
+<li>Change the route to include a version URL segment</li>
+</ol>
+<p>Example for <code v-pre>AlbumController</code>:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using Microsoft.AspNetCore.Mvc;
+
+namespace Chinook.API.Controllers;
+
+[ApiVersion(&quot;1.0&quot;)] // declare this controller belongs to v1
+[Route(&quot;api/v{version:apiVersion}/[controller]&quot;)]
+[ApiController]
+[EnableCors(&quot;CorsPolicy&quot;)]
+public class AlbumController : ControllerBase
+{
+    // ... existing code
 }</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="add-api-versioning-to-startup-in-api-project">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-api-versioning-to-startup-in-api-project">#</doc-anchor-trigger>
-        <span>ADD API VERSIONING TO STARTUP IN API PROJECT</span>
-    </h2>
-</doc-anchor-target>
+<p>Repeat for each controller (Artist, Customer, Employee, Genre, Invoice, InvoiceLine, MediaType, Playlist, Track, etc.).</p>
+<p>Version-neutral endpoints (e.g., health/home):</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddVersioning();</code></pre>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[ApiVersionNeutral]
+[Route(&quot;/health&quot;)] // or whatever your endpoint is
+public class HealthController : ControllerBase { /* ... */ }</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="add-new-customer-controller-for-version-2">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-new-customer-controller-for-version-2">#</doc-anchor-trigger>
-        <span>ADD NEW CUSTOMER CONTROLLER FOR VERSION 2</span>
-    </h2>
-</doc-anchor-target>
-<p><figure class="content-center">
-    <img src="2022-05-12_07-32-18.png" alt="" class="rounded-image-rounded border-image-border border-image-border-width" />
-    <figcaption class="caption"></figcaption>
-</figure>
-</p>
+<p>Notes:</p>
+<ul>
+<li>With URL segments, you do NOT need to add <code v-pre>Vary</code> directives for response caching—the path differs by version.</li>
+<li>When you introduce v2, you can either:
+<ul>
+<li>Create separate controller classes in a <code v-pre>V2</code> folder/namespace with <code v-pre>[ApiVersion(&quot;2.0&quot;)]</code>, same route template; or</li>
+<li><p>Keep a single controller and map specific actions:</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[Route(&quot;api/v{version:apiVersion}/[controller]&quot;)]
-[ApiController]
-[EnableCors(&quot;CorsPolicy&quot;)]
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[ApiVersion(&quot;1.0&quot;)]
 [ApiVersion(&quot;2.0&quot;)]
-public class CustomerController : ControllerBase</code></pre>
+[Route(&quot;api/v{version:apiVersion}/[controller]&quot;)]
+public class AlbumController : ControllerBase
+{
+    [HttpGet]
+    [MapToApiVersion(&quot;1.0&quot;)] // v1 behavior
+    public IActionResult GetV1() =&gt; Ok(/* ... */);
+
+    [HttpGet]
+    [MapToApiVersion(&quot;2.0&quot;)] // v2 behavior
+    public IActionResult GetV2() =&gt; Ok(/* ... */);
+}</code></pre>
 </doc-codeblock></div>
-<p><figure class="content-center">
-    <img src="2022-05-12_07-37-47.png" alt="" class="rounded-image-rounded border-image-border border-image-border-width" />
-    <figcaption class="caption"></figcaption>
-</figure>
-</p>
-<doc-anchor-target id="modify-customer-v1-controller-for-versioning-in-api-project">
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<doc-anchor-target id="step-4--prepare-for-deprecation-and-sunset-optional-but-recommended">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#modify-customer-v1-controller-for-versioning-in-api-project">#</doc-anchor-trigger>
-        <span>MODIFY CUSTOMER V1 CONTROLLER FOR VERSIONING IN API PROJECT</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-4--prepare-for-deprecation-and-sunset-optional-but-recommended">#</doc-anchor-trigger>
+        <span>Step 4 — Prepare for deprecation and sunset (optional but recommended)</span>
     </h2>
 </doc-anchor-target>
+<p>Why: Communicates lifecycle changes to clients proactively.</p>
+<ul>
+<li>Mark deprecated versions at the controller level:</li>
+</ul>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[Route( &quot;api/v{version:apiVersion}/[controller]&quot; )]
-[ApiController]
-[EnableCors(&quot;CorsPolicy&quot;)]
-[ApiVersion( &quot;1.0&quot;, Deprecated = true)]
-public class CustomerController : ControllerBase</code></pre>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[ApiVersion(&quot;1.0&quot;, Deprecated = true)]</code></pre>
 </doc-codeblock></div>
-<p><figure class="content-center">
-    <img src="2022-05-12_07-36-22.png" alt="" class="rounded-image-rounded border-image-border border-image-border-width" />
-    <figcaption class="caption"></figcaption>
-</figure>
-</p>
-<doc-anchor-target id="test-in-postman">
+<ul>
+<li>Add a custom middleware or action filter to inject <code v-pre>Sunset</code> and documentation links for deprecated versions:</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">public class SunsetHeaderMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly DateTimeOffset _sunsetDate;
+
+    public SunsetHeaderMiddleware(RequestDelegate next, DateTimeOffset sunsetDate)
+    {
+        _next = next;
+        _sunsetDate = sunsetDate;
+    }
+
+    public async Task Invoke(HttpContext context)
+    {
+        await _next(context);
+        // conditionally add header for deprecated versions only, if desired
+        context.Response.Headers.TryAdd(&quot;Sunset&quot;, _sunsetDate.ToString(&quot;R&quot;));
+        context.Response.Headers.TryAdd(&quot;Link&quot;, &quot;&lt;/docs/migration&gt;; rel=\&quot;deprecation\&quot;&quot;);
+    }
+}
+
+// In Program.cs
+app.UseMiddleware&lt;SunsetHeaderMiddleware&gt;(new DateTimeOffset(2026, 01, 01, 0, 0, 0, TimeSpan.Zero));</code></pre>
+</doc-codeblock></div>
+<hr>
+<doc-anchor-target id="step-5--validate-and-align-with-response-caching">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#test-in-postman">#</doc-anchor-trigger>
-        <span>TEST IN POSTMAN</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-5--validate-and-align-with-response-caching">#</doc-anchor-trigger>
+        <span>Step 5 — Validate and align with response caching</span>
     </h2>
 </doc-anchor-target>
-<doc-anchor-target id="version-1-endpoint">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#version-1-endpoint">#</doc-anchor-trigger>
-        <span>Version 1 Endpoint</span>
-    </h3>
-</doc-anchor-target>
+<p>Why: Ensure caches don’t mix content across versions.</p>
+<ul>
+<li>Keep <code v-pre>app.UseResponseCaching()</code>.</li>
+<li>If you add <code v-pre>[ResponseCache]</code> attributes, you can keep them as-is with URL segment versioning.</li>
+<li>If at any point you switch to header or query-string versioning, add appropriate varies:
+<ul>
+<li><p>Header-based (e.g., <code v-pre>x-api-version</code>):</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<div class="codeblock-title">dos</div>
-<pre translate="no" class="language-none"><code v-pre class="language-none">https://localhost:44320/api/v1/Customer</code></pre>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[ResponseCache(VaryByHeader = &quot;x-api-version&quot;)]</code></pre>
 </doc-codeblock></div>
-<p><figure class="content-center">
-    <img src="snag_1122b36c.png" alt="" class="rounded-image-rounded border-image-border border-image-border-width" />
-    <figcaption class="caption"></figcaption>
-</figure>
-</p>
-<doc-anchor-target id="version-2-endpoint">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#version-2-endpoint">#</doc-anchor-trigger>
-        <span>Version 2 Endpoint</span>
-    </h3>
-</doc-anchor-target>
+</li>
+<li><p>Query-based (e.g., <code v-pre>api-version</code>):</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<div class="codeblock-title">dos</div>
-<pre translate="no" class="language-none"><code v-pre class="language-none">https://localhost:44320/api/v2/Customer</code></pre>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[ResponseCache(VaryByQueryKeys = new[] { &quot;api-version&quot; })]</code></pre>
 </doc-codeblock></div>
+</li>
+</ul>
+</li>
+</ul>
+<p>Your domain-level <code v-pre>VersionedMemoryCache</code> does not require changes—API versioning doesn’t affect those keys.</p>
+<hr>
+<doc-anchor-target id="step-6--rollout-plan-and-compatibility-window">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-6--rollout-plan-and-compatibility-window">#</doc-anchor-trigger>
+        <span>Step 6 — Rollout plan and compatibility window</span>
+    </h2>
+</doc-anchor-target>
+<p>Why: Avoid breaking existing clients overnight.</p>
+<ul>
+<li>Option A (strict): Require <code v-pre>/api/v1/...</code> immediately (<code v-pre>AssumeDefaultVersionWhenUnspecified = false</code>).</li>
+<li>Option B (graceful): Temporarily allow unversioned routes:
+<ul>
+<li>Set <code v-pre>AssumeDefaultVersionWhenUnspecified = true</code> so old <code v-pre>/api/[controller]</code> resolves to v1.</li>
+<li>Communicate migration deadline and later revert to <code v-pre>false</code>.</li>
+</ul>
+</li>
+<li>Option C (dual endpoints): Expose both old and new routes by keeping a compatibility controller or duplicate <code v-pre>[Route]</code> attributes for a short window, then remove the legacy route.</li>
+</ul>
+<hr>
+<doc-anchor-target id="step-7--testing-the-versioning-unitintegration">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-7--testing-the-versioning-unitintegration">#</doc-anchor-trigger>
+        <span>Step 7 — Testing the versioning (unit/integration)</span>
+    </h2>
+</doc-anchor-target>
+<p>Why: Proves routing, version selection, headers, and caching behavior are correct.</p>
+<ul>
+<li>Test harness: <code v-pre>Microsoft.AspNetCore.Mvc.Testing</code> with <code v-pre>WebApplicationFactory&lt;Program&gt;</code> to run the API in-memory.</li>
+</ul>
+<p>Example tests (xUnit-style):</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Xunit;
+
+public class VersioningTests : IClassFixture&lt;WebApplicationFactory&lt;Program&gt;&gt;
+{
+    private readonly HttpClient _client;
+
+    public VersioningTests(WebApplicationFactory&lt;Program&gt; factory)
+    {
+        _client = factory.CreateClient();
+    }
+
+    [Fact]
+    public async Task Get_V1_Album_Should_Return_200()
+    {
+        var res = await _client.GetAsync(&quot;/api/v1/album&quot;);
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+        Assert.True(res.Headers.Contains(&quot;api-supported-versions&quot;));
+    }
+
+    [Fact]
+    public async Task Get_V2_Album_Should_Return_404_When_Not_Implemented()
+    {
+        var res = await _client.GetAsync(&quot;/api/v2/album&quot;);
+        Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+    }
+}</code></pre>
+</doc-codeblock></div>
+<p>Caching differentiation test (conceptual):</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[Fact]
+public async Task ResponseCache_Should_Not_Mix_Versions()
+{
+    // First request to v1
+    var res1 = await _client.GetAsync(&quot;/api/v1/album&quot;);
+    res1.EnsureSuccessStatusCode();
+
+    // Then to v2 (assuming different behavior or not implemented)
+    var res2 = await _client.GetAsync(&quot;/api/v2/album&quot;);
+
+    // Expect different status/content; at minimum, not the same response object
+    Assert.NotEqual(res1.StatusCode, res2.StatusCode);
+}</code></pre>
+</doc-codeblock></div>
+<p>Domain cache independence (with repository mocks) — pseudocode outline:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">// Arrange a test server with mocked repository and in-memory IMemoryCache
+// Call /api/v1/album to populate domain cache via supervisor
+// Call /api/v2/album (same underlying domain call) and assert repository call count has not increased
+// demonstrating domain cache is shared across API versions</code></pre>
+</doc-codeblock></div>
+<p>Swagger API Explorer (when added):</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">// Resolve IApiVersionDescriptionProvider, assert it contains v1, and v1 is marked deprecated when you set Deprecated = true</code></pre>
+</doc-codeblock></div>
+<hr>
+<doc-anchor-target id="step-8--prepare-for-swagger-next-iteration">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-8--prepare-for-swagger-next-iteration">#</doc-anchor-trigger>
+        <span>Step 8 — Prepare for Swagger (next iteration)</span>
+    </h2>
+</doc-anchor-target>
+<p>Why: You’ll want separate Swagger docs per version.</p>
+<p>When you add Swashbuckle:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using Microsoft.AspNetCore.Mvc.ApiExplorer;
+
+builder.Services.AddSwaggerGen(options =&gt;
+{
+    using var provider = builder.Services.BuildServiceProvider()
+        .GetRequiredService&lt;IApiVersionDescriptionProvider&gt;();
+
+    foreach (var description in provider.ApiVersionDescriptions)
+    {
+        options.SwaggerDoc(description.GroupName, new Microsoft.OpenApi.Models.OpenApiInfo
+        {
+            Title = $&quot;Chinook API {description.ApiVersion}&quot;,
+            Version = description.GroupName,
+            Description = description.IsDeprecated ? &quot;This API version has been deprecated.&quot; : null
+        });
+    }
+});
+
+// app.UseSwagger(); app.UseSwaggerUI(c =&gt; { ... add endpoints per description ... });</code></pre>
+</doc-codeblock></div>
+<hr>
+<doc-anchor-target id="acceptance-checklist">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#acceptance-checklist">#</doc-anchor-trigger>
+        <span>Acceptance checklist</span>
+    </h2>
+</doc-anchor-target>
+<ul>
+<li>All controllers routed under <code v-pre>/api/v1/...</code> and annotated with <code v-pre>[ApiVersion(&quot;1.0&quot;)]</code>.</li>
+<li><code v-pre>AddApiVersioning</code> and <code v-pre>AddVersionedApiExplorer</code> registered.</li>
+<li>Response caching remains valid (no mixing across versions).</li>
+<li>Optional deprecation/sunset headers in place when needed.</li>
+<li>Tests passing for routing, headers, cache behavior, and version explorer.</li>
+<li>Ready to add Swagger with one doc per version.</li>
+</ul>
+<p>If you’d like, I can turn this plan into a file-by-file change checklist for your repo and prepare a starting PR once you confirm the approach.</p>
 
                                 
                                 <!-- Required only on API pages -->
