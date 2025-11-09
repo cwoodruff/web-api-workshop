@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816027898898">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816035149443">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -35,12 +35,12 @@
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.11.0.816027898898" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.816035149443" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816027898898" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816035149443" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816027898898" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816027898898" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816035149443" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816035149443" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -418,22 +418,38 @@ namespace Chinook.API.Data
 <div class="codeblock-wrapper"><doc-codeblock>
 <pre translate="no" class="language-json"><code v-pre class="language-json">{
   &quot;ConnectionStrings&quot;: {
-    &quot;IdentityConnection&quot;: &quot;&lt;SET IN user-secrets OR ENV&gt;&quot;
+    // Existing SQL Server connections (already in your project)
+    &quot;ChinookDbWindows&quot;: &quot;Server=.;Database=Chinook;MultipleActiveResultSets=true;TrustServerCertificate=true;Integrated Security=true;Trusted_Connection=true;Application Name=ChinookWebAPI&quot;,
+    &quot;ChinookDbDocker&quot;: &quot;Server=localhost,2022;Database=Chinook;User=sa;Password=8Riwudeg!!;Trusted_Connection=False;MultipleActiveResultSets=true;TrustServerCertificate=true;Application Name=ChinookWebAPI&quot;,
+
+    // Option B (separate Identity DB) – SQL Server variant
+    &quot;IdentitySqlServer&quot;: &quot;Server=.;Database=ChinookIdentity;MultipleActiveResultSets=true;TrustServerCertificate=true;Integrated Security=true;Trusted_Connection=true;Application Name=ChinookWebAPI&quot;,
+
+    // Option B (separate Identity DB) – SQLite variant
+    // Creates/uses a local file ChinookIdentity.db in the API folder
+    &quot;IdentitySqlite&quot;: &quot;Data Source=ChinookIdentity.db;Cache=Shared&quot;
+  },
+  &quot;Identity&quot;: {
+    // Choose which provider to use for the Identity context when on Option B
+    // Values: &quot;SqlServer&quot; or &quot;Sqlite&quot;
+    &quot;Provider&quot;: &quot;SqlServer&quot;
   },
   &quot;Jwt&quot;: {
     &quot;Issuer&quot;: &quot;Chinook.Api&quot;,
     &quot;Audience&quot;: &quot;Chinook.Api.Clients&quot;,
-    &quot;SigningKey&quot;: &quot;&lt;DEVELOPMENT-ONLY-KEY-USE-USER-SECRETS&gt;&quot;
+    &quot;SigningKey&quot;: &quot;&lt;SET_WITH_USER_SECRETS&gt;&quot;
   }
 }</code></pre>
 </doc-codeblock></div>
+<p>Development secrets (recommended):</p>
 <ul>
-<li>Set Development values via user-secrets (example for SQL Server):</li>
+<li>Set <code v-pre>Jwt:SigningKey</code> using user‑secrets.</li>
+<li>If you override any connection strings locally, set them via user‑secrets as well.</li>
 </ul>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-bash"><code v-pre class="language-bash"># Inside Chinook.API directory
-dotnet user-secrets set &quot;ConnectionStrings:IdentityConnection&quot; &quot;Server=localhost;Database=ChinookIdentity;Trusted_Connection=True;TrustServerCertificate=True;&quot;
-dotnet user-secrets set &quot;Jwt:SigningKey&quot; &quot;dev-super-secret-signing-key-change-me&quot;</code></pre>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash"> cd Chinook.API
+ dotnet user-secrets init
+ dotnet user-secrets set &quot;Jwt:SigningKey&quot; &quot;dev-super-secret-signing-key-change-me&quot;</code></pre>
 </doc-codeblock></div>
 <doc-anchor-target id="step-4-register-dbcontext-identity-authentication-authorization-in-programcs">
     <h3>
@@ -441,28 +457,76 @@ dotnet user-secrets set &quot;Jwt:SigningKey&quot; &quot;dev-super-secret-signin
         <span>Step 4 Register DbContext, Identity, Authentication, Authorization in <code v-pre>Program.cs</code></span>
     </h3>
 </doc-anchor-target>
-<ul>
-<li>Using statements to add:</li>
-</ul>
+<p>You have two solid ways to wire the Identity <code v-pre>ApplicationDbContext</code>.</p>
+<doc-anchor-target id="option-a--reuse-the-existing-chinook-sql-server-connection-simple">
+    <h4>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#option-a--reuse-the-existing-chinook-sql-server-connection-simple">#</doc-anchor-trigger>
+        <span>Option A — Reuse the existing Chinook SQL Server connection (simple)</span>
+    </h4>
+</doc-anchor-target>
+<p>This is already close to what you have. Keep or paste this block where services are configured (before Identity is added):</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using System.Text;
-using Chinook.API.Data;
-using Chinook.API.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;</code></pre>
-</doc-codeblock></div>
-<ul>
-<li>Service registrations (in the builder.Services section):</li>
-</ul>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">// DbContext for Identity (choose provider)
-builder.Services.AddDbContext&lt;ApplicationDbContext&gt;(options =&gt;
-    options.UseSqlServer(builder.Configuration.GetConnectionString(&quot;IdentityConnection&quot;)));
+using Chinook.API.Data;
 
-// Identity Core
-builder.Services
+// Decide at runtime which Chinook SQL connection to use
+var connection = string.Empty;
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    connection = builder.Configuration.GetConnectionString(&quot;ChinookDbWindows&quot;);
+else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+    connection = builder.Configuration.GetConnectionString(&quot;ChinookDbDocker&quot;);
+
+builder.Services.AddDbContext&lt;ApplicationDbContext&gt;(options =&gt; options.UseSqlServer(connection));</code></pre>
+</doc-codeblock></div>
+<p>Pros: one database to manage; fewer moving parts for a workshop.
+Cons: Identity tables mix with application tables (OK for workshops, less ideal for prod).</p>
+<doc-anchor-target id="option-b--separate-identity-db-with-a-switch-for-sql-server-or-sqlite">
+    <h4>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#option-b--separate-identity-db-with-a-switch-for-sql-server-or-sqlite">#</doc-anchor-trigger>
+        <span>Option B — Separate Identity DB with a switch for SQL Server or SQLite</span>
+    </h4>
+</doc-anchor-target>
+<p>Use this when you want to switch Identity storage independently (SQL Server vs SQLite) without touching Chinook’s main DB.</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using Microsoft.EntityFrameworkCore;
+using Chinook.API.Data;
+
+var idProvider = builder.Configuration[&quot;Identity:Provider&quot;] ?? &quot;SqlServer&quot;;
+
+builder.Services.AddDbContext&lt;ApplicationDbContext&gt;(options =&gt;
+{
+    if (idProvider.Equals(&quot;Sqlite&quot;, StringComparison.OrdinalIgnoreCase))
+    {
+        var sqliteConn = builder.Configuration.GetConnectionString(&quot;IdentitySqlite&quot;)
+                         ?? &quot;Data Source=ChinookIdentity.db;Cache=Shared&quot;;
+        options.UseSqlite(sqliteConn);
+    }
+    else
+    {
+        // Default to SQL Server for Identity DB
+        var sqlConn = builder.Configuration.GetConnectionString(&quot;IdentitySqlServer&quot;)
+                      ?? builder.Configuration.GetConnectionString(
+                           RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                               ? &quot;ChinookDbWindows&quot;
+                               : &quot;ChinookDbDocker&quot;);
+        options.UseSqlServer(sqlConn);
+    }
+});</code></pre>
+</doc-codeblock></div>
+<p>Notes:</p>
+<ul>
+<li><p>For SQLite, ensure the <code v-pre>Microsoft.EntityFrameworkCore.Sqlite</code> package is referenced in <code v-pre>Chinook.API.csproj</code> if you choose this provider:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-markup"><code v-pre class="language-markup">&lt;PackageReference Include=&quot;Microsoft.EntityFrameworkCore.Sqlite&quot; Version=&quot;10.0.0-rc.2.25502.107&quot; /&gt;</code></pre>
+</doc-codeblock></div>
+</li>
+<li><p>For SQL Server, you already have <code v-pre>Microsoft.EntityFrameworkCore.SqlServer</code> referenced.</p>
+</li>
+</ul>
+<p>Identity + JWT + Authorization registrations remain as you have them (no change needed):</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services
     .AddIdentityCore&lt;ApplicationUser&gt;(options =&gt;
     {
         options.Password.RequiredLength = 6;
@@ -473,11 +537,10 @@ builder.Services
     })
     .AddRoles&lt;IdentityRole&gt;()
     .AddEntityFrameworkStores&lt;ApplicationDbContext&gt;()
+    .AddSignInManager()
     .AddDefaultTokenProviders();
 
-// Authentication with JWT Bearer
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =&gt;
     {
         var cfg = builder.Configuration;
@@ -489,27 +552,52 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = cfg[&quot;Jwt:Issuer&quot;],
             ValidAudience = cfg[&quot;Jwt:Audience&quot;],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg[&quot;Jwt:SigningKey&quot;]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg[&quot;Jwt:SigningKey&quot;] ?? &quot;&quot;)),
+            ClockSkew = TimeSpan.FromMinutes(1)
         };
     });
 
-// Authorization policies
 builder.Services.AddAuthorization(options =&gt;
 {
     options.AddPolicy(&quot;CanWrite&quot;, policy =&gt; policy.RequireRole(&quot;Admin&quot;, &quot;Manager&quot;));
 });</code></pre>
 </doc-codeblock></div>
-<ul>
-<li>Middleware order (in the pipeline before <code v-pre>app.MapControllers();</code>):</li>
-</ul>
+<p>Pipeline (unchanged):</p>
 <div class="codeblock-wrapper"><doc-codeblock>
 <pre translate="no" class="language-csharp"><code v-pre class="language-csharp">app.UseAuthentication();
 app.UseAuthorization();</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="step-5-implement-a-token-service">
+<doc-anchor-target id="step-5-ef-core-migrations-per-provider">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#step-5-implement-a-token-service">#</doc-anchor-trigger>
-        <span>Step 5 Implement a token service</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-5-ef-core-migrations-per-provider">#</doc-anchor-trigger>
+        <span>Step 5 EF Core migrations per provider</span>
+    </h3>
+</doc-anchor-target>
+<p>Run from the <code v-pre>Chinook.API</code> directory.</p>
+<ul>
+<li>SQL Server (Option A or Option B with SqlServer):</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash"> dotnet ef migrations add AddIdentitySchema --context ApplicationDbContext
+ dotnet ef database update --context ApplicationDbContext</code></pre>
+</doc-codeblock></div>
+<ul>
+<li>SQLite (Option B):</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash"># Add the Sqlite provider package first if not present
+ dotnet add package Microsoft.EntityFrameworkCore.Sqlite --version 10.0.0-rc.2.25502.107
+
+ dotnet ef migrations add AddIdentitySchema_Sqlite --context ApplicationDbContext
+ dotnet ef database update --context ApplicationDbContext</code></pre>
+</doc-codeblock></div>
+<ul>
+<li>Verify Identity tables (<code v-pre>AspNetUsers</code>, <code v-pre>AspNetRoles</code>, etc.) are created.</li>
+</ul>
+<doc-anchor-target id="step-6-implement-a-token-service">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-6-implement-a-token-service">#</doc-anchor-trigger>
+        <span>Step 6 Implement a token service</span>
     </h3>
 </doc-anchor-target>
 <ul>
@@ -566,10 +654,10 @@ namespace Chinook.API.Services
 <ul>
 <li>Register in DI (in <code v-pre>Program.cs</code>): <code v-pre>builder.Services.AddSingleton&lt;ITokenService, TokenService&gt;();</code></li>
 </ul>
-<doc-anchor-target id="step-6-add-authentication-endpoints">
+<doc-anchor-target id="step-7-add-authentication-endpoints">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#step-6-add-authentication-endpoints">#</doc-anchor-trigger>
-        <span>Step 6 Add authentication endpoints</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-7-add-authentication-endpoints">#</doc-anchor-trigger>
+        <span>Step 7 Add authentication endpoints</span>
     </h3>
 </doc-anchor-target>
 <ul>
@@ -644,10 +732,10 @@ namespace Chinook.API.Controllers
 <ul>
 <li>Note: <code v-pre>SignInManager</code> is optional for API; <code v-pre>UserManager</code> + password check is sufficient.</li>
 </ul>
-<doc-anchor-target id="step-7-seed-default-roles-and-an-admin-user">
+<doc-anchor-target id="step-8-seed-default-roles-and-an-admin-user">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#step-7-seed-default-roles-and-an-admin-user">#</doc-anchor-trigger>
-        <span>Step 7 Seed default roles and an admin user</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-8-seed-default-roles-and-an-admin-user">#</doc-anchor-trigger>
+        <span>Step 8 Seed default roles and an admin user</span>
     </h3>
 </doc-anchor-target>
 <ul>
@@ -696,10 +784,10 @@ namespace Chinook.API.Infrastructure
 <div class="codeblock-wrapper"><doc-codeblock>
 <pre translate="no" class="language-csharp"><code v-pre class="language-csharp">await Chinook.API.Infrastructure.IdentityDataSeeder.SeedAsync(app.Services);</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="step-8-protect-existing-api-endpoints">
+<doc-anchor-target id="step-9-protect-existing-api-endpoints">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#step-8-protect-existing-api-endpoints">#</doc-anchor-trigger>
-        <span>Step 8 Protect existing API endpoints</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-9-protect-existing-api-endpoints">#</doc-anchor-trigger>
+        <span>Step 9 Protect existing API endpoints</span>
     </h3>
 </doc-anchor-target>
 <ul>
@@ -709,94 +797,47 @@ namespace Chinook.API.Infrastructure
 <li>For write operations, add <code v-pre>[Authorize(Policy = &quot;CanWrite&quot;)]</code>.</li>
 </ul>
 </li>
-<li>Example attribute usage:</li>
 </ul>
+<p>The <code v-pre>AlbumController</code> in your repo already matches the recommended pattern. Here’s the authoritative template to apply elsewhere:</p>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[Authorize] // at controller level
-public class AlbumController : ControllerBase
-{
-    [AllowAnonymous]
-    [HttpGet]
-    public Task&lt;...&gt; Get() { ... }
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using Microsoft.AspNetCore.Authorization;
 
-    [Authorize(Policy = &quot;CanWrite&quot;)] 
+[Authorize] // default: all actions require an authenticated user
+[ApiController]
+[Route(&quot;api/v{version:apiVersion}/[controller]&quot;)]
+public class SampleController : ControllerBase
+{
+    [HttpGet]
+    [AllowAnonymous] // explicitly allow public, unauthenticated GETs
+    public async Task&lt;IActionResult&gt; GetAll() { /* ... */ }
+
+    [HttpGet(&quot;{id}&quot;)]
+    public async Task&lt;IActionResult&gt; GetById(int id) { /* ... */ }
+
     [HttpPost]
-    public Task&lt;...&gt; Post(...) { ... }
+    [Authorize(Policy = &quot;CanWrite&quot;)] // only Admin/Manager (per policy) can write
+    public async Task&lt;IActionResult&gt; Create([FromBody] object dto) { /* ... */ }
+
+    [HttpPut(&quot;{id}&quot;)]
+    [Authorize(Policy = &quot;CanWrite&quot;)] // protect updates
+    public async Task&lt;IActionResult&gt; Update(int id, [FromBody] object dto) { /* ... */ }
+
+    [HttpDelete(&quot;{id}&quot;)]
+    [Authorize(Policy = &quot;CanWrite&quot;)] // protect deletes
+    public async Task&lt;IActionResult&gt; Delete(int id) { /* ... */ }
 }</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="step-9-add-swaggeropenapi-with-jwt-support-and-api-versioning">
+<p>Use <code v-pre>[AllowAnonymous]</code> only where you truly want open access. Otherwise, everything under <code v-pre>[Authorize]</code> will enforce JWT auth, returning 401 for missing/invalid tokens and 403 for insufficient roles.</p>
+<doc-anchor-target id="step-10-manual-test-plan-quick-pass">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#step-9-add-swaggeropenapi-with-jwt-support-and-api-versioning">#</doc-anchor-trigger>
-        <span>Step 9 Add Swagger/OpenAPI with JWT support and API versioning</span>
-    </h3>
-</doc-anchor-target>
-<ul>
-<li>Services (in <code v-pre>Program.cs</code>):</li>
-</ul>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using Microsoft.OpenApi.Models;
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =&gt;
-{
-    // Versioned docs: you can dynamically add docs using IApiVersionDescriptionProvider later
-    c.SwaggerDoc(&quot;v1&quot;, new OpenApiInfo { Title = &quot;Chinook API&quot;, Version = &quot;v1&quot; });
-
-    var jwtScheme = new OpenApiSecurityScheme
-    {
-        Name = &quot;Authorization&quot;,
-        Description = &quot;Enter 'Bearer {token}'&quot;,
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = &quot;bearer&quot;,
-        BearerFormat = &quot;JWT&quot;,
-        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = &quot;Bearer&quot; }
-    };
-
-    c.AddSecurityDefinition(&quot;Bearer&quot;, jwtScheme);
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { jwtScheme, Array.Empty&lt;string&gt;() }
-    });
-});</code></pre>
-</doc-codeblock></div>
-<ul>
-<li>Middleware and UI (after building <code v-pre>app</code>):</li>
-</ul>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">app.UseSwagger();
-app.UseSwaggerUI();</code></pre>
-</doc-codeblock></div>
-<ul>
-<li>Enhancement for API versioning: inject <code v-pre>IApiVersionDescriptionProvider</code> and enumerate to call <code v-pre>SwaggerEndpoint</code> per version group in <code v-pre>UseSwaggerUI</code>.</li>
-</ul>
-<doc-anchor-target id="step-10-create-and-apply-ef-core-migrations">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#step-10-create-and-apply-ef-core-migrations">#</doc-anchor-trigger>
-        <span>Step 10 Create and apply EF Core migrations</span>
-    </h3>
-</doc-anchor-target>
-<ul>
-<li>Add migration and update database:</li>
-</ul>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-bash"><code v-pre class="language-bash"># From Chinook.API folder
- dotnet ef migrations add AddIdentitySchema --context ApplicationDbContext
- dotnet ef database update --context ApplicationDbContext</code></pre>
-</doc-codeblock></div>
-<ul>
-<li>Verify Identity tables (<code v-pre>AspNetUsers</code>, <code v-pre>AspNetRoles</code>, etc.) are created.</li>
-</ul>
-<doc-anchor-target id="step-11-manual-test-plan-quick-pass">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#step-11-manual-test-plan-quick-pass">#</doc-anchor-trigger>
-        <span>Step 11 Manual test plan (quick pass)</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-10-manual-test-plan-quick-pass">#</doc-anchor-trigger>
+        <span>Step 10 Manual test plan (quick pass)</span>
     </h3>
 </doc-anchor-target>
 <ul>
 <li>Register a user via <code v-pre>POST /api/v1/auth/register</code> with JSON body <code v-pre>{ &quot;userName&quot;: &quot;alice&quot;, &quot;email&quot;: &quot;alice@local&quot;, &quot;password&quot;: &quot;Alice123!&quot; }</code>.</li>
 <li>Login via <code v-pre>POST /api/v1/auth/login</code>, copy <code v-pre>access_token</code>.</li>
-<li>In Swagger, click <code v-pre>Authorize</code> and paste <code v-pre>Bearer {token}</code>.</li>
+<li>Call a protected write endpoint (e.g., <code v-pre>POST /api/v1/albums</code>) without token and verify 401.</li>
 <li>Call a protected write endpoint (e.g., <code v-pre>POST /api/v1/albums</code>) and verify 403 for a normal user.</li>
 <li>Login as admin (seeded), paste token, and verify write succeeds (200/201).</li>
 <li>Call a public <code v-pre>GET</code> without token and confirm it works if <code v-pre>[AllowAnonymous]</code> is applied.</li>
@@ -829,23 +870,10 @@ app.UseSwaggerUI();</code></pre>
 <li>Admin token can access write endpoints successfully.</li>
 </ul>
 </li>
-<li>Swagger/OpenAPI
-<ul>
-<li>Swagger UI is available in Development.</li>
-<li>“Authorize” button accepts a Bearer token; authenticated calls succeed via Swagger.</li>
-<li>Versioned endpoints appear under correct version groups.</li>
-</ul>
-</li>
 <li>Configuration and security hygiene
 <ul>
 <li>JWT signing key and connection strings are stored in user-secrets or environment variables, not committed.</li>
 <li>Password policy documented; defaults appropriate for workshop.</li>
-</ul>
-</li>
-<li>Documentation and testing
-<ul>
-<li>README (or module guide) includes setup steps, testing instructions, and example requests.</li>
-<li>Manual test steps executed and passed (register → login → call protected &amp; public endpoints).</li>
 </ul>
 </li>
 </ul>
