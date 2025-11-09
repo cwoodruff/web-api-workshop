@@ -10,45 +10,30 @@ public partial class ChinookSupervisor
 {
     public async Task<IEnumerable<MediaTypeApiModel>> GetAllMediaType()
     {
-        List<MediaType> mediaTypes = await _mediaTypeRepository.GetAll();
-        var mediaTypeApiModels = mediaTypes.ConvertAll();
-
-        foreach (var mediaType in mediaTypeApiModels)
+        var key = _vCache.All("mediatype");
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(12));
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("MediaType-", mediaType.Id), mediaType, (TimeSpan)cacheEntryOptions);
-        }
-
-        return mediaTypeApiModels;
+            List<MediaType> mediaTypes = await _mediaTypeRepository.GetAll();
+            return mediaTypes.ConvertAll();
+        }, options) ?? Array.Empty<MediaTypeApiModel>();
     }
 
     public async Task<MediaTypeApiModel?> GetMediaTypeById(int id)
     {
-        var mediaTypeApiModelCached = _cache.Get<MediaTypeApiModel>(string.Concat("MediaType-", id));
+        var key = _vCache.EntityById("mediatype", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromDays(2))
+            .SetSlidingExpiration(TimeSpan.FromHours(6));
 
-        if (mediaTypeApiModelCached != null)
-        {
-            return mediaTypeApiModelCached;
-        }
-        else
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
             var mediaType = await _mediaTypeRepository.GetById(id);
             if (mediaType == null) return null;
             var mediaTypeApiModel = mediaType.Convert();
             mediaTypeApiModel.Tracks = (await GetTrackByMediaTypeId(mediaTypeApiModel.Id)).ToList();
-
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("MediaType-", mediaTypeApiModel.Id), mediaTypeApiModel,
-                (TimeSpan)cacheEntryOptions);
-
             return mediaTypeApiModel;
-        }
+        }, options);
     }
 
     public async Task<MediaTypeApiModel> AddMediaType(MediaTypeApiModel newMediaTypeApiModel)
@@ -59,6 +44,9 @@ public partial class ChinookSupervisor
 
         mediaType = await _mediaTypeRepository.Add(mediaType);
         newMediaTypeApiModel.Id = mediaType.Id;
+
+        _vCache.BumpVersion("mediatype");
+        _vCache.BumpVersion("track");
         return newMediaTypeApiModel;
     }
 
@@ -72,9 +60,25 @@ public partial class ChinookSupervisor
         mediaType.Id = mediaTypeApiModel.Id;
         mediaType.Name = mediaTypeApiModel.Name ?? string.Empty;
 
-        return await _mediaTypeRepository.Update(mediaType);
+        var updated = await _mediaTypeRepository.Update(mediaType);
+        if (updated)
+        {
+            _vCache.Remove(_vCache.EntityById("mediatype", mediaType.Id));
+            _vCache.BumpVersion("mediatype");
+            _vCache.BumpVersion("track");
+        }
+        return updated;
     }
 
-    public Task<bool> DeleteMediaType(int id)
-        => _mediaTypeRepository.Delete(id);
+    public async Task<bool> DeleteMediaType(int id)
+    {
+        var deleted = await _mediaTypeRepository.Delete(id);
+        if (deleted)
+        {
+            _vCache.Remove(_vCache.EntityById("mediatype", id));
+            _vCache.BumpVersion("mediatype");
+            _vCache.BumpVersion("track");
+        }
+        return deleted;
+    }
 }

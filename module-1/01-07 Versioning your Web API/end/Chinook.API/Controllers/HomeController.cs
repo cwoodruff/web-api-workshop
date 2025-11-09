@@ -2,6 +2,8 @@
 
 namespace Chinook.API.Controllers;
 
+[ApiVersionNeutral]
+[Route("")]
 public class HomeController : ControllerBase
 {
     private readonly ILogger<HomeController> _logger;

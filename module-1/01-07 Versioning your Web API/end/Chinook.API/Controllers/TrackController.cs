@@ -8,7 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chinook.API.Controllers;
 
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
 public class TrackController : ControllerBase

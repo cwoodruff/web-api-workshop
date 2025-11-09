@@ -10,44 +10,30 @@ public partial class ChinookSupervisor
 {
     public async Task<IEnumerable<GenreApiModel>> GetAllGenre()
     {
-        List<Genre> genres = await _genreRepository.GetAll();
-        var genreApiModels = genres.ConvertAll();
-
-        foreach (var genre in genreApiModels)
+        var key = _vCache.All("genre");
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromHours(12));
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Genre-", genre.Id), genre, (TimeSpan)cacheEntryOptions);
-        }
-
-        return genreApiModels;
+            List<Genre> genres = await _genreRepository.GetAll();
+            return genres.ConvertAll();
+        }, options) ?? Array.Empty<GenreApiModel>();
     }
 
     public async Task<GenreApiModel?> GetGenreById(int id)
     {
-        var genreApiModelCached = _cache.Get<GenreApiModel>(string.Concat("Genre-", id));
+        var key = _vCache.EntityById("genre", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromDays(2))
+            .SetSlidingExpiration(TimeSpan.FromHours(6));
 
-        if (genreApiModelCached != null)
-        {
-            return genreApiModelCached;
-        }
-        else
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
             var genre = await _genreRepository.GetById(id);
             if (genre == null) return null;
             var genreApiModel = genre.Convert();
             genreApiModel.Tracks = (await GetTrackByGenreId(genreApiModel.Id)).ToList();
-
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Genre-", genreApiModel.Id), genreApiModel, (TimeSpan)cacheEntryOptions);
-
             return genreApiModel;
-        }
+        }, options);
     }
 
     public async Task<GenreApiModel> AddGenre(GenreApiModel newGenreApiModel)
@@ -58,6 +44,9 @@ public partial class ChinookSupervisor
 
         genre = await _genreRepository.Add(genre);
         newGenreApiModel.Id = genre.Id;
+
+        _vCache.BumpVersion("genre");
+        _vCache.BumpVersion("track");
         return newGenreApiModel;
     }
 
@@ -71,9 +60,25 @@ public partial class ChinookSupervisor
         genre.Id = genreApiModel.Id;
         genre.Name = genreApiModel.Name ?? string.Empty;
 
-        return await _genreRepository.Update(genre);
+        var updated = await _genreRepository.Update(genre);
+        if (updated)
+        {
+            _vCache.Remove(_vCache.EntityById("genre", genre.Id));
+            _vCache.BumpVersion("genre");
+            _vCache.BumpVersion("track");
+        }
+        return updated;
     }
 
-    public Task<bool> DeleteGenre(int id)
-        => _genreRepository.Delete(id);
+    public async Task<bool> DeleteGenre(int id)
+    {
+        var deleted = await _genreRepository.Delete(id);
+        if (deleted)
+        {
+            _vCache.Remove(_vCache.EntityById("genre", id));
+            _vCache.BumpVersion("genre");
+            _vCache.BumpVersion("track");
+        }
+        return deleted;
+    }
 }

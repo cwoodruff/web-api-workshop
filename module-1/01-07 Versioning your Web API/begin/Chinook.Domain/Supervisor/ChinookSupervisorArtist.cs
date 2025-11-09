@@ -10,44 +10,30 @@ public partial class ChinookSupervisor
 {
     public async Task<IEnumerable<ArtistApiModel>> GetAllArtist()
     {
-        List<Artist> artists = await _artistRepository.GetAll();
-        var artistApiModels = artists.ConvertAll();
-
-        foreach (var artist in artistApiModels)
+        var key = _vCache.All("artist");
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Artist-", artist.Id), artist, (TimeSpan)cacheEntryOptions);
-        }
-
-        return artistApiModels;
+            List<Artist> artists = await _artistRepository.GetAll();
+            return artists.ConvertAll();
+        }, options) ?? Array.Empty<ArtistApiModel>();
     }
 
     public async Task<ArtistApiModel> GetArtistById(int id)
     {
-        var artistApiModelCached = _cache.Get<ArtistApiModel>(string.Concat("Artist-", id));
+        var key = _vCache.EntityById("artist", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromDays(1))
+            .SetSlidingExpiration(TimeSpan.FromHours(1));
 
-        if (artistApiModelCached != null)
-        {
-            return artistApiModelCached;
-        }
-        else
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
             var artist = await _artistRepository.GetById(id);
             if (artist == null) return null!;
             var artistApiModel = artist.Convert();
             artistApiModel.Albums = (await _albumRepository.GetByArtistId(artist.Id)).ConvertAll().ToList();
-
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Artist-", artistApiModel.Id), artistApiModel, (TimeSpan)cacheEntryOptions);
-
             return artistApiModel;
-        }
+        }, options)!;
     }
 
     public async Task<ArtistApiModel> AddArtist(ArtistApiModel newArtistApiModel)
@@ -58,6 +44,10 @@ public partial class ChinookSupervisor
 
         artist = await _artistRepository.Add(artist);
         newArtistApiModel.Id = artist.Id;
+
+        _vCache.BumpVersion("artist");
+        // Albums list may also be impacted (e.g., artist name shown on album views)
+        _vCache.BumpVersion("album");
         return newArtistApiModel;
     }
 
@@ -71,9 +61,25 @@ public partial class ChinookSupervisor
         artist.Id = artistApiModel.Id;
         artist.Name = artistApiModel.Name ?? string.Empty;
 
-        return await _artistRepository.Update(artist);
+        var updated = await _artistRepository.Update(artist);
+        if (updated)
+        {
+            _vCache.Remove(_vCache.EntityById("artist", artist.Id));
+            _vCache.BumpVersion("artist");
+            _vCache.BumpVersion("album");
+        }
+        return updated;
     }
 
-    public Task<bool> DeleteArtist(int id)
-        => _artistRepository.Delete(id);
+    public async Task<bool> DeleteArtist(int id)
+    {
+        var deleted = await _artistRepository.Delete(id);
+        if (deleted)
+        {
+            _vCache.Remove(_vCache.EntityById("artist", id));
+            _vCache.BumpVersion("artist");
+            _vCache.BumpVersion("album");
+        }
+        return deleted;
+    }
 }

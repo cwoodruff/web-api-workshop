@@ -10,45 +10,31 @@ public partial class ChinookSupervisor
 {
     public async Task<IEnumerable<PlaylistApiModel>> GetAllPlaylist()
     {
-        List<Playlist> playlists = await _playlistRepository.GetAll();
-        var playlistApiModels = playlists.ConvertAll();
-
-        foreach (var playList in playlistApiModels)
+        var key = _vCache.All("playlist");
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Playlist-", playList.Id), playList, (TimeSpan)cacheEntryOptions);
-        }
-
-        return playlistApiModels;
+            List<Playlist> playlists = await _playlistRepository.GetAll();
+            return playlists.ConvertAll();
+        }, options) ?? Array.Empty<PlaylistApiModel>();
     }
 
     public async Task<PlaylistApiModel> GetPlaylistById(int id)
     {
-        var playListApiModelCached = _cache.Get<PlaylistApiModel>(string.Concat("Playlist-", id));
+        var key = _vCache.EntityById("playlist", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromHours(12))
+            .SetSlidingExpiration(TimeSpan.FromMinutes(30));
 
-        if (playListApiModelCached != null)
-        {
-            return playListApiModelCached;
-        }
-        else
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
             var playlist = await _playlistRepository.GetById(id);
             if (playlist == null) return null!;
             var playlistApiModel = playlist.Convert();
-            playlistApiModel.Tracks = (await GetTrackByMediaTypeId(playlistApiModel.Id)).ToList();
-
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Playlist-", playlistApiModel.Id), playlistApiModel,
-                (TimeSpan)cacheEntryOptions);
-
+            // Intentionally do not cache playlist-track associations here
+            playlistApiModel.Tracks = (await GetTrackByPlaylistId(playlistApiModel.Id)).ToList();
             return playlistApiModel;
-        }
+        }, options)!;
     }
 
     public async Task<PlaylistApiModel> AddPlaylist(PlaylistApiModel newPlaylistApiModel)
@@ -59,6 +45,8 @@ public partial class ChinookSupervisor
 
         playlist = await _playlistRepository.Add(playlist);
         newPlaylistApiModel.Id = playlist.Id;
+
+        _vCache.BumpVersion("playlist");
         return newPlaylistApiModel;
     }
 
@@ -72,11 +60,25 @@ public partial class ChinookSupervisor
         playlist.Id = playlistApiModel.Id;
         playlist.Name = playlistApiModel.Name ?? string.Empty;
 
-        return await _playlistRepository.Update(playlist);
+        var updated = await _playlistRepository.Update(playlist);
+        if (updated)
+        {
+            _vCache.Remove(_vCache.EntityById("playlist", playlist.Id));
+            _vCache.BumpVersion("playlist");
+        }
+        return updated;
     }
 
-    public Task<bool> DeletePlaylist(int id)
-        => _playlistRepository.Delete(id);
+    public async Task<bool> DeletePlaylist(int id)
+    {
+        var deleted = await _playlistRepository.Delete(id);
+        if (deleted)
+        {
+            _vCache.Remove(_vCache.EntityById("playlist", id));
+            _vCache.BumpVersion("playlist");
+        }
+        return deleted;
+    }
 
     // public async Task<IEnumerable<PlaylistApiModel>> GetPlaylistByTrackId(int id)
     // {

@@ -10,50 +10,40 @@ public partial class ChinookSupervisor
 {
     public async Task<IEnumerable<EmployeeApiModel>> GetAllEmployee()
     {
-        List<Employee> employees = await _employeeRepository.GetAll();
-        var employeeApiModels = employees.ConvertAll();
-
-        foreach (var employee in employeeApiModels)
+        var key = _vCache.All("employee");
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Employee-", employee.Id), employee, (TimeSpan)cacheEntryOptions);
-        }
-
-        return employeeApiModels;
+            List<Employee> employees = await _employeeRepository.GetAll();
+            return employees.ConvertAll();
+        }, options) ?? Array.Empty<EmployeeApiModel>();
     }
 
     public async Task<EmployeeApiModel?> GetEmployeeById(int id)
     {
-        var employeeApiModelCached = _cache.Get<EmployeeApiModel>(string.Concat("Employee-", id));
+        var key = _vCache.EntityById("employee", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromDays(1))
+            .SetSlidingExpiration(TimeSpan.FromHours(1));
 
-        if (employeeApiModelCached != null)
-        {
-            return employeeApiModelCached;
-        }
-        else
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
             var employee = await _employeeRepository.GetById(id);
             if (employee == null) return null;
             var employeeApiModel = employee.Convert();
-
-            var cacheEntryOptions =
-                new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(604800))
-                    .AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(604800);
-            ;
-            _cache.Set(string.Concat("Employee-", employeeApiModel.Id), employeeApiModel,
-                (TimeSpan)cacheEntryOptions);
-
             return employeeApiModel;
-        }
+        }, options);
     }
 
     public async Task<EmployeeApiModel?> GetEmployeeReportsTo(int id)
     {
-        var employee = await _employeeRepository.GetReportsTo(id);
-        return employee.Convert();
+        var key = _vCache.ByFk("employee", "reports-to", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var employee = await _employeeRepository.GetReportsTo(id);
+            return employee.Convert();
+        }, options);
     }
 
     public async Task<EmployeeApiModel> AddEmployee(EmployeeApiModel newEmployeeApiModel)
@@ -64,6 +54,9 @@ public partial class ChinookSupervisor
 
         employee = await _employeeRepository.Add(employee);
         newEmployeeApiModel.Id = employee.Id;
+
+        _vCache.BumpVersion("employee");
+        _vCache.BumpVersion("customer");
         return newEmployeeApiModel;
     }
 
@@ -90,21 +83,47 @@ public partial class ChinookSupervisor
         employee.Fax = employeeApiModel.Fax ?? string.Empty;
         employee.Email = employeeApiModel.Email ?? string.Empty;
 
-        return await _employeeRepository.Update(employee);
+        var updated = await _employeeRepository.Update(employee);
+        if (updated)
+        {
+            _vCache.Remove(_vCache.EntityById("employee", employee.Id));
+            _vCache.BumpVersion("employee");
+            _vCache.BumpVersion("customer");
+        }
+        return updated;
     }
 
-    public Task<bool> DeleteEmployee(int id)
-        => _employeeRepository.Delete(id);
+    public async Task<bool> DeleteEmployee(int id)
+    {
+        var deleted = await _employeeRepository.Delete(id);
+        if (deleted)
+        {
+            _vCache.Remove(_vCache.EntityById("employee", id));
+            _vCache.BumpVersion("employee");
+            _vCache.BumpVersion("customer");
+        }
+        return deleted;
+    }
 
     public async Task<IEnumerable<EmployeeApiModel>> GetEmployeeDirectReports(int id)
     {
-        var employees = await _employeeRepository.GetDirectReports(id);
-        return employees.ConvertAll();
+        var key = _vCache.ByFk("employee", "direct-reports", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var employees = await _employeeRepository.GetDirectReports(id);
+            return employees.ConvertAll();
+        }, options) ?? Array.Empty<EmployeeApiModel>();
     }
 
     public async Task<IEnumerable<EmployeeApiModel>> GetDirectReports(int id)
     {
-        var employees = await _employeeRepository.GetDirectReports(id);
-        return employees.ConvertAll();
+        var key = _vCache.ByFk("employee", "direct-reports", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var employees = await _employeeRepository.GetDirectReports(id);
+            return employees.ConvertAll();
+        }, options) ?? Array.Empty<EmployeeApiModel>();
     }
 }

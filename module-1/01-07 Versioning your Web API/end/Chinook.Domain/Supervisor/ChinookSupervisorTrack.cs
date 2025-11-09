@@ -1,7 +1,6 @@
 using Chinook.Domain.Extensions;
 using FluentValidation;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Chinook.Domain.ApiModels;
 using Chinook.Domain.Entities;
 
@@ -11,31 +10,23 @@ public partial class ChinookSupervisor
 {
     public async Task<IEnumerable<TrackApiModel>> GetAllTrack()
     {
-        List<Track> tracks = await _trackRepository.GetAll();
-        var trackApiModels = tracks.ConvertAll();
-
-        foreach (var track in trackApiModels)
+        var key = _vCache.All("track");
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(3));
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
-            DistributedCacheEntryOptions cacheEntryOptions = new DistributedCacheEntryOptions();
-            cacheEntryOptions.SetSlidingExpiration(TimeSpan.FromSeconds(3600));
-            cacheEntryOptions.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(86400);
-
-            await _distributedCache.SetStringAsync($"Track-{track.Id}", JsonSerializer.Serialize(track),
-                cacheEntryOptions);
-        }
-
-        return trackApiModels;
+            List<Track> tracks = await _trackRepository.GetAll();
+            return tracks.ConvertAll();
+        }, options) ?? Array.Empty<TrackApiModel>();
     }
 
     public async Task<TrackApiModel?> GetTrackById(int id)
     {
-        var trackApiModelCached = await _distributedCache.GetStringAsync($"Track-{id}");
+        var key = _vCache.EntityById("track", id);
+        var options = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromHours(12))
+            .SetSlidingExpiration(TimeSpan.FromMinutes(30));
 
-        if (trackApiModelCached != null)
-        {
-            return JsonSerializer.Deserialize<TrackApiModel>(trackApiModelCached);
-        }
-        else
+        return await _vCache.GetOrCreateAsync(key, async () =>
         {
             var track = await _trackRepository.GetById(id);
             if (track == null) return null;
@@ -44,46 +35,54 @@ public partial class ChinookSupervisor
             trackApiModel.Album = await GetAlbumById(trackApiModel.AlbumId);
             trackApiModel.MediaType = await GetMediaTypeById(trackApiModel.MediaTypeId);
             if (trackApiModel.Album != null) trackApiModel.AlbumName = trackApiModel.Album.Title;
-
             if (trackApiModel.MediaType != null) trackApiModel.MediaTypeName = trackApiModel.MediaType.Name;
             if (trackApiModel.Genre != null) trackApiModel.GenreName = trackApiModel.Genre.Name;
-
-            DistributedCacheEntryOptions cacheEntryOptions = new DistributedCacheEntryOptions();
-            cacheEntryOptions.SetSlidingExpiration(TimeSpan.FromSeconds(3600));
-            cacheEntryOptions.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(86400);
-
-            await _distributedCache.SetStringAsync($"Track-{track.Id}", JsonSerializer.Serialize(trackApiModel),
-                cacheEntryOptions);
-
             return trackApiModel;
-        }
+        }, options);
     }
 
     public async Task<IEnumerable<TrackApiModel>?> GetTrackByAlbumId(int id)
     {
-        var tracks = await _trackRepository.GetByAlbumId(id);
-        if (tracks == null)
-            return null;
-        else
-            return tracks.ConvertAll();
+        var key = _vCache.ByFk("track", "by-album", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var tracks = await _trackRepository.GetByAlbumId(id);
+            return tracks?.ConvertAll();
+        }, options);
     }
 
     public async Task<IEnumerable<TrackApiModel>> GetTrackByGenreId(int id)
     {
-        var tracks = await _trackRepository.GetByGenreId(id);
-        return tracks.ConvertAll();
+        var key = _vCache.ByFk("track", "by-genre", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var tracks = await _trackRepository.GetByGenreId(id);
+            return tracks.ConvertAll();
+        }, options) ?? Array.Empty<TrackApiModel>();
     }
 
     public async Task<IEnumerable<TrackApiModel>> GetTrackByMediaTypeId(int id)
     {
-        var tracks = await _trackRepository.GetByMediaTypeId(id);
-        return tracks.ConvertAll();
+        var key = _vCache.ByFk("track", "by-media", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var tracks = await _trackRepository.GetByMediaTypeId(id);
+            return tracks.ConvertAll();
+        }, options) ?? Array.Empty<TrackApiModel>();
     }
 
     public async Task<IEnumerable<TrackApiModel>> GetTrackByPlaylistId(int id)
     {
-        var tracks = await _trackRepository.GetByPlaylistId(id);
-        return tracks.ConvertAll();
+        var key = _vCache.ByFk("track", "by-playlist", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var tracks = await _trackRepository.GetByPlaylistId(id);
+            return tracks.ConvertAll();
+        }, options) ?? Array.Empty<TrackApiModel>();
     }
 
     public async Task<TrackApiModel> AddTrack(TrackApiModel newTrackApiModel)
@@ -94,6 +93,8 @@ public partial class ChinookSupervisor
 
         await _trackRepository.Add(track);
         newTrackApiModel.Id = track.Id;
+
+        _vCache.BumpVersion("track");
         return newTrackApiModel;
     }
 
@@ -114,21 +115,45 @@ public partial class ChinookSupervisor
         track.Bytes = trackApiModel.Bytes;
         track.UnitPrice = trackApiModel.UnitPrice;
 
-        return await _trackRepository.Update(track);
+        var updated = await _trackRepository.Update(track);
+        if (updated)
+        {
+            _vCache.Remove(_vCache.EntityById("track", track.Id));
+            _vCache.BumpVersion("track");
+        }
+        return updated;
     }
 
-    public Task<bool> DeleteTrack(int id)
-        => _trackRepository.Delete(id);
+    public async Task<bool> DeleteTrack(int id)
+    {
+        var deleted = await _trackRepository.Delete(id);
+        if (deleted)
+        {
+            _vCache.Remove(_vCache.EntityById("track", id));
+            _vCache.BumpVersion("track");
+        }
+        return deleted;
+    }
 
     public async Task<IEnumerable<TrackApiModel>> GetTrackByArtistId(int id)
     {
-        var tracks = await _trackRepository.GetByArtistId(id);
-        return tracks.ConvertAll();
+        var key = _vCache.ByFk("track", "by-artist", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var tracks = await _trackRepository.GetByArtistId(id);
+            return tracks.ConvertAll();
+        }, options) ?? Array.Empty<TrackApiModel>();
     }
 
     public async Task<IEnumerable<TrackApiModel>> GetTrackByInvoiceId(int id)
     {
-        var tracks = await _trackRepository.GetByInvoiceId(id);
-        return tracks.ConvertAll();
+        var key = _vCache.ByFk("track", "by-invoice", id);
+        var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        return await _vCache.GetOrCreateAsync(key, async () =>
+        {
+            var tracks = await _trackRepository.GetByInvoiceId(id);
+            return tracks.ConvertAll();
+        }, options) ?? Array.Empty<TrackApiModel>();
     }
 }
