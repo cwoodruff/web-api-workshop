@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816035180055">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816038811866">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Documenting your API with OpenAPI</title>
     <meta name="title" content="Documenting your API with OpenAPI">
-    <meta name="description" content="Versioning your Web API">
+    <meta name="description" content="This plan guides a developer to add OpenAPI/Swagger using Swashbuckle to the ASP.">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/documenting-with-openapi/">
@@ -24,23 +24,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/documenting-with-openapi/">
     <meta property="og:title" content="Documenting your API with OpenAPI">
-    <meta property="og:description" content="Versioning your Web API">
+    <meta property="og:description" content="This plan guides a developer to add OpenAPI/Swagger using Swashbuckle to the ASP.">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/documenting-with-openapi/">
     <meta property="twitter:title" content="Documenting your API with OpenAPI">
-    <meta property="twitter:description" content="Versioning your Web API">
+    <meta property="twitter:description" content="This plan guides a developer to add OpenAPI/Swagger using Swashbuckle to the ASP.">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.11.0.816035180055" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.816038811866" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816035180055" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816038811866" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816035180055" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816035180055" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816038811866" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816038811866" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -253,312 +253,355 @@
         <span>Documenting your API with OpenAPI</span>
     </h1>
 </doc-anchor-target>
-<doc-anchor-target id="start-from-previous-modules-end">
+<doc-anchor-target id="overview">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#start-from-previous-modules-end">#</doc-anchor-trigger>
-        <span>START FROM PREVIOUS MODULE&#x27;S END</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#overview">#</doc-anchor-trigger>
+        <span>Overview</span>
     </h2>
 </doc-anchor-target>
-<p><a href="../versioning/">Versioning your Web API</a></p>
-<doc-anchor-target id="decorate-every-version-10-controller-with-versioning">
+<p>This plan guides a developer to add OpenAPI/Swagger using Swashbuckle to the ASP.NET Core Web API, integrating cleanly with existing API Versioning and Identity/JWT authentication. It includes:</p>
+<ul>
+<li>A high-level overview (what we’re adding and why)</li>
+<li>A detailed, step-by-step implementation plan (exact actions and code snippets)</li>
+<li>A final verification checklist (how to test that everything works)</li>
+</ul>
+<p>Note: Where you see “OpenAI” it likely means “OpenAPI.” The plan below assumes OpenAPI via Swashbuckle.</p>
+<hr>
+<doc-anchor-target id="developer-plan-overview">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#decorate-every-version-10-controller-with-versioning">#</doc-anchor-trigger>
-        <span>DECORATE EVERY VERSION 1.0 CONTROLLER WITH VERSIONING</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#developer-plan-overview">#</doc-anchor-trigger>
+        <span>Developer Plan Overview</span>
     </h2>
 </doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[Route( &quot;api/v{version:apiVersion}/[controller]&quot; )]
-[ApiController]
-[EnableCors(&quot;CorsPolicy&quot;)]
-[ApiVersion( &quot;1.0&quot; )]
-public class CustomerController : ControllerBase</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="decorate-every-version-10-controller-action-with-versioning">
+<ol>
+<li>Add Swashbuckle packages to the API project.</li>
+<li>Enable XML documentation in the API project to surface controller/action summaries in Swagger.</li>
+<li>Register SwaggerGen:
+<ul>
+<li>Generate one OpenAPI document per API version using <code v-pre>IApiVersionDescriptionProvider</code>.</li>
+<li>Include XML comments.</li>
+<li>Add JWT Bearer security definition and global requirement.</li>
+<li>(Optional but recommended) Add operation filters for <code v-pre>[Authorize]</code>/<code v-pre>[AllowAnonymous]</code> and ProblemDetails responses.</li>
+</ul>
+</li>
+<li>Add Swagger middleware and UI:
+<ul>
+<li>Add <code v-pre>UseSwagger</code> and <code v-pre>UseSwaggerUI</code>.</li>
+<li>Configure UI endpoints for each discovered API version.</li>
+<li>(Optional) Lock down Swagger in production or move it to <code v-pre>/docs</code>.</li>
+</ul>
+</li>
+<li>Annotate controllers/actions (incremental polish):
+<ul>
+<li>Summaries, response types, tags, and version attributes.</li>
+</ul>
+</li>
+<li>CI/CD and production:
+<ul>
+<li>Ensure XML docs are produced in CI.</li>
+<li>(Optional) Publish versioned <code v-pre>swagger.json</code> artifacts, lock UI in prod.</li>
+</ul>
+</li>
+</ol>
+<hr>
+<doc-anchor-target id="step-by-step-implementation-swashbuckle">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#decorate-every-version-10-controller-action-with-versioning">#</doc-anchor-trigger>
-        <span>DECORATE EVERY VERSION 1.0 CONTROLLER ACTION WITH VERSIONING</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-by-step-implementation-swashbuckle">#</doc-anchor-trigger>
+        <span>Step-by-Step Implementation (Swashbuckle)</span>
     </h2>
 </doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">[HttpGet]
-[Produces(typeof(List&lt;AlbumApiModel&gt;))]
-[MapToApiVersion(&quot;1.0&quot;)]
-public async Task&lt;ActionResult&lt;List&lt;AlbumApiModel&gt;&gt;&gt; Get()</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="add-openapiswagger-nuget-packages-to-api-project">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-openapiswagger-nuget-packages-to-api-project">#</doc-anchor-trigger>
-        <span>ADD OPENAPI/SWAGGER NUGET PACKAGES TO API PROJECT</span>
-    </h2>
-</doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<div class="codeblock-title">dos</div>
-<pre translate="no" class="language-none"><code v-pre class="language-none">dotnet add package Swashbuckle.AspNetCore.Swagger
-dotnet add package Swashbuckle.AspNetCore.SwaggerGen
-dotnet add package Swashbuckle.AspNetCore.SwaggerUI
-dotnet add package Swashbuckle.AspNetCore.Annotations</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="add-openapiswagger-to-startup-configureservices">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-openapiswagger-to-startup-configureservices">#</doc-anchor-trigger>
-        <span>ADD OPENAPI/SWAGGER TO STARTUP CONFIGURESERVICES</span>
-    </h2>
-</doc-anchor-target>
-<doc-anchor-target id="servicesconfigurationcs">
+<p>These steps assume your API project is <code v-pre>Chinook.API</code> and minimal-hosting <code v-pre>Program.cs</code> is used. Adjust paths/names as needed. This is an implementation guide; do not apply changes unless you are ready to implement.</p>
+<doc-anchor-target id="step-1-add-nuget-packages">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#servicesconfigurationcs">#</doc-anchor-trigger>
-        <span>ServicesConfiguration.cs</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-1-add-nuget-packages">#</doc-anchor-trigger>
+        <span>Step 1 Add NuGet packages</span>
     </h3>
 </doc-anchor-target>
+<ul>
+<li>Swashbuckle core:
+<ul>
+<li><code v-pre>Swashbuckle.AspNetCore</code></li>
+</ul>
+</li>
+<li>Optional annotations (recommended for <code v-pre>SwaggerOperation</code> attributes):
+<ul>
+<li><code v-pre>Swashbuckle.AspNetCore.Annotations</code></li>
+</ul>
+</li>
+<li>Command examples:
+<ul>
+<li><code v-pre>dotnet add Chinook.API package Swashbuckle.AspNetCore</code></li>
+<li><code v-pre>dotnet add Chinook.API package Swashbuckle.AspNetCore.Annotations</code></li>
+</ul>
+</li>
+</ul>
+<doc-anchor-target id="step-2-enable-xml-documentation-in-the-api-project">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-2-enable-xml-documentation-in-the-api-project">#</doc-anchor-trigger>
+        <span>Step 2 Enable XML documentation in the API project</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Edit <code v-pre>Chinook.API.csproj</code> and ensure:
+<ul>
+<li><code v-pre>&lt;GenerateDocumentationFile&gt;true&lt;/GenerateDocumentationFile&gt;</code></li>
+<li>Optionally suppress missing XML doc warnings initially: <code v-pre>&lt;NoWarn&gt;$(NoWarn);1591&lt;/NoWarn&gt;</code></li>
+</ul>
+</li>
+<li>Confirm the XML output file path (implicitly generated under <code v-pre>bin/&lt;Config&gt;/&lt;TFM&gt;/Chinook.API.xml</code>). If you want a fixed path, set <code v-pre>&lt;DocumentationFile&gt;bin\$(Configuration)\$(TargetFramework)\Chinook.API.xml&lt;/DocumentationFile&gt;</code>.</li>
+</ul>
+<doc-anchor-target id="step-3-register-swaggergen-in-programcs">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-3-register-swaggergen-in-programcs">#</doc-anchor-trigger>
+        <span>Step 3 Register SwaggerGen in <code v-pre>Program.cs</code></span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Add the service registration after API Versioning and VersionedApiExplorer registrations.</li>
+<li>Example configuration (illustrative):</li>
+</ul>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">public static void AddSwaggerServices(this IServiceCollection services)
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+
+builder.Services.AddSwaggerGen(c =&gt;
 {
-    services.AddSwaggerGen(c =&gt;
+    // 3.1 XML comments
+    var xmlFile = &quot;Chinook.API.xml&quot;;
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
     {
-        c.SwaggerDoc(&quot;v1&quot;, new OpenApiInfo
+        c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+    }
+
+    // 3.2 JWT Bearer security
+    var bearerScheme = new OpenApiSecurityScheme
+    {
+        Name = &quot;Authorization&quot;,
+        Type = SecuritySchemeType.Http,
+        Scheme = &quot;bearer&quot;,
+        BearerFormat = &quot;JWT&quot;,
+        In = ParameterLocation.Header,
+        Description = &quot;Enter 'Bearer {your JWT}'&quot;
+    };
+    c.AddSecurityDefinition(&quot;Bearer&quot;, bearerScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
         {
-            Version = &quot;v1&quot;,
-            Title = &quot;Chinook Music Store API&quot;,
-            Description = &quot;A simple example ASP.NET Core Web API&quot;,
-            TermsOfService = new Uri(&quot;https://example.com/terms&quot;),
-            Contact = new OpenApiContact
-            {
-                Name = &quot;Chris Woodruff&quot;,
-                Email = string.Empty,
-                Url = new Uri(&quot;https://chriswoodruff.com&quot;)
-            },
-            License = new OpenApiLicense
-            {
-                Name = &quot;Use under MIT&quot;,
-                Url = new Uri(&quot;https://opensource.org/licenses/MIT&quot;)
-            }
-        });
-        c.EnableAnnotations();
+            new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = &quot;Bearer&quot; } },
+            Array.Empty&lt;string&gt;()
+        }
     });
+
+    // 3.3 Versioned docs: defer to options setup using IApiVersionDescriptionProvider below
+});
+
+// After building the app, we will configure Swagger docs per version (see Step 4.2 UI and Step 3.4 docs per version below).</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="step-4-generate-one-swagger-doc-per-api-version">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-4-generate-one-swagger-doc-per-api-version">#</doc-anchor-trigger>
+        <span>Step 4 Generate one Swagger doc per API version</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Add a post-configure block that uses <code v-pre>IApiVersionDescriptionProvider</code> to add a <code v-pre>SwaggerDoc</code> for each API version. Two common approaches:
+<ul>
+<li>
+<ol type="A" start="1">
+<li>Configure inside <code v-pre>AddSwaggerGen</code> using a transient resolve of <code v-pre>IApiVersionDescriptionProvider</code> (requires building a temporary provider in <code v-pre>Program.cs</code>), or</li>
+</ol>
+</li>
+<li>
+<ol type="A" start="2">
+<li>Use <code v-pre>AddSwaggerGen</code> as above, and add <code v-pre>ConfigureOptions</code> pattern to inject API version descriptions.</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>Simple in-place pattern:</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddSwaggerGen(c =&gt; { /* previous config */ });
+
+builder.Services.ConfigureOptions&lt;ConfigureSwaggerOptions&gt;();
+
+// where ConfigureSwaggerOptions is defined as:
+public class ConfigureSwaggerOptions : Microsoft.Extensions.Options.IConfigureOptions&lt;Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions&gt;
+{
+    private readonly IApiVersionDescriptionProvider _provider;
+    public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider)
+        =&gt; _provider = provider;
+
+    public void Configure(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions options)
+    {
+        foreach (var description in _provider.ApiVersionDescriptions)
+        {
+            options.SwaggerDoc(description.GroupName, new OpenApiInfo
+            {
+                Title = &quot;Chinook API&quot;,
+                Version = description.ApiVersion.ToString(),
+                Description = description.IsDeprecated
+                    ? &quot;This API version has been deprecated.&quot;
+                    : &quot;Chinook Web API documentation.&quot;
+            });
+        }
+    }
 }</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="add-openapiswagger-to-startup">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-openapiswagger-to-startup">#</doc-anchor-trigger>
-        <span>ADD OPENAPI/SWAGGER TO STARTUP</span>
-    </h2>
+<doc-anchor-target id="step-5-add-optional-operation-filters">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-5-add-optional-operation-filters">#</doc-anchor-trigger>
+        <span>Step 5 Add optional operation filters</span>
+    </h3>
 </doc-anchor-target>
+<ul>
+<li><code v-pre>AuthorizeOperationFilter</code> to reflect <code v-pre>[Authorize]</code>/<code v-pre>[AllowAnonymous]</code>, and add 401/403 responses:</li>
+</ul>
 <div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddSwaggerServices();
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
+
+public sealed class AuthorizeOperationFilter : IOperationFilter
+{
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        var hasAuthorize = context.MethodInfo.DeclaringType!.GetCustomAttributes(true).OfType&lt;AuthorizeAttribute&gt;().Any()
+                            || context.MethodInfo.GetCustomAttributes(true).OfType&lt;AuthorizeAttribute&gt;().Any();
+        var allowAnonymous = context.MethodInfo.GetCustomAttributes(true).OfType&lt;AllowAnonymousAttribute&gt;().Any();
+
+        if (allowAnonymous)
+        {
+            return; // no security requirement
+        }
+
+        if (hasAuthorize)
+        {
+            operation.Responses.TryAdd(&quot;401&quot;, new OpenApiResponse { Description = &quot;Unauthorized&quot; });
+            operation.Responses.TryAdd(&quot;403&quot;, new OpenApiResponse { Description = &quot;Forbidden&quot; });
+
+            operation.Security ??= new List&lt;OpenApiSecurityRequirement&gt;();
+            operation.Security.Add(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = &quot;Bearer&quot; }
+                    },
+                    Array.Empty&lt;string&gt;()
+                }
+            });
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<ul>
+<li>Register the filter:</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddSwaggerGen(c =&gt;
+{
+    // ...existing config...
+    c.OperationFilter&lt;AuthorizeOperationFilter&gt;();
+});</code></pre>
+</doc-codeblock></div>
+<ul>
+<li>Optional <code v-pre>ProblemDetailsOperationFilter</code> to add <code v-pre>application/problem+json</code> for error responses.</li>
+</ul>
+<doc-anchor-target id="step-6-add-middleware-and-ui-after-building-the-app">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-6-add-middleware-and-ui-after-building-the-app">#</doc-anchor-trigger>
+        <span>Step 6 Add middleware and UI (after building the app)</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Place after authentication/authorization is configured but before <code v-pre>MapControllers()</code> is also acceptable. Commonly used before mapping endpoints.</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">var app = builder.Build();
+
+// ... existing middleware: CORS, caching, HTTPS, authz, etc.
 
 app.UseSwagger();
-app.UseSwaggerUI(s =&gt; s.SwaggerEndpoint(&quot;/swagger/v1/swagger.json&quot;, &quot;v1 docs&quot;));</code></pre>
+
+app.UseSwaggerUI(options =&gt;
+{
+    var provider = app.Services.GetRequiredService&lt;IApiVersionDescriptionProvider&gt;();
+    foreach (var description in provider.ApiVersionDescriptions)
+    {
+        options.SwaggerEndpoint($&quot;/swagger/{description.GroupName}/swagger.json&quot;,
+                                $&quot;Chinook API {description.GroupName.ToUpperInvariant()}&quot;);
+    }
+    // Optional: place docs at /docs instead of /swagger
+    // options.RoutePrefix = &quot;docs&quot;;
+
+    // Optional: disable Try it out in production
+    // options.SupportedSubmitMethods(Array.Empty&lt;Swashbuckle.AspNetCore.SwaggerUI.SubmitMethod&gt;());
+});
+
+app.MapControllers();
+app.Run();</code></pre>
 </doc-codeblock></div>
-<doc-anchor-target id="discover-that-our-swagger-setup-does-not-work-with-our-versioning">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#discover-that-our-swagger-setup-does-not-work-with-our-versioning">#</doc-anchor-trigger>
-        <span>DISCOVER THAT OUR SWAGGER SETUP DOES NOT WORK WITH OUR VERSIONING</span>
-    </h2>
-</doc-anchor-target>
-<p><figure class="content-center">
-    <img src="snag_1163deb6.png" alt="" class="rounded-image-rounded border-image-border border-image-border-width" />
-    <figcaption class="caption"></figcaption>
-</figure>
-</p>
-<p><span style='color: red;font-size: large;'><strong>We will now resolve and allow the Web API solution to use version for OpenAPI</strong></span></p>
-<doc-anchor-target id="add-apiexplorer">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-apiexplorer">#</doc-anchor-trigger>
-        <span>ADD APIEXPLORER</span>
-    </h2>
-</doc-anchor-target>
-<doc-anchor-target id="add-apiexplorer-nuget-packages-to-api-project">
+<doc-anchor-target id="step-7-annotations-and-controller-polish-incremental">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-apiexplorer-nuget-packages-to-api-project">#</doc-anchor-trigger>
-        <span>ADD APIEXPLORER NUGET PACKAGES TO API PROJECT</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-7-annotations-and-controller-polish-incremental">#</doc-anchor-trigger>
+        <span>Step 7 Annotations and controller polish (incremental)</span>
     </h3>
 </doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<div class="codeblock-title">dos</div>
-<pre translate="no" class="language-none"><code v-pre class="language-none">dotnet add package Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="add-addapiexplorer-method-to-configureservices">
+<ul>
+<li>Add summaries/remarks via XML doc comments on controllers/actions.</li>
+<li>Use <code v-pre>SwaggerOperation</code> for concise summaries, descriptions, operationId, and tags.</li>
+<li>Add <code v-pre>ProducesResponseType</code> for all expected outcomes (e.g., <code v-pre>200/201/204</code>, <code v-pre>400</code>, <code v-pre>401</code>, <code v-pre>403</code>, <code v-pre>404</code>, <code v-pre>409</code>, <code v-pre>422</code>, <code v-pre>500</code>).</li>
+<li>Ensure version attributes are correct: <code v-pre>[ApiVersion(&quot;1.0&quot;)]</code>, <code v-pre>[ApiVersion(&quot;2.0&quot;)]</code>, and <code v-pre>MapToApiVersion</code> for per-action splits.</li>
+<li>Confirm route templates include version segment if using <code v-pre>UrlSegmentApiVersionReader</code> (e.g., <code v-pre>api/v{version:apiVersion}/[controller]</code>).</li>
+</ul>
+<hr>
+<doc-anchor-target id="verification-overview-and-checklist">
     <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-addapiexplorer-method-to-configureservices">#</doc-anchor-trigger>
-        <span>ADD ADDAPIEXPLORER METHOD TO CONFIGURESERVICES</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#verification-overview-and-checklist">#</doc-anchor-trigger>
+        <span>Verification Overview and Checklist</span>
     </h3>
 </doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">public static void AddApiExplorer(this IServiceCollection services)
-{
-    services.AddVersionedApiExplorer(setup =&gt;
-    {
-        setup.GroupNameFormat = &quot;'v'VVV&quot;;
-        setup.SubstituteApiVersionInUrl = true;
-    });
-}</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="remove-previous-addswaggerservices-in-configureservicescs">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#remove-previous-addswaggerservices-in-configureservicescs">#</doc-anchor-trigger>
-        <span>REMOVE PREVIOUS ADDSWAGGERSERVICES IN CONFIGURESERVICES.CS</span>
-    </h2>
-</doc-anchor-target>
-<p>Remove the following code:</p>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">public static void AddSwaggerServices(this IServiceCollection services)
-{
-    services.AddSwaggerGen(c =&gt;
-    {
-        c.SwaggerDoc(&quot;v1&quot;, new OpenApiInfo
-        {
-            Version = &quot;v1&quot;,
-            Title = &quot;Chinook Music Store API&quot;,
-            Description = &quot;A simple example ASP.NET Core Web API&quot;,
-            TermsOfService = new Uri(&quot;https://example.com/terms&quot;),
-            Contact = new OpenApiContact
-            {
-                Name = &quot;Chris Woodruff&quot;,
-                Email = string.Empty,
-                Url = new Uri(&quot;https://chriswoodruff.com&quot;)
-            },
-            License = new OpenApiLicense
-            {
-                Name = &quot;Use under MIT&quot;,
-                Url = new Uri(&quot;https://opensource.org/licenses/MIT&quot;)
-            }
-        });
-        c.EnableAnnotations();
-    });
-}</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="add-openapiswagger-to-configureservicescs">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-openapiswagger-to-configureservicescs">#</doc-anchor-trigger>
-        <span>ADD OPENAPI/SWAGGER TO CONFIGURESERVICES.CS</span>
-    </h2>
-</doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">public static void AddSwaggerServices(this IServiceCollection services)
-{
-    services.AddSwaggerGen(options =&gt; {
-        // for further customization
-        //options.OperationFilter&lt;DefaultValuesFilter&gt;();
-    });
-    services.AddSwaggerGen();
-    services.ConfigureOptions&lt;ConfigureSwaggerOptions&gt;();
-}</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="add-configureswaggeroptions-class-to-configureservicescs">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-configureswaggeroptions-class-to-configureservicescs">#</doc-anchor-trigger>
-        <span>ADD CONFIGURESWAGGEROPTIONS CLASS TO CONFIGURESERVICES.CS</span>
-    </h2>
-</doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">public class ConfigureSwaggerOptions : IConfigureNamedOptions&lt;SwaggerGenOptions&gt;
-{
-    private readonly IApiVersionDescriptionProvider provider;
-
-    public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider)
-    {
-        this.provider = provider;
-    }
-
-    public void Configure(SwaggerGenOptions options)
-    {
-        // add swagger document for every API version discovered
-        foreach (var description in provider.ApiVersionDescriptions)
-        {
-            options.SwaggerDoc(
-                description.GroupName,
-                CreateVersionInfo(description));
-            options.EnableAnnotations();
-        }
-    }
-
-    public void Configure(string name, SwaggerGenOptions options)
-    {
-        Configure(options);
-    }
-
-    private OpenApiInfo CreateVersionInfo(ApiVersionDescription description)
-    {
-        var info = new OpenApiInfo()
-        {
-            Title = &quot;Chinook Music Store API&quot;,
-            Version = description.ApiVersion.ToString(),
-            Description = &quot;A simple example ASP.NET Core Web API&quot;,
-            TermsOfService = new Uri(&quot;https://example.com/terms&quot;),
-            Contact = new OpenApiContact
-            {
-                Name = &quot;Chris Woodruff&quot;,
-                Email = string.Empty,
-                Url = new Uri(&quot;https://woodruff.dev&quot;)
-            },
-            License = new OpenApiLicense
-            {
-                Name = &quot;Use under MIT&quot;,
-                Url = new Uri(&quot;https://opensource.org/licenses/MIT&quot;)
-            }
-        };
-
-        if (description.IsDeprecated)
-        {
-            info.Description += &quot; This API version has been deprecated.&quot;;
-        }
-
-        return info;
-    }
-}</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="add-appbuilderextensionscs-to-api-project">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#add-appbuilderextensionscs-to-api-project">#</doc-anchor-trigger>
-        <span>ADD APPBUILDEREXTENSIONS.CS TO API PROJECT</span>
-    </h2>
-</doc-anchor-target>
-<p><figure class="content-center">
-    <img src="standing20up20an20asp.net20core20web20api/documenting-with-openapi/addappbuilderextensionsclass.png" alt="" class="rounded-image-rounded border-image-border border-image-border-width" />
-    <figcaption class="caption"></figcaption>
-</figure>
-</p>
-<doc-anchor-target id="create-appbuilderextensions-class-and-useswaggerwithversioning-method">
-    <h3>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#create-appbuilderextensions-class-and-useswaggerwithversioning-method">#</doc-anchor-trigger>
-        <span>CREATE APPBUILDEREXTENSIONS CLASS AND USESWAGGERWITHVERSIONING METHOD</span>
-    </h3>
-</doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">public static class AppBuilderExtensions
-{
-    public static IApplicationBuilder UseSwaggerWithVersioning(this IApplicationBuilder app)
-    {
-        IServiceProvider services = app.ApplicationServices;
-        var provider = services.GetRequiredService&lt;IApiVersionDescriptionProvider&gt;();
-
-        app.UseSwagger();
-
-        app.UseSwaggerUI(options =&gt;
-        {
-            foreach (var description in provider.ApiVersionDescriptions)
-            {
-                options.SwaggerEndpoint($&quot;/swagger/{description.GroupName}/swagger.json&quot;, description.GroupName.ToUpperInvariant());
-            }
-        });
-
-        return app;
-    }
-}</code></pre>
-</doc-codeblock></div>
-<doc-anchor-target id="connection-everything-inside-programcs">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#connection-everything-inside-programcs">#</doc-anchor-trigger>
-        <span>CONNECTION EVERYTHING INSIDE PROGRAM.CS</span>
-    </h2>
-</doc-anchor-target>
-<div class="codeblock-wrapper"><doc-codeblock>
-<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddApiExplorer();
-builder.Services.AddSwaggerServices();
-
-
-app.UseSwaggerWithVersioning();</code></pre>
-</doc-codeblock></div>
+<p>Use this checklist to confirm correct behavior after implementation.</p>
+<p>Functional UI checks</p>
+<ul>
+<li>Swagger UI accessible at <code v-pre>/swagger</code>.</li>
+<li>Multiple API versions appear (e.g., <code v-pre>v1</code>, <code v-pre>v2</code>) if your app exposes more than one.</li>
+<li>Selecting each version shows only the endpoints for that version.</li>
+<li>XML summaries from controllers/actions are visible in operation descriptions.</li>
+</ul>
+<p>Security and identity</p>
+<ul>
+<li><code v-pre>Authorize</code> button present in Swagger UI with a <code v-pre>Bearer</code> scheme.</li>
+<li>Calling a secured endpoint without a token returns <code v-pre>401</code> and UI shows <code v-pre>401</code> response documentation.</li>
+<li>Calling with a valid JWT lacking <code v-pre>Admin</code>/<code v-pre>Manager</code> roles returns <code v-pre>403</code> for endpoints governed by the <code v-pre>CanWrite</code> policy.</li>
+<li>Endpoints marked <code v-pre>[AllowAnonymous]</code> (e.g., token issuance) are callable without setting a token in Swagger UI.</li>
+</ul>
+<p>Contracts and responses</p>
+<ul>
+<li>Each endpoint advertises correct <code v-pre>ProducesResponseType</code> entries for success and errors.</li>
+<li>Error responses use <code v-pre>application/problem+json</code> (if added via filter) and include <code v-pre>ProblemDetails</code> fields.</li>
+<li>Content types match expectations (<code v-pre>application/json</code>, <code v-pre>application/octet-stream</code> for file downloads, etc.).</li>
+</ul>
+<p>Versioning alignment</p>
+<ul>
+<li>Routes include <code v-pre>v{version:apiVersion}</code> when using <code v-pre>UrlSegmentApiVersionReader</code>.</li>
+<li><code v-pre>[ApiVersion]</code> and <code v-pre>MapToApiVersion</code> attributes correctly align with routes and displayed versions.</li>
+<li>Deprecated versions are marked as such in the document description if applicable.</li>
+</ul>
+<p>Stability and automation</p>
+<ul>
+<li>OpenAPI JSON documents are available at <code v-pre>/swagger/{group}/swagger.json</code> for all supported versions.</li>
+<li>(Optional) CI builds produce XML docs and publish OpenAPI artifacts.</li>
+<li>(Optional) OpenAPI linter passes (no severe errors).</li>
+</ul>
+<p>Acceptance criteria</p>
+<ul>
+<li>A developer can obtain a JWT and call secured endpoints via Swagger UI successfully.</li>
+<li>Anonymous endpoints remain accessible without a token.</li>
+<li>The OpenAPI documents are accurate, versioned, and consumable by tooling for client generation.</li>
+</ul>
 
                                 
                                 <!-- Required only on API pages -->
