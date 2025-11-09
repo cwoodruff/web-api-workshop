@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
+[ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
-[ApiVersion("1.0")]
 public class MediaTypeController : ControllerBase
 {
     private readonly IChinookSupervisor _chinookSupervisor;
@@ -24,7 +24,6 @@ public class MediaTypeController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<MediaTypeApiModel>>> Get()
     {
         try
@@ -50,7 +49,6 @@ public class MediaTypeController : ControllerBase
 
     [HttpGet("{id}", Name = "GetMediaTypeById")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<MediaTypeApiModel>> Get(int id)
     {
         try
@@ -77,7 +75,6 @@ public class MediaTypeController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<MediaTypeApiModel>> Post([FromBody] MediaTypeApiModel input)
     {
         try
@@ -108,7 +105,6 @@ public class MediaTypeController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<MediaTypeApiModel>> Put(int id, [FromBody] MediaTypeApiModel input)
     {
         try
@@ -137,7 +133,6 @@ public class MediaTypeController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try

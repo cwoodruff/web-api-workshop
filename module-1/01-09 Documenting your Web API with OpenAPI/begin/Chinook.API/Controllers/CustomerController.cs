@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
+[ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
-[ApiVersion("1.0", Deprecated = true)]
 public class CustomerController : ControllerBase
 {
     private readonly IChinookSupervisor _chinookSupervisor;

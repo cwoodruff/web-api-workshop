@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
+[ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
-[ApiVersion("1.0")]
 public class InvoiceLineController : ControllerBase
 {
     private readonly IChinookSupervisor _chinookSupervisor;
@@ -24,7 +24,6 @@ public class InvoiceLineController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<InvoiceLineApiModel>>> Get()
     {
         try
@@ -50,7 +49,6 @@ public class InvoiceLineController : ControllerBase
 
     [HttpGet("{id}", Name = "GetInvoiceLineById")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<InvoiceLineApiModel>> Get(int id)
     {
         try
@@ -77,7 +75,6 @@ public class InvoiceLineController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<InvoiceLineApiModel>> Post([FromBody] InvoiceLineApiModel input)
     {
         try
@@ -108,7 +105,6 @@ public class InvoiceLineController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<InvoiceLineApiModel>> Put(int id, [FromBody] InvoiceLineApiModel input)
     {
         try
@@ -139,7 +135,6 @@ public class InvoiceLineController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try
@@ -156,7 +151,6 @@ public class InvoiceLineController : ControllerBase
 
     [HttpGet("invoice/{id}")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<InvoiceLineApiModel>>> GetByInvoiceId(int id)
     {
         try
@@ -182,7 +176,6 @@ public class InvoiceLineController : ControllerBase
 
     [HttpGet("track/{id}")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<InvoiceLineApiModel>>> GetByTrackId(int id)
     {
         try

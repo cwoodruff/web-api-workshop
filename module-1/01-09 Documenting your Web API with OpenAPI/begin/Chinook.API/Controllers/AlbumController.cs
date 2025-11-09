@@ -2,14 +2,17 @@
 using Chinook.Domain.ApiModels;
 using Chinook.Domain.Supervisor;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
+[Authorize]
 public class AlbumController : ControllerBase
 {
     private readonly IChinookSupervisor _chinookSupervisor;
@@ -22,6 +25,7 @@ public class AlbumController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     [Produces(typeof(List<AlbumApiModel>))]
     public async Task<ActionResult<List<AlbumApiModel>>> Get()
     {
@@ -69,6 +73,7 @@ public class AlbumController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "CanWrite")]
     [Produces("application/json")]
     [Consumes("application/json")]
     public async Task<ActionResult<AlbumApiModel>> Post([FromBody] AlbumApiModel input)
@@ -97,6 +102,7 @@ public class AlbumController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "CanWrite")]
     [Produces("application/json")]
     [Consumes("application/json")]
     public async Task<ActionResult<AlbumApiModel>> Put(int id, [FromBody] AlbumApiModel input)
@@ -125,6 +131,7 @@ public class AlbumController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Policy = "CanWrite")]
     public async Task<ActionResult> Delete(int id)
     {
         try  

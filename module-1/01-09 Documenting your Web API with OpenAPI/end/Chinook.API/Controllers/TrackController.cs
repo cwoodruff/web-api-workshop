@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chinook.API.Controllers;
 
+[ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
-[ApiVersion("1.0")]
 public class TrackController : ControllerBase
 {
     private readonly IChinookSupervisor _chinookSupervisor;
@@ -25,7 +25,6 @@ public class TrackController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> Get()
     {
         try
@@ -51,7 +50,6 @@ public class TrackController : ControllerBase
 
     [HttpGet("{id}", Name = "GetTrackById")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<TrackApiModel>> Get(int id)
     {
         try
@@ -78,7 +76,6 @@ public class TrackController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<TrackApiModel>> Post([FromBody] TrackApiModel input)
     {
         try
@@ -107,7 +104,6 @@ public class TrackController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<TrackApiModel>> Put(int id, [FromBody] TrackApiModel input)
     {
         try
@@ -136,7 +132,6 @@ public class TrackController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try
@@ -153,7 +148,6 @@ public class TrackController : ControllerBase
 
     [HttpGet("artist/{id}")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByArtistId(int id)
     {
         try
@@ -179,7 +173,6 @@ public class TrackController : ControllerBase
 
     [HttpGet("invoice/{id}")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByInvoiceId(int id)
     {
         try
@@ -205,7 +198,6 @@ public class TrackController : ControllerBase
 
     [HttpGet("album/{id}")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByAlbumId(int id)
     {
         try
@@ -231,7 +223,6 @@ public class TrackController : ControllerBase
 
     [HttpGet("mediatype/{id}")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByMediaTypeId(int id)
     {
         try
@@ -257,7 +248,6 @@ public class TrackController : ControllerBase
 
     [HttpGet("genre/{id}")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<TrackApiModel>>> GetByGenreId(int id)
     {
         try

@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Controllers;
 
+[ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiController]
 [EnableCors("CorsPolicy")]
-[ApiVersion("1.0")]
 public class InvoiceController : ControllerBase
 {
     private readonly IChinookSupervisor _chinookSupervisor;
@@ -24,7 +24,6 @@ public class InvoiceController : ControllerBase
 
     [HttpGet]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<InvoiceApiModel>>> Get()
     {
         try
@@ -50,7 +49,6 @@ public class InvoiceController : ControllerBase
 
     [HttpGet("{id}", Name = "GetInvoiceById")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<InvoiceApiModel>> Get(int id)
     {
         try
@@ -77,7 +75,6 @@ public class InvoiceController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [Consumes("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<InvoiceApiModel>> Post([FromBody] InvoiceApiModel input)
     {
         try
@@ -108,7 +105,6 @@ public class InvoiceController : ControllerBase
     [HttpPut("{id}")]
     [Produces("application/json")]
     [Consumes("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<InvoiceApiModel>> Put(int id, [FromBody] InvoiceApiModel input)
     {
         try
@@ -137,7 +133,6 @@ public class InvoiceController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult> Delete(int id)
     {
         try
@@ -154,7 +149,6 @@ public class InvoiceController : ControllerBase
 
     [HttpGet("employee/{id}")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<InvoiceApiModel>>> GetByEmployeeId(int id)
     {
         try
@@ -180,7 +174,6 @@ public class InvoiceController : ControllerBase
 
     [HttpGet("customer/{id}")]
     [Produces("application/json")]
-    [MapToApiVersion("1.0")]
     public async Task<ActionResult<List<InvoiceApiModel>>> GetByCustomerId(int id)
     {
         try

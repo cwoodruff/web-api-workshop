@@ -6,7 +6,6 @@ using Chinook.Domain.Validation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.HttpLogging;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Chinook.API.Configurations;
 
@@ -60,10 +59,10 @@ public static class ServicesConfiguration
                     .AllowAnyHeader());
         });
     }
-
+    
     public static void ConfigureValidators(this IServiceCollection services)
     {
-        services.AddFluentValidation()
+        services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters()
             .AddTransient<IValidator<AlbumApiModel>, AlbumValidator>()
             .AddTransient<IValidator<ArtistApiModel>, ArtistValidator>()
             .AddTransient<IValidator<CustomerApiModel>, CustomerValidator>()
@@ -86,18 +85,6 @@ public static class ServicesConfiguration
             options.ConnectionString = configuration.GetConnectionString("ChinookSQLCache");
             options.SchemaName = "dbo";
             options.TableName = "ChinookCache";
-        });
-    }
-    
-    public static void AddVersioning(this IServiceCollection services)
-    {
-        services.AddApiVersioning(options =>
-        {
-            options.AssumeDefaultVersionWhenUnspecified = true;
-            options.DefaultApiVersion = new ApiVersion(1, 0);
-            //options.DefaultApiVersion = new ApiVersion( new DateTime( 2023, 8, 4 ) );
-			//options.DefaultApiVersion = new ApiVersion(new DateTime( 2023, 8, 4 ), "LetoII", 1, "Beta");
-            options.ReportApiVersions = true;
         });
     }
 }
