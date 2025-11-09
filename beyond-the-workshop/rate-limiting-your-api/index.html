@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816044080574">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816047201441">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Rate Limiting your API</title>
     <meta name="title" content="Rate Limiting your API">
-    <meta name="description" content="Documenting your API with OpenAPI">
+    <meta name="description" content="Goal: Add a simple, demo-friendly rate limit of 20 requests per minute per client to all controller endpoints.">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/beyond-the-workshop/rate-limiting-your-api/">
@@ -24,22 +24,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/beyond-the-workshop/rate-limiting-your-api/">
     <meta property="og:title" content="Rate Limiting your API">
-    <meta property="og:description" content="Documenting your API with OpenAPI">
+    <meta property="og:description" content="Goal: Add a simple, demo-friendly rate limit of 20 requests per minute per client to all controller endpoints.">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/beyond-the-workshop/rate-limiting-your-api/">
     <meta property="twitter:title" content="Rate Limiting your API">
-    <meta property="twitter:description" content="Documenting your API with OpenAPI">
+    <meta property="twitter:description" content="Goal: Add a simple, demo-friendly rate limit of 20 requests per minute per client to all controller endpoints.">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.11.0.816044080574" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.816047201441" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816044080574" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816047201441" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816044080574" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816047201441" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816047201441" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -252,13 +253,211 @@
         <span>Rate Limiting your API</span>
     </h1>
 </doc-anchor-target>
-<doc-anchor-target id="start-from-the-end-of-the-workshop-final-project">
+<doc-anchor-target id="implementing-20-requestsmin-rate-limiting-in-aspnet-core-10-web-api">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#start-from-the-end-of-the-workshop-final-project">#</doc-anchor-trigger>
-        <span>START FROM THE END OF THE WORKSHOP FINAL PROJECT</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#implementing-20-requestsmin-rate-limiting-in-aspnet-core-10-web-api">#</doc-anchor-trigger>
+        <span>Implementing 20 requests/min Rate Limiting in ASP.NET Core 10 Web API</span>
     </h2>
 </doc-anchor-target>
-<p><a href="../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/">Documenting your API with OpenAPI</a></p>
+<doc-anchor-target id="overview-and-objectives">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#overview-and-objectives">#</doc-anchor-trigger>
+        <span>Overview and Objectives</span>
+    </h2>
+</doc-anchor-target>
+<p>Goal: Add a simple, demo-friendly rate limit of 20 requests per minute per client to all controller endpoints.</p>
+<p>Chosen approach:</p>
+<ul>
+<li>Limiter type: fixed-window (1 minute)</li>
+<li>Partitioning: per client IP address</li>
+<li>Policy name: <code v-pre>fixed-per-minute</code></li>
+<li>Middleware: enable <code v-pre>UseRateLimiter()</code> in the pipeline</li>
+<li>Application: apply policy to all controllers via endpoint convention</li>
+<li>Rejection behavior: return <code v-pre>429 Too Many Requests</code> with <code v-pre>Retry-After: 60</code> and a brief message</li>
+</ul>
+<p>Result: After 20 successful requests from the same IP within a minute, further requests receive 429 until the window resets.</p>
+<p>Key namespaces:</p>
+<ul>
+<li><code v-pre>Microsoft.AspNetCore.RateLimiting</code></li>
+<li><code v-pre>System.Threading.RateLimiting</code></li>
+</ul>
+<p>Key files:</p>
+<ul>
+<li><code v-pre>Chinook.API/Configurations/ServicesConfiguration.cs</code></li>
+<li><code v-pre>Chinook.API/Program.cs</code></li>
+</ul>
+<hr>
+<doc-anchor-target id="prerequisites-and-assumptions">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#prerequisites-and-assumptions">#</doc-anchor-trigger>
+        <span>Prerequisites and Assumptions</span>
+    </h2>
+</doc-anchor-target>
+<ul>
+<li>Project targets .NET 10 (per environment info) and uses ASP.NET Core 10.</li>
+<li>You have the solution open in Rider/VS, or a terminal with dotnet CLI.</li>
+<li>No gateway/ingress rewriting client IPs without forwarded headers configuration (for demo). If behind a proxy/LB, see Production Notes below.</li>
+</ul>
+<hr>
+<doc-anchor-target id="implementation">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#implementation">#</doc-anchor-trigger>
+        <span>Implementation</span>
+    </h2>
+</doc-anchor-target>
+<p>The following steps describe precisely what’s already implemented in the solution.</p>
+<doc-anchor-target id="step-1--add-required-namespaces-and-service-extension">
+    <h4>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-1--add-required-namespaces-and-service-extension">#</doc-anchor-trigger>
+        <span>Step 1 — Add required namespaces and service extension</span>
+    </h4>
+</doc-anchor-target>
+<p>File: <code v-pre>Chinook.API/Configurations/ServicesConfiguration.cs</code></p>
+<ul>
+<li><p>Ensure the following namespaces are present at the top:</p>
+<ul>
+<li><code v-pre>using Microsoft.AspNetCore.Http;</code></li>
+<li><code v-pre>using Microsoft.AspNetCore.RateLimiting;</code></li>
+<li><code v-pre>using System.Threading.RateLimiting;</code></li>
+</ul>
+</li>
+<li><p>Add an extension method to register the rate limiter in DI (this is already present):</p>
+</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">public static void AddRateLimitingServices(this IServiceCollection services)
+{
+    // Configure a named per-IP fixed window limiter policy (20 requests per minute)
+    services.AddRateLimiter(options =&gt;
+    {
+        // Named policy: per-IP fixed window limiter (20 requests per minute)
+        options.AddPolicy&lt;string&gt;(&quot;fixed-per-minute&quot;, httpContext =&gt;
+        {
+            var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? &quot;unknown&quot;;
+            return RateLimitPartition.GetFixedWindowLimiter(ip, _ =&gt; new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            });
+        });
+
+        options.OnRejected = async (context, token) =&gt;
+        {
+            context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+            // Simple Retry-After header for demo purposes
+            context.HttpContext.Response.Headers.RetryAfter = &quot;60&quot;;
+            await context.HttpContext.Response.WriteAsync(&quot;Too many requests. Please retry later.&quot;, token);
+        };
+    });
+}</code></pre>
+</doc-codeblock></div>
+<p>What this does:</p>
+<ul>
+<li>Creates a named policy <code v-pre>fixed-per-minute</code>.</li>
+<li>Uses per-IP partitioning so each client IP gets its own 20-requests/min limit.</li>
+<li>Disables queuing (<code v-pre>QueueLimit = 0</code>) to make demo behavior crisp.</li>
+<li>Sets a clear <code v-pre>OnRejected</code> handler to return <code v-pre>429</code> with <code v-pre>Retry-After: 60</code> seconds.</li>
+</ul>
+<doc-anchor-target id="step-2--register-the-extension-in-programcs">
+    <h4>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-2--register-the-extension-in-programcs">#</doc-anchor-trigger>
+        <span>Step 2 — Register the extension in Program.cs</span>
+    </h4>
+</doc-anchor-target>
+<p>File: <code v-pre>Chinook.API/Program.cs</code></p>
+<ul>
+<li>Ensure this namespace is present for endpoint conventions:</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using Microsoft.AspNetCore.RateLimiting;</code></pre>
+</doc-codeblock></div>
+<ul>
+<li>After the existing service registrations and <code v-pre>AddControllers()</code>, register your rate-limiting services:</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddRateLimitingServices();</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="step-3--add-middleware-in-the-correct-order">
+    <h4>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-3--add-middleware-in-the-correct-order">#</doc-anchor-trigger>
+        <span>Step 3 — Add middleware in the correct order</span>
+    </h4>
+</doc-anchor-target>
+<ul>
+<li>Insert the rate limiter into the middleware pipeline before <code v-pre>UseAuthorization()</code> and after <code v-pre>UseCors()</code>:</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">app.UseAuthentication();
+app.UseCors();
+app.UseRateLimiter(); // before caching/authorization
+app.UseResponseCaching();
+app.UseHttpsRedirection();
+app.UseAuthorization();</code></pre>
+</doc-codeblock></div>
+<p>Rationale:</p>
+<ul>
+<li>For IP-based partitioning, <code v-pre>UseRateLimiter()</code> can be after CORS. If you switch to user-based partitioning later, ensure it stays after <code v-pre>UseAuthentication()</code> so <code v-pre>HttpContext.User</code> is populated.</li>
+</ul>
+<doc-anchor-target id="step-4--apply-the-policy-to-all-controllers">
+    <h4>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-4--apply-the-policy-to-all-controllers">#</doc-anchor-trigger>
+        <span>Step 4 — Apply the policy to all controllers</span>
+    </h4>
+</doc-anchor-target>
+<ul>
+<li>Apply the named policy using the endpoint convention on controller mappings:</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">app.MapControllers().RequireRateLimiting(&quot;fixed-per-minute&quot;);</code></pre>
+</doc-codeblock></div>
+<p>This uniformly enforces the policy across all controllers.</p>
+<hr>
+<doc-anchor-target id="manual-verification">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#manual-verification">#</doc-anchor-trigger>
+        <span>Manual Verification</span>
+    </h3>
+</doc-anchor-target>
+<p>Once the app is running, verify the limiter.</p>
+<doc-anchor-target id="step-1--start-the-api">
+    <h4>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-1--start-the-api">#</doc-anchor-trigger>
+        <span>Step 1 — Start the API</span>
+    </h4>
+</doc-anchor-target>
+<ul>
+<li>Use Rider’s Run button or CLI:</li>
+</ul>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">dotnet run --project Chinook.API</code></pre>
+</doc-codeblock></div>
+<p>Confirm you see startup logs without errors.</p>
+<doc-anchor-target id="step-2--make-more-than-20-requests-within-a-minute">
+    <h4>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-2--make-more-than-20-requests-within-a-minute">#</doc-anchor-trigger>
+        <span>Step 2 — Make more than 20 requests within a minute</span>
+    </h4>
+</doc-anchor-target>
+<p>Replace the sample endpoint with any existing controller route. For example, if you have <code v-pre>api/albums</code>:</p>
+<p>macOS/Linux (bash):</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">for i in {1..25}; do curl -s -o /dev/null -w &quot;%{http_code}\n&quot; https://localhost:5001/api/albums; done</code></pre>
+</doc-codeblock></div>
+<p>PowerShell:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-powershell"><code v-pre class="language-powershell">1..25 | ForEach-Object { (Invoke-WebRequest -UseBasicParsing https://localhost:5001/api/albums).StatusCode }</code></pre>
+</doc-codeblock></div>
+<p>Expected:</p>
+<ul>
+<li>First ~20 requests return 2xx/normal responses.</li>
+<li>Requests beyond 20 within 60 seconds return <code v-pre>429</code> with header <code v-pre>Retry-After: 60</code> and body <code v-pre>Too many requests. Please retry later.</code></li>
+</ul>
+<p>You can inspect headers with:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-bash"><code v-pre class="language-bash">curl -i https://localhost:5001/api/albums</code></pre>
+</doc-codeblock></div>
 
                                 
                                 <!-- Required only on API pages -->
@@ -344,6 +543,6 @@
 
     <div id="retype-overlay-target"></div>
 
-    <script data-cfasync="false">window.__DOCS__ = { "title": "Rate Limiting your API", level: 2, icon: "file", hasPrism: false, hasMermaid: false, hasMath: false, tocDepth: 23 }</script>
+    <script data-cfasync="false">window.__DOCS__ = { "title": "Rate Limiting your API", level: 2, icon: "file", hasPrism: true, hasMermaid: false, hasMath: false, tocDepth: 23 }</script>
 </body>
 </html>
