@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816047201441">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816054453279">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Using Hypermedia in your API Responses</title>
     <meta name="title" content="Using Hypermedia in your API Responses">
-    <meta name="description" content="Documenting your API with OpenAPI">
+    <meta name="description" content="Confirm hypermedia conventions">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/beyond-the-workshop/using-hypermedia-in-your-api-responses/">
@@ -24,22 +24,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/beyond-the-workshop/using-hypermedia-in-your-api-responses/">
     <meta property="og:title" content="Using Hypermedia in your API Responses">
-    <meta property="og:description" content="Documenting your API with OpenAPI">
+    <meta property="og:description" content="Confirm hypermedia conventions">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/beyond-the-workshop/using-hypermedia-in-your-api-responses/">
     <meta property="twitter:title" content="Using Hypermedia in your API Responses">
-    <meta property="twitter:description" content="Documenting your API with OpenAPI">
+    <meta property="twitter:description" content="Confirm hypermedia conventions">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.11.0.816047201441" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.816054453279" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816047201441" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816054453279" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816047201441" data-turbo-eval="false" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816054453279" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816054453279" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -252,13 +253,738 @@
         <span>Using Hypermedia in your API Responses</span>
     </h1>
 </doc-anchor-target>
-<doc-anchor-target id="start-from-the-end-of-the-workshop-final-project">
+<doc-anchor-target id="phase-1---align-on-conventions-and-scope">
     <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#start-from-the-end-of-the-workshop-final-project">#</doc-anchor-trigger>
-        <span>START FROM THE END OF THE WORKSHOP FINAL PROJECT</span>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#phase-1---align-on-conventions-and-scope">#</doc-anchor-trigger>
+        <span>Phase 1 - Align on Conventions and Scope</span>
     </h2>
 </doc-anchor-target>
-<p><a href="../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/">Documenting your API with OpenAPI</a></p>
+<ol>
+<li>Confirm hypermedia conventions</li>
+</ol>
+<ul>
+<li>Links container: keep a top‑level <code v-pre>Links</code> array on each ApiModel via <code v-pre>Representation</code>/<code v-pre>BaseApiModel</code>.</li>
+<li>Rel names: standardize on semantic rels — <code v-pre>self</code>, <code v-pre>artist</code>, <code v-pre>album</code>, <code v-pre>tracks</code>, <code v-pre>collection</code>, <code v-pre>next</code>, <code v-pre>prev</code>, <code v-pre>first</code>, <code v-pre>last</code>.</li>
+<li>URL generation: always use <code v-pre>LinkGenerator.GetUriByName(&quot;RouteName&quot;, new { ... })</code> with named routes.</li>
+</ul>
+<ol start="2">
+<li>Define initial resource scope</li>
+</ol>
+<ul>
+<li>Start with: Album, Artist, Track. Then expand to Customer, Employee, Genre, MediaType, Playlist, Invoice, InvoiceLine.</li>
+</ul>
+<ol start="3">
+<li>Output shape</li>
+</ol>
+<ul>
+<li>Keep current DTO shape with <code v-pre>links</code> array. Titles in links are optional but recommended.</li>
+</ul>
+<hr>
+<doc-anchor-target id="phase-2---foundation-audit-and-core-types">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#phase-2---foundation-audit-and-core-types">#</doc-anchor-trigger>
+        <span>Phase 2 - Foundation Audit and Core Types</span>
+    </h2>
+</doc-anchor-target>
+<doc-anchor-target id="step-1-ensure-models-inherit-baseapimodel">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-1-ensure-models-inherit-baseapimodel">#</doc-anchor-trigger>
+        <span>Step 1 Ensure models inherit <code v-pre>BaseApiModel</code></span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Confirm each ApiModel inherits <code v-pre>BaseApiModel</code> so <code v-pre>Links</code> exists.</li>
+</ul>
+<p>Code: base representation and link types</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.Domain.Helpers
+{
+    public sealed class Link
+    {
+        public string Rel { get; set; } = string.Empty;
+        public string Href { get; set; } = string.Empty;
+        public string? Title { get; set; }
+        // Optional affordances (enable later if you want):
+        public string? Method { get; set; }
+        public string? Type { get; set; }
+    }
+
+    public interface IRepresentation
+    {
+        List&lt;Link&gt; Links { get; }
+        void AddLink(Link link);
+    }
+
+    public abstract class Representation : IRepresentation
+    {
+        public List&lt;Link&gt; Links { get; } = new();
+
+        // De-duplicate by Rel (case-insensitive). Replace existing if same rel.
+        public void AddLink(Link link)
+        {
+            var i = Links.FindIndex(l =&gt; string.Equals(l.Rel, link.Rel, StringComparison.OrdinalIgnoreCase));
+            if (i &gt;= 0) Links[i] = link; else Links.Add(link);
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.Domain.ApiModels
+{
+    using Chinook.Domain.Helpers;
+
+    public abstract class BaseApiModel : Representation
+    {
+        public int Id { get; set; }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="step-2-name-all-routes-used-by-links">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-2-name-all-routes-used-by-links">#</doc-anchor-trigger>
+        <span>Step 2 Name all routes used by links</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Add <code v-pre>Name = &quot;...&quot;</code> to controller actions for single and collection endpoints (and related endpoints like “album tracks”).</li>
+</ul>
+<p>Code: controller route naming examples</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.API.Controllers
+{
+    using Chinook.Domain.ApiModels;
+    using Microsoft.AspNetCore.Mvc;
+
+    [ApiController]
+    [Route(&quot;api/[controller]&quot;)]
+    public sealed class TrackController : ControllerBase
+    {
+        [HttpGet(&quot;{id}&quot;, Name = &quot;GetTrackById&quot;)]
+        public ActionResult&lt;TrackApiModel&gt; GetById(int id)
+        {
+            var model = new TrackApiModel { Id = id, Name = $&quot;Track {id}&quot;, AlbumId = 9, GenreId = 3, MediaTypeId = 1 };
+            return Ok(model);
+        }
+
+        [HttpGet(Name = &quot;GetTracks&quot;)]
+        public ActionResult&lt;List&lt;TrackApiModel&gt;&gt; GetAll()
+        {
+            var items = Enumerable.Range(1, 3).Select(i =&gt; new TrackApiModel { Id = i, Name = $&quot;Track {i}&quot;, AlbumId = 9, GenreId = 3, MediaTypeId = 1 }).ToList();
+            return Ok(items);
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="step-3-ensure-controllers-return-apimodels-in-an-objectresult">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-3-ensure-controllers-return-apimodels-in-an-objectresult">#</doc-anchor-trigger>
+        <span>Step 3 Ensure controllers return ApiModels in an ObjectResult</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Return <code v-pre>ActionResult&lt;TApiModel&gt;</code> or <code v-pre>ActionResult&lt;List&lt;TApiModel&gt;&gt;</code>. The global result filter enriches <code v-pre>ObjectResult</code> values.</li>
+</ul>
+<doc-anchor-target id="step-4-confirm-pipeline-registration">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-4-confirm-pipeline-registration">#</doc-anchor-trigger>
+        <span>Step 4 Confirm pipeline registration</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Register the hypermedia services and the global result filter in DI.</li>
+</ul>
+<p>Code: enricher infrastructure and result filter</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.Domain.Hypermedia
+{
+    using Chinook.Domain.Helpers;
+
+    public interface IEnricher
+    {
+        bool Match(object? value);
+        Task ProcessAsync(object? value, CancellationToken ct = default);
+    }
+
+    public abstract class Enricher&lt;T&gt; : IEnricher where T : class, IRepresentation
+    {
+        public virtual bool Match(object? value) =&gt; value is T;
+        public async Task ProcessAsync(object? value, CancellationToken ct = default)
+        {
+            if (value is T typed) await ProcessAsync(typed, ct);
+        }
+        protected abstract Task ProcessAsync(T representation, CancellationToken ct);
+    }
+
+    public abstract class ListEnricher&lt;TList&gt; : IEnricher where TList : class
+    {
+        public virtual bool Match(object? value) =&gt; value is TList;
+        public async Task ProcessAsync(object? value, CancellationToken ct = default)
+        {
+            if (value is TList typed) await ProcessAsync(typed, ct);
+        }
+        protected abstract Task ProcessAsync(TList representation, CancellationToken ct);
+    }
+}</code></pre>
+</doc-codeblock></div>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.Domain.Hypermedia
+{
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Filters;
+
+    public sealed class RepresentationEnricher : IAsyncResultFilter
+    {
+        private readonly IEnumerable&lt;IEnricher&gt; _enrichers;
+        public RepresentationEnricher(IEnumerable&lt;IEnricher&gt; enrichers) =&gt; _enrichers = enrichers;
+
+        public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+        {
+            if (context.Result is ObjectResult objectResult &amp;&amp; objectResult.Value is not null)
+            {
+                var value = objectResult.Value;
+                foreach (var enricher in _enrichers)
+                {
+                    if (enricher.Match(value))
+                    {
+                        await enricher.ProcessAsync(value, context.HttpContext.RequestAborted);
+                    }
+                }
+            }
+            await next();
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<p>Code: DI registration and filter wiring</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.API.Configurations
+{
+    using Chinook.Domain.Hypermedia;
+    using Microsoft.Extensions.DependencyInjection;
+
+    public static class ServicesConfiguration
+    {
+        public static IServiceCollection AddHypermedia(this IServiceCollection services)
+        {
+            services.AddHttpContextAccessor();
+
+            // Register resource enrichers (single + list). Expand as you add more.
+            services.AddScoped&lt;IEnricher, TrackEnricher&gt;();
+            services.AddScoped&lt;IEnricher, TracksEnricher&gt;();
+
+            services.AddScoped&lt;IEnricher, AlbumEnricher&gt;();
+            services.AddScoped&lt;IEnricher, AlbumsEnricher&gt;();
+
+            services.AddScoped&lt;RepresentationEnricher&gt;();
+            return services;
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">// Program.cs
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHypermedia();
+
+builder.Services.AddControllers(options =&gt;
+{
+    options.Filters.Add&lt;Chinook.Domain.Hypermedia.RepresentationEnricher&gt;();
+});
+
+var app = builder.Build();
+app.MapControllers();
+app.Run();</code></pre>
+</doc-codeblock></div>
+<hr>
+<doc-anchor-target id="phase-3---implementrefine-enrichers-per-resource">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#phase-3---implementrefine-enrichers-per-resource">#</doc-anchor-trigger>
+        <span>Phase 3 - Implement/Refine Enrichers Per Resource</span>
+    </h2>
+</doc-anchor-target>
+<doc-anchor-target id="step-5-track-enrichers-single--list">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-5-track-enrichers-single--list">#</doc-anchor-trigger>
+        <span>Step 5 Track enrichers (single + list)</span>
+    </h3>
+</doc-anchor-target>
+<p>Code: API models (if not present)</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.Domain.ApiModels
+{
+    using Chinook.Domain.Helpers;
+
+    public sealed class TrackApiModel : BaseApiModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public int? AlbumId { get; set; }
+        public int? GenreId { get; set; }
+        public int? MediaTypeId { get; set; }
+    }
+
+    public sealed class AlbumApiModel : BaseApiModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public int? ArtistId { get; set; }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<p>Code: Track single‑resource enricher</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.API.Hypermedia.Enrichers
+{
+    using Chinook.Domain.ApiModels;
+    using Chinook.Domain.Helpers;
+    using Chinook.Domain.Hypermedia;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
+
+    public sealed class TrackEnricher : Enricher&lt;TrackApiModel&gt;
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly LinkGenerator _linkGenerator;
+
+        public TrackEnricher(IHttpContextAccessor httpContextAccessor, LinkGenerator linkGenerator)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            _linkGenerator = linkGenerator;
+        }
+
+        protected override Task ProcessAsync(TrackApiModel model, CancellationToken ct)
+        {
+            var http = _httpContextAccessor.HttpContext!;
+
+            var self = _linkGenerator.GetUriByName(http, &quot;GetTrackById&quot;, new { id = model.Id });
+            if (!string.IsNullOrEmpty(self))
+                model.AddLink(new Link { Rel = &quot;self&quot;, Title = $&quot;Track #{model.Id}&quot;, Href = self });
+
+            if (model.AlbumId is int albumId)
+            {
+                var albumHref = _linkGenerator.GetUriByName(http, &quot;GetAlbumById&quot;, new { id = albumId });
+                if (!string.IsNullOrEmpty(albumHref))
+                    model.AddLink(new Link { Rel = &quot;album&quot;, Title = $&quot;Album #{albumId}&quot;, Href = albumHref });
+            }
+
+            if (model.GenreId is int genreId)
+            {
+                var genreHref = _linkGenerator.GetUriByName(http, &quot;GetGenreById&quot;, new { id = genreId });
+                if (!string.IsNullOrEmpty(genreHref))
+                    model.AddLink(new Link { Rel = &quot;genre&quot;, Title = $&quot;Genre #{genreId}&quot;, Href = genreHref });
+            }
+
+            if (model.MediaTypeId is int mediaTypeId)
+            {
+                var mediaHref = _linkGenerator.GetUriByName(http, &quot;GetMediaTypeById&quot;, new { id = mediaTypeId });
+                if (!string.IsNullOrEmpty(mediaHref))
+                    model.AddLink(new Link { Rel = &quot;mediaType&quot;, Title = $&quot;Media Type #{mediaTypeId}&quot;, Href = mediaHref });
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<p>Code: Tracks collection enricher</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.API.Hypermedia.Enrichers
+{
+    using Chinook.Domain.ApiModels;
+    using Chinook.Domain.Helpers;
+    using Chinook.Domain.Hypermedia;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
+
+    public sealed class TracksEnricher : ListEnricher&lt;List&lt;TrackApiModel&gt;&gt;
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly LinkGenerator _linkGenerator;
+
+        public TracksEnricher(IHttpContextAccessor httpContextAccessor, LinkGenerator linkGenerator)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            _linkGenerator = linkGenerator;
+        }
+
+        protected override Task ProcessAsync(List&lt;TrackApiModel&gt; models, CancellationToken ct)
+        {
+            var http = _httpContextAccessor.HttpContext!;
+            foreach (var model in models)
+            {
+                var self = _linkGenerator.GetUriByName(http, &quot;GetTrackById&quot;, new { id = model.Id });
+                if (!string.IsNullOrEmpty(self))
+                    model.AddLink(new Link { Rel = &quot;self&quot;, Title = $&quot;Track #{model.Id}&quot;, Href = self });
+            }
+            return Task.CompletedTask;
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="step-6-album-enrichers-single--list">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-6-album-enrichers-single--list">#</doc-anchor-trigger>
+        <span>Step 6 Album enrichers (single + list)</span>
+    </h3>
+</doc-anchor-target>
+<p>Code: Album single‑resource enricher</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.API.Hypermedia.Enrichers
+{
+    using Chinook.Domain.ApiModels;
+    using Chinook.Domain.Helpers;
+    using Chinook.Domain.Hypermedia;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
+
+    public sealed class AlbumEnricher : Enricher&lt;AlbumApiModel&gt;
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly LinkGenerator _linkGenerator;
+
+        public AlbumEnricher(IHttpContextAccessor httpContextAccessor, LinkGenerator linkGenerator)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            _linkGenerator = linkGenerator;
+        }
+
+        protected override Task ProcessAsync(AlbumApiModel model, CancellationToken ct)
+        {
+            var http = _httpContextAccessor.HttpContext!;
+
+            var self = _linkGenerator.GetUriByName(http, &quot;GetAlbumById&quot;, new { id = model.Id });
+            if (!string.IsNullOrEmpty(self))
+                model.AddLink(new Link { Rel = &quot;self&quot;, Title = $&quot;Album #{model.Id}&quot;, Href = self });
+
+            if (model.ArtistId is int artistId)
+            {
+                var artistHref = _linkGenerator.GetUriByName(http, &quot;GetArtistById&quot;, new { id = artistId });
+                if (!string.IsNullOrEmpty(artistHref))
+                    model.AddLink(new Link { Rel = &quot;artist&quot;, Title = $&quot;Artist #{artistId}&quot;, Href = artistHref });
+            }
+
+            var tracksHref = _linkGenerator.GetUriByName(http, &quot;GetAlbumTracks&quot;, new { id = model.Id });
+            if (!string.IsNullOrEmpty(tracksHref))
+                model.AddLink(new Link { Rel = &quot;tracks&quot;, Title = $&quot;Album #{model.Id} Tracks&quot;, Href = tracksHref });
+
+            return Task.CompletedTask;
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<p>Code: Albums collection enricher</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.API.Hypermedia.Enrichers
+{
+    using Chinook.Domain.ApiModels;
+    using Chinook.Domain.Helpers;
+    using Chinook.Domain.Hypermedia;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
+
+    public sealed class AlbumsEnricher : ListEnricher&lt;List&lt;AlbumApiModel&gt;&gt;
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly LinkGenerator _linkGenerator;
+
+        public AlbumsEnricher(IHttpContextAccessor httpContextAccessor, LinkGenerator linkGenerator)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            _linkGenerator = linkGenerator;
+        }
+
+        protected override Task ProcessAsync(List&lt;AlbumApiModel&gt; models, CancellationToken ct)
+        {
+            var http = _httpContextAccessor.HttpContext!;
+            foreach (var model in models)
+            {
+                var self = _linkGenerator.GetUriByName(http, &quot;GetAlbumById&quot;, new { id = model.Id });
+                if (!string.IsNullOrEmpty(self))
+                    model.AddLink(new Link { Rel = &quot;self&quot;, Title = $&quot;Album #{model.Id}&quot;, Href = self });
+            }
+            return Task.CompletedTask;
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="step-7-register-enrichers-in-di">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-7-register-enrichers-in-di">#</doc-anchor-trigger>
+        <span>Step 7 Register enrichers in DI</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Ensure each enricher is registered as <code v-pre>IEnricher</code> in <code v-pre>AddHypermedia()</code> (see Phase 1, step 7 code).</li>
+</ul>
+<hr>
+<doc-anchor-target id="phase-4--perresource-link-matrix-and-checklist">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#phase-4--perresource-link-matrix-and-checklist">#</doc-anchor-trigger>
+        <span>Phase 4 — Per‑Resource Link Matrix and Checklist</span>
+    </h2>
+</doc-anchor-target>
+<doc-anchor-target id="step-8-define-link-matrices-developer-note">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-8-define-link-matrices-developer-note">#</doc-anchor-trigger>
+        <span>Step 8 Define link matrices (developer note)</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Album: <code v-pre>self</code> → <code v-pre>GetAlbumById</code>; <code v-pre>artist</code> → <code v-pre>GetArtistById</code>; <code v-pre>tracks</code> → <code v-pre>GetAlbumTracks</code>.</li>
+<li>Artist: <code v-pre>self</code> → <code v-pre>GetArtistById</code>; <code v-pre>albums</code> → <code v-pre>GetArtistAlbums</code> or item links via <code v-pre>GetAlbumById</code>.</li>
+<li>Track: <code v-pre>self</code> → <code v-pre>GetTrackById</code>; <code v-pre>album</code> → <code v-pre>GetAlbumById</code>; <code v-pre>genre</code> → <code v-pre>GetGenreById</code>; <code v-pre>mediaType</code> → <code v-pre>GetMediaTypeById</code>.</li>
+<li>Repeat similarly for other resources.</li>
+</ul>
+<doc-anchor-target id="step-9-apply-the-checklist-per-resource">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-9-apply-the-checklist-per-resource">#</doc-anchor-trigger>
+        <span>Step 9 Apply the checklist per resource</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>ApiModel inherits <code v-pre>BaseApiModel</code> and includes <code v-pre>Id</code>.</li>
+<li>Controller actions have named routes.</li>
+<li>Single enricher adds <code v-pre>self</code> + relationship links.</li>
+<li>List enricher adds at least per‑item <code v-pre>self</code> (and pagination links if applicable).</li>
+<li>Enrichers registered in DI; global filter enabled.</li>
+</ul>
+<hr>
+<doc-anchor-target id="phase-5--verification-and-tests">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#phase-5--verification-and-tests">#</doc-anchor-trigger>
+        <span>Phase 5 — Verification and Tests</span>
+    </h2>
+</doc-anchor-target>
+<doc-anchor-target id="step-10-manual-verification-curlpostman">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-10-manual-verification-curlpostman">#</doc-anchor-trigger>
+        <span>Step 10 Manual verification (curl/Postman)</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li><code v-pre>curl -s https://localhost:&lt;port&gt;/api/tracks/42 | jq '.'</code> and inspect <code v-pre>links</code>.</li>
+</ul>
+<doc-anchor-target id="step-11-integration-test-example">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-11-integration-test-example">#</doc-anchor-trigger>
+        <span>Step 11 Integration test example</span>
+    </h3>
+</doc-anchor-target>
+<p>Code: minimal integration test</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using System.Net.Http.Json;
+using Chinook.Domain.ApiModels;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Xunit;
+
+public class HypermediaTests : IClassFixture&lt;WebApplicationFactory&lt;Program&gt;&gt;
+{
+    private readonly WebApplicationFactory&lt;Program&gt; _factory;
+    public HypermediaTests(WebApplicationFactory&lt;Program&gt; factory) =&gt; _factory = factory;
+
+    [Fact]
+    public async Task GetTrackById_IncludesSelfLink()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync(&quot;/api/track/42&quot;);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadFromJsonAsync&lt;TrackApiModel&gt;();
+        Assert.NotNull(json);
+        Assert.Contains(json!.Links, l =&gt; l.Rel == &quot;self&quot; &amp;&amp; !string.IsNullOrWhiteSpace(l.Href));
+    }
+}</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="step-12-regression-guard">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-12-regression-guard">#</doc-anchor-trigger>
+        <span>Step 12 Regression guard</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Keep a test asserting the <code v-pre>self</code> link correctness for a known id, ensuring stability across route template changes (thanks to <code v-pre>GetUriByName</code>).</li>
+</ul>
+<doc-anchor-target id="step-13-performance-considerations">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-13-performance-considerations">#</doc-anchor-trigger>
+        <span>Step 13 Performance considerations</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>For large lists, measure impact. Consider future opt‑out via <code v-pre>?includeLinks=false</code> if needed.</li>
+</ul>
+<hr>
+<doc-anchor-target id="phase-6--optional-refinements-staying-on-current-infra">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#phase-6--optional-refinements-staying-on-current-infra">#</doc-anchor-trigger>
+        <span>Phase 6 — Optional Refinements (Staying on Current Infra)</span>
+    </h2>
+</doc-anchor-target>
+<doc-anchor-target id="step-14-standardize-rels">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-14-standardize-rels">#</doc-anchor-trigger>
+        <span>Step 14 Standardize rels</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>If any enrichers use numeric rels, migrate to semantic rels (<code v-pre>self</code>, <code v-pre>artist</code>, etc.). Optionally publish both during transition.</li>
+</ul>
+<doc-anchor-target id="step-15-nested-model-links">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-15-nested-model-links">#</doc-anchor-trigger>
+        <span>Step 15 Nested model links</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>If nested models are embedded in responses, add links to them as well (e.g., embedded <code v-pre>ArtistApiModel</code> inside an <code v-pre>AlbumApiModel</code>).</li>
+</ul>
+<doc-anchor-target id="step-16-pagination-links-if-paging-is-available">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-16-pagination-links-if-paging-is-available">#</doc-anchor-trigger>
+        <span>Step 16 Pagination links (if paging is available)</span>
+    </h3>
+</doc-anchor-target>
+<p>Code: paginated wrapper and enricher</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.Domain.ApiModels
+{
+    using Chinook.Domain.Helpers;
+
+    public sealed class PagedResult&lt;T&gt; : Representation where T : IRepresentation
+    {
+        public List&lt;T&gt; Items { get; init; } = new();
+        public int PageNumber { get; init; }
+        public int PageSize { get; init; }
+        public int TotalCount { get; init; }
+        public int TotalPages =&gt; (int)Math.Ceiling((double)TotalCount / Math.Max(1, PageSize));
+    }
+}</code></pre>
+</doc-codeblock></div>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">namespace Chinook.API.Hypermedia.Enrichers
+{
+    using Chinook.Domain.ApiModels;
+    using Chinook.Domain.Helpers;
+    using Chinook.Domain.Hypermedia;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
+
+    public sealed class PagedTracksEnricher : Enricher&lt;PagedResult&lt;TrackApiModel&gt;&gt;
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly LinkGenerator _linkGenerator;
+
+        public PagedTracksEnricher(IHttpContextAccessor httpContextAccessor, LinkGenerator linkGenerator)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            _linkGenerator = linkGenerator;
+        }
+
+        protected override Task ProcessAsync(PagedResult&lt;TrackApiModel&gt; model, CancellationToken ct)
+        {
+            var http = _httpContextAccessor.HttpContext!;
+
+            string? PageUrl(int page) =&gt; _linkGenerator.GetUriByName(http, &quot;GetTracks&quot;, new { page, pageSize = model.PageSize });
+
+            var self = PageUrl(model.PageNumber);
+            if (!string.IsNullOrEmpty(self)) model.AddLink(new Link { Rel = &quot;self&quot;, Href = self });
+
+            if (model.PageNumber &gt; 1)
+            {
+                var prev = PageUrl(model.PageNumber - 1);
+                if (!string.IsNullOrEmpty(prev)) model.AddLink(new Link { Rel = &quot;prev&quot;, Href = prev });
+                var first = PageUrl(1);
+                if (!string.IsNullOrEmpty(first)) model.AddLink(new Link { Rel = &quot;first&quot;, Href = first });
+            }
+
+            if (model.PageNumber &lt; model.TotalPages)
+            {
+                var next = PageUrl(model.PageNumber + 1);
+                if (!string.IsNullOrEmpty(next)) model.AddLink(new Link { Rel = &quot;next&quot;, Href = next });
+                var last = PageUrl(model.TotalPages);
+                if (!string.IsNullOrEmpty(last)) model.AddLink(new Link { Rel = &quot;last&quot;, Href = last });
+            }
+
+            foreach (var item in model.Items)
+            {
+                var selfItem = _linkGenerator.GetUriByName(http, &quot;GetTrackById&quot;, new { id = item.Id });
+                if (!string.IsNullOrEmpty(selfItem))
+                    item.AddLink(new Link { Rel = &quot;self&quot;, Title = $&quot;Track #{item.Id}&quot;, Href = selfItem });
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}</code></pre>
+</doc-codeblock></div>
+<doc-anchor-target id="step-17-swaggeropenapi-notes">
+    <h3>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#step-17-swaggeropenapi-notes">#</doc-anchor-trigger>
+        <span>Step 17 Swagger/OpenAPI notes</span>
+    </h3>
+</doc-anchor-target>
+<ul>
+<li>Document the <code v-pre>links</code> array in response schemas and provide examples so clients expect hypermedia.</li>
+</ul>
+<hr>
+<doc-anchor-target id="phase-7--advanced-upgrade-path-optional-standardsbased">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#phase-7--advanced-upgrade-path-optional-standardsbased">#</doc-anchor-trigger>
+        <span>Phase 7 — Advanced Upgrade Path (Optional, Standards‑Based)</span>
+    </h2>
+</doc-anchor-target>
+<p>If you later choose to adopt HAL with content negotiation and policy‑based composition:</p>
+<ul>
+<li>Use <code v-pre>_links</code> and <code v-pre>_embedded</code>, media type <code v-pre>application/hal+json</code>.</li>
+<li>Introduce <code v-pre>IHypermediaPolicy&lt;T&gt;</code> and a <code v-pre>HypermediaComposer</code> instead of scanning all enrichers.</li>
+<li>Add an output formatter (<code v-pre>HalOutputFormatter</code>) that writes HAL only when requested via <code v-pre>Accept</code> header.</li>
+</ul>
+<p>Code: basic (placeholder) HAL output formatter skeleton</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">using System.Text;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Net.Http.Headers;
+
+public sealed class HalOutputFormatter : TextOutputFormatter
+{
+    public HalOutputFormatter()
+    {
+        SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(&quot;application/hal+json&quot;));
+        SupportedEncodings.Add(Encoding.UTF8);
+    }
+
+    protected override bool CanWriteType(Type? type) =&gt; true; // tighten for your types
+
+    public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
+    {
+        // Map Representation.Links =&gt; _links as needed (omitted for brevity)
+        var json = JsonSerializer.Serialize(context.Object, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true });
+        await context.HttpContext.Response.WriteAsync(json, selectedEncoding);
+    }
+}</code></pre>
+</doc-codeblock></div>
+<p>Wire it when ready:</p>
+<div class="codeblock-wrapper"><doc-codeblock>
+<pre translate="no" class="language-csharp"><code v-pre class="language-csharp">builder.Services.AddControllers(options =&gt;
+{
+    options.OutputFormatters.Insert(0, new HalOutputFormatter());
+});</code></pre>
+</doc-codeblock></div>
+<p>---**</p>
+<doc-anchor-target id="quick-reference-checklist-per-endpoint">
+    <h2>
+        <doc-anchor-trigger class="header-anchor-trigger" to="#quick-reference-checklist-per-endpoint">#</doc-anchor-trigger>
+        <span>Quick Reference Checklist (Per Endpoint)</span>
+    </h2>
+</doc-anchor-target>
+<ul>
+<li>ApiModel inherits <code v-pre>BaseApiModel</code> and has <code v-pre>Id</code>.</li>
+<li>Controller action has a unique named route.</li>
+<li>Single‑resource enricher produces <code v-pre>self</code> + relationship links.</li>
+<li>Collection enricher ensures per‑item <code v-pre>self</code> and optional pagination links.</li>
+<li>Enrichers are registered via <code v-pre>AddHypermedia()</code>; global <code v-pre>RepresentationEnricher</code> filter is enabled.</li>
+<li>Manual and integration tests verify presence and correctness of links.</li>
+</ul>
 
                                 
                                 <!-- Required only on API pages -->
@@ -351,6 +1077,6 @@
 
     <div id="retype-overlay-target"></div>
 
-    <script data-cfasync="false">window.__DOCS__ = { "title": "Using Hypermedia in your API Responses", level: 2, icon: "file", hasPrism: false, hasMermaid: false, hasMath: false, tocDepth: 23 }</script>
+    <script data-cfasync="false">window.__DOCS__ = { "title": "Using Hypermedia in your API Responses", level: 2, icon: "file", hasPrism: true, hasMermaid: false, hasMath: false, tocDepth: 23 }</script>
 </body>
 </html>
