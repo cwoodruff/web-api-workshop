@@ -4,9 +4,6 @@ icon: gear
 ---
 # Identity in your Web API
 
-## START FROM THE END OF THE WORKSHOP FINAL PROJECT
-[Documenting your API with OpenAPI](../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/)
-
 ## Module overview and outcomes
 - Objective: Add ASP.NET Core Identity, JWT-based authentication, and authorization to the existing Web API, and prepare for Swagger/OpenAPI in next part for secured testing. No UI; pure API.
 - What you’ll deliver
@@ -47,11 +44,6 @@ Note: File paths are relative to `Chinook.API` unless stated. Replace provider-s
 - Core packages
     - `dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore`
     - `dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer`
-    - `dotnet add package Swashbuckle.AspNetCore`
-- EF Core provider (pick one)
-    - SQL Server: `dotnet add package Microsoft.EntityFrameworkCore.SqlServer`
-    - SQLite: `dotnet add package Microsoft.EntityFrameworkCore.Sqlite`
-    - PostgreSQL: `dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL`
 
 ### Step 2 Create Identity models and DbContext
 - Add `Identity/ApplicationUser.cs`:
