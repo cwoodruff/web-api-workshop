@@ -2,7 +2,6 @@ using Chinook.Domain.ApiModels;
 using Chinook.Domain.Entities;
 using Chinook.Domain.Extensions;
 using FluentValidation;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Chinook.Domain.Supervisor;
 

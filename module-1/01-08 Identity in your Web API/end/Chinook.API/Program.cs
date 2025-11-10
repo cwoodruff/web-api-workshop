@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using System.Text;
 using Chinook.API.Configurations;
 using Chinook.API.Data;
 using Chinook.API.Identity;
@@ -8,7 +7,6 @@ using Chinook.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -105,8 +103,6 @@ builder.Services.AddAuthorization(options =>
 
 // Token service for issuing JWTs
 builder.Services.AddSingleton<ITokenService, TokenService>();
-
-// Swagger with JWT support
 
 var app = builder.Build();
 
