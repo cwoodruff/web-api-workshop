@@ -6,16 +6,17 @@ icon: rocket
 
 ## Phase 1 - Align on Conventions and Scope
 
-1) Confirm hypermedia conventions
-- Links container: keep a top‑level `Links` array on each ApiModel via `Representation`/`BaseApiModel`.
-- Rel names: standardize on semantic rels — `self`, `artist`, `album`, `tracks`, `collection`, `next`, `prev`, `first`, `last`.
-- URL generation: always use `LinkGenerator.GetUriByName("RouteName", new { ... })` with named routes.
+- Confirm hypermedia conventions
+  - Links container: keep a top‑level `Links` array on each ApiModel via `Representation`/`BaseApiModel`.
+  - Rel names: standardize on semantic rels — `self`, `artist`, `album`, `tracks`, `collection`, `next`, `prev`, `first`, `last`.
+  - URL generation: always use `LinkGenerator.GetUriByName("RouteName", new { ... })` with named routes.
 
-2) Define initial resource scope
-- Start with: Album, Artist, Track. Then expand to Customer, Employee, Genre, MediaType, Playlist, Invoice, InvoiceLine.
+- Define initial resource scope
+  - Start with: Album, Artist, Track. Then expand to Customer, Employee, Genre, MediaType, Playlist, Invoice, InvoiceLine.
 
-3) Output shape
-- Keep current DTO shape with `links` array. Titles in links are optional but recommended.
+- Output shape
+   - Keep current DTO shape with `links` array. Titles/Names in links are 
+     optional but recommended.
 
 ---
 
