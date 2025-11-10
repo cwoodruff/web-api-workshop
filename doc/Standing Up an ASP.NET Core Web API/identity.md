@@ -4,9 +4,6 @@ icon: gear
 ---
 # Identity in your Web API
 
-## START FROM THE END OF THE WORKSHOP FINAL PROJECT
-[Documenting your API with OpenAPI](../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/)
-
 ## Module overview and outcomes
 - Objective: Add ASP.NET Core Identity, JWT-based authentication, and authorization to the existing Web API, and prepare for Swagger/OpenAPI in next part for secured testing. No UI; pure API.
 - What you’ll deliver
