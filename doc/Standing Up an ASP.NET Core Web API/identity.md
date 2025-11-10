@@ -8,12 +8,11 @@ icon: gear
 [Documenting your API with OpenAPI](../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/)
 
 ## Module overview and outcomes
-- Objective: Add ASP.NET Core Identity, JWT-based authentication, and authorization to the existing Web API, and prepare Swagger/OpenAPI for secured testing. No UI; pure API.
+- Objective: Add ASP.NET Core Identity, JWT-based authentication, and authorization to the existing Web API, and prepare for Swagger/OpenAPI in next part for secured testing. No UI; pure API.
 - What you’ll deliver
     - Identity store and user/role management via EF Core
     - Token issuance endpoints (register/login) with JWT
     - Policies and role-based authorization protecting selected endpoints
-    - Swagger configured with versioning and “Authorize” (Bearer) support
 - Prerequisites
     - .NET SDK matching `net10.0` target
     - Chosen DB provider installed locally (SQL Server / SQLite / PostgreSQL)
@@ -35,11 +34,7 @@ icon: gear
 - Role-based policies: `Admin`, `Manager`, `User` with a `CanWrite` policy for write operations.
 - Default stance: Secure write endpoints; keep read endpoints public or authenticated based on workshop goals.
 
-4) Developer experience and Swagger
-- Add Swagger with versioned docs (using already-configured `IApiVersionDescriptionProvider`).
-- Add a Bearer security scheme so tokens can be pasted into Swagger UI.
-
-5) Deployment considerations
+4) Deployment considerations
 - Secrets via user-secrets in Development, environment variables/Key Vault in Non-Dev.
 - EF migrations to create Identity schema.
 
