@@ -47,11 +47,6 @@ Note: File paths are relative to `Chinook.API` unless stated. Replace provider-s
 - Core packages
     - `dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore`
     - `dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer`
-    - `dotnet add package Swashbuckle.AspNetCore`
-- EF Core provider (pick one)
-    - SQL Server: `dotnet add package Microsoft.EntityFrameworkCore.SqlServer`
-    - SQLite: `dotnet add package Microsoft.EntityFrameworkCore.Sqlite`
-    - PostgreSQL: `dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL`
 
 ### Step 2 Create Identity models and DbContext
 - Add `Identity/ApplicationUser.cs`:
