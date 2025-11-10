@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="turbo-root" content="/web-api-workshop">
-    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816080252318">
+    <meta name="turbo-cache-control" content="no-cache" data-turbo-track="reload" data-track-token="3.11.0.816081226734">
 
     <!-- See retype.com -->
     <meta name="generator" content="Retype 3.11.0">
@@ -15,7 +15,7 @@
     <!-- Primary Meta Tags -->
     <title>Identity in your Web API</title>
     <meta name="title" content="Identity in your Web API">
-    <meta name="description" content="Documenting your API with OpenAPI">
+    <meta name="description" content="Objective: Add ASP.NET Core Identity, JWT-based authentication, and authorization to the existing Web API, and prepare for Swagger/OpenAPI in next...">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/identity/">
@@ -24,23 +24,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/identity/">
     <meta property="og:title" content="Identity in your Web API">
-    <meta property="og:description" content="Documenting your API with OpenAPI">
+    <meta property="og:description" content="Objective: Add ASP.NET Core Identity, JWT-based authentication, and authorization to the existing Web API, and prepare for Swagger/OpenAPI in next...">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cwoodruff.github.io/web-api-workshop/standing-up-an-asp.net-core-web-api/identity/">
     <meta property="twitter:title" content="Identity in your Web API">
-    <meta property="twitter:description" content="Documenting your API with OpenAPI">
+    <meta property="twitter:description" content="Objective: Add ASP.NET Core Identity, JWT-based authentication, and authorization to the existing Web API, and prepare for Swagger/OpenAPI in next...">
 
     <script data-cfasync="false">(function(){var cl=document.documentElement.classList,ls=localStorage.getItem("retype_scheme"),hd=cl.contains("dark"),hl=cl.contains("light"),wm=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;if(ls==="dark"||(!ls&&wm&&!hd&&!hl)){cl.remove("light");cl.add("dark")}else if(ls==="light"||(!ls&&!wm&&!hd&&!hl)){cl.remove("dark");cl.add("light")}})();</script>
 
     <link href="../../images/favicon.png" rel="icon">
-    <link href="../../resources/css/retype.css?v=3.11.0.816080252318" rel="stylesheet">
+    <link href="../../resources/css/retype.css?v=3.11.0.816081226734" rel="stylesheet">
 
-    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816080252318" data-turbo-eval="false" defer></script>
+    <script data-cfasync="false" src="../../resources/js/config.js?v=3.11.0.816081226734" data-turbo-eval="false" defer></script>
     <script data-cfasync="false" src="../../resources/js/retype.js?v=3.11.0" data-turbo-eval="false" defer></script>
-    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816080252318" data-turbo-eval="false" defer></script>
-    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816080252318" defer></script>
+    <script id="lunr-js" data-cfasync="false" src="../../resources/js/lunr.js?v=3.11.0.816081226734" data-turbo-eval="false" defer></script>
+    <script id="prism-js" data-cfasync="false" src="../../resources/js/prism.js?v=3.11.0.816081226734" defer></script>
 </head>
 <body>
     <div id="retype-app" class="relative text-base antialiased text-base-text bg-base-bg font-body">
@@ -253,13 +253,6 @@
         <span>Identity in your Web API</span>
     </h1>
 </doc-anchor-target>
-<doc-anchor-target id="start-from-the-end-of-the-workshop-final-project">
-    <h2>
-        <doc-anchor-trigger class="header-anchor-trigger" to="#start-from-the-end-of-the-workshop-final-project">#</doc-anchor-trigger>
-        <span>START FROM THE END OF THE WORKSHOP FINAL PROJECT</span>
-    </h2>
-</doc-anchor-target>
-<p><a href="../../standing-up-an-asp.net-core-web-api/documenting-with-openapi/">Documenting your API with OpenAPI</a></p>
 <doc-anchor-target id="module-overview-and-outcomes">
     <h2>
         <doc-anchor-trigger class="header-anchor-trigger" to="#module-overview-and-outcomes">#</doc-anchor-trigger>
