@@ -92,7 +92,7 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = cfg["Jwt:Issuer"],
             ValidAudience = cfg["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:SigningKey"] ?? "")),
+            IssuerSigningKey = JwtKeyProvider.GetSigningKey(cfg),
             ClockSkew = TimeSpan.FromMinutes(1)
         };
     });

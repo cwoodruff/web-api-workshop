@@ -1,4 +1,4 @@
-USE [Chinook]
+USE [ChinookIdentity]
 GO
 /****** Object:  Table [dbo].[AspNetRoleClaims]    Script Date: 9/29/2021 12:38:03 PM ******/
 SET ANSI_NULLS ON
