@@ -1,5 +1,5 @@
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using Chinook.API.Configurations;
 using Chinook.API.Data;
 using Chinook.API.Identity;
@@ -8,8 +8,8 @@ using Chinook.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -40,50 +40,6 @@ builder.Services.AddVersionedApiExplorer(options =>
 {
     options.GroupNameFormat = "'v'VVV"; // e.g., v1, v1.1
     options.SubstituteApiVersionInUrl = true;
-});
-
-// OpenAPI/Swagger services
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    // Basic metadata
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Version = "v1",
-        Title = "Chinook Web API",
-        Description = "Workshop Web API with Identity, Versioning, and JWT auth.",
-        Contact = new OpenApiContact { Name = "Chinook Team" },
-        License = new OpenApiLicense { Name = "MIT", Url = new Uri("https://opensource.org/licenses/MIT") }
-    });
-
-    // Include XML comments
-    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
-    if (File.Exists(xmlPath))
-    {
-        options.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
-    }
-
-    // JWT Bearer auth header
-    var securityScheme = new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Description = "Enter 'Bearer' [space] and then your valid token.",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        Reference = new OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = ReferenceType.SecurityScheme
-        }
-    };
-    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { securityScheme, Array.Empty<string>() }
-    });
 });
 
 // Identity EF DbContext (separate Identity database with provider switch)
@@ -137,7 +93,7 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = cfg["Jwt:Issuer"],
             ValidAudience = cfg["Jwt:Audience"],
-            IssuerSigningKey = JwtKeyProvider.GetSigningKey(cfg),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:SigningKey"] ?? "")),
             ClockSkew = TimeSpan.FromMinutes(1)
         };
     });
@@ -151,6 +107,42 @@ builder.Services.AddAuthorization(options =>
 // Token service for issuing JWTs
 builder.Services.AddSingleton<ITokenService, TokenService>();
 
+// Swagger with JWT support
+builder.Services.AddSwaggerGen(c =>
+{
+    // XML comments
+    var xmlFile = "Chinook.API.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+    }
+
+    // JWT Bearer security
+    var bearerScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer {your JWT}'"
+    };
+    c.AddSecurityDefinition("Bearer", bearerScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
+            Array.Empty<string>()
+        }
+    });
+
+    // Operation filters
+    c.OperationFilter<Chinook.API.Infrastructure.Swagger.AuthorizeOperationFilter>();
+});
+
+builder.Services.ConfigureOptions<Chinook.API.Configurations.ConfigureSwaggerOptions>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -160,24 +152,21 @@ app.UseResponseCaching();
 
 app.UseHttpsRedirection();
 
-// Swagger middleware (always on for workshop; consider env check in prod)
-app.UseSwagger();
-
-// Build versioned Swagger endpoints if versioning is enabled
-var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-app.UseSwaggerUI(options =>
-{
-    foreach (var description in provider.ApiVersionDescriptions)
-    {
-        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"Chinook API {description.GroupName.ToUpperInvariant()}");
-    }
-    // Fallback to v1 if no versioned explorer provided
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Chinook API v1");
-});
-
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Swagger middleware and UI
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+    foreach (var description in provider.ApiVersionDescriptions)
+    {
+        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+            $"Chinook API {description.GroupName.ToUpperInvariant()}");
+    }
+    // options.RoutePrefix = "docs"; // optional custom route
+});
 
 app.MapControllers();
 
