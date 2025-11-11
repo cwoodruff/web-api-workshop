@@ -1,4 +1,5 @@
 using Chinook.API.Configurations;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,7 +28,17 @@ app.UseCors();
 
 app.UseRateLimiter();
 
-app.UseResponseCaching();
+// Prevent caching for Swagger assets and JSON to avoid HTML being cached under the same URL
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/swagger", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.Headers["Cache-Control"] = "no-store, no-cache";
+        context.Response.Headers["Pragma"] = "no-cache";
+        context.Response.Headers["Expires"] = "0";
+    }
+    await next();
+});
 
 app.UseHttpsRedirection();
 
@@ -35,9 +46,25 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+    app.UseSwagger(c =>
+    {
+        // Make the Swagger JSON route explicit and predictable
+        c.RouteTemplate = "swagger/{documentName}/swagger.json";
+    });
+    app.UseSwaggerUI(options =>
+    {
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            // Use an absolute path to avoid any relative resolution issues in the UI
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"Chinook API {description.GroupName.ToUpperInvariant()}");
+        }
+        // Serve Swagger UI from /docs to keep /swagger solely for JSON endpoints and avoid any route overlap
+        options.RoutePrefix = "docs";
+    });
 }
+
+app.UseAuthorization();
 
 app.MapControllers().RequireRateLimiting("fixed-per-minute");
 

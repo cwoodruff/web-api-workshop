@@ -220,7 +220,7 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
     {
         var info = new OpenApiInfo()
         {
-            Version = "v1",
+            Version = description.ApiVersion.ToString(),
             Title = "Chinook Music Store API",
             Description = "A simple example ASP.NET Core Web API",
             TermsOfService = new Uri("https://example.com/terms"),
